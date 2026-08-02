@@ -77,6 +77,7 @@ Validation requires these exact predicates to evaluate to `true` during admissio
    - `let infoSourceScope = (edge.type == 'derived_from' || edge.type == 'quotes' || edge.type == 'compresses' || edge.type == 'depends_on') ? toObj.scopeId : fromObj.scopeId;`
    - `let infoDestScope = (infoSourceScope == toObj.scopeId) ? fromObj.scopeId : toObj.scopeId;`
    - `let lease = getReceipt(receipt.authorityRef);`
+   - `if (!lease) return false;`
    - `return (`
      - `edge.scopeId == infoDestScope &&`
      - `receipt.inputs.sourceScopeId == infoSourceScope &&`
@@ -97,9 +98,20 @@ Validation requires these exact predicates to evaluate to `true` during admissio
    - `if (!authorityTypes.includes(edge.type)) return true;`
    - `if (!edge.basis) return false;`
    - `let receipt = getReceipt(edge.basis);`
-   - `if (!receipt || receipt.receiptType != 'LeaseGrant') return false;`
-   - `return isValidLeaseGrant(receipt.receiptId);`
-   - *Result*: Semantic attribution does not act as authorization. Operation-specific authority validation must occur against a valid `LeaseGrant`. `LeaseConsumption` records consumption and never independently grants authority, and `WitnessReceipt` grants no authority.
+   - `if (!receipt) return false;`
+   - `if (receipt.receiptType == 'WitnessReceipt' || receipt.receiptType == 'LeaseConsumption') return false; // Grant no authority`
+   - `if (receipt.receiptType != 'LeaseGrant') return false;`
+   - `return (`
+     - `receipt.outputs.capability == edge.type &&`
+     - `receipt.outputs.recipient == edge.assertedBy &&`
+     - `receipt.issuer != null &&`
+     - `receipt.outputs.scopeId == edge.scopeId &&`
+     - `receipt.outputs.logicalExpiry > Date.now() &&`
+     - `receipt.outputs.invocationsRemaining > 0 &&`
+     - `receipt.policyRefs.includes(edge.disclosure) &&`
+     - `isValidLeaseGrant(receipt.receiptId)`
+   - `);`
+   - *Result*: Semantic attribution does not act as authorization. Operation-specific authority validation must occur against a valid `LeaseGrant`, binding capability, recipient, actor, scope, expiry, invocation availability, disclosure, and the requested operation. `LeaseConsumption` records consumption and never independently grants authority; `WitnessReceipt` grants no authority.
 
 3. **`isDisputed(edge)`**:
    - `return graph.exists(e => e.type == 'answers' && (getNode(e.from).kind == 'tension') && e.to == edge.id);`
@@ -125,31 +137,13 @@ Validation requires these exact predicates to evaluate to `true` during admissio
 - **Plural current harvests**: Multiple `harvest` nodes can `compress` the same sources. No engine may force singular canonical truth; all valid harvests remain in the traversal path.
 
 ### Evidence Traversal Polarity
-When traversing the graph to compile semantic evidence, every one of the 21 canonical edge types dictates an exact traversal direction and semantic effect for its origin node (`from`) in relation to its target node (`to`). Edges where `isDisputed(edge) == true` evaluate to `Exclude` regardless of type.
+When traversing the graph to compile semantic evidence, Project 0 adheres to TranchNode-compatible entry rules. Edges where `isDisputed(edge) == true` are excluded from active traversal.
 
-| Edge Type | Traversal Entry Side | Next Endpoint | Semantic Effect | Exclusions |
-|---|---|---|---|---|
-| `derived_from` | `from` | `to` | Amplify | Exclude if `isDisputed` |
-| `quotes` | `from` | `to` | Amplify | Exclude if `isDisputed` |
-| `compresses` | `from` | `to` | Amplify | Exclude if `isDisputed` |
-| `revises` | `from` | `to` | Amplify | Exclude if `isDisputed` |
-| `depends_on` | `from` | `to` | Amplify | Exclude if `isDisputed` |
-| `supports` | `from` | `to` | Amplify | Exclude if `isDisputed` |
-| `contradicts` | `from` | `to` | Mitigate | Exclude if `isDisputed` |
-| `qualifies` | `from` | `to` | Amplify | Exclude if `isDisputed` |
-| `observes` | `from` | `to` | Amplify | Exclude if `isDisputed` |
-| `answers` | `from` | `to` | Amplify | Exclude if `isDisputed` |
-| `asks` | `from` | `to` | Mitigate | Exclude if `isDisputed` |
-| `rebuttal_to` | `from` | `to` | Mitigate | Exclude if `isDisputed` |
-| `responds_to` | `from` | `to` | Mitigate | Exclude if `isDisputed` |
-| `continues` | `from` | `to` | Amplify | Exclude if `isDisputed` |
-| `delegates` | `from` | `to` | None (Admin) | Does not become evidence automatically |
-| `consumes` | `from` | `to` | Replace/Exclude | Does not become evidence automatically |
-| `revokes` | `from` | `to` | Replace/Exclude | Does not become evidence automatically |
-| `permits_disclosure`| `from` | `to` | None (Admin) | Does not become evidence automatically |
-| `precedes` | `from` | `to` | None (Admin) | Does not become evidence automatically |
-| `overlaps` | `from` | `to` | None (Admin) | Does not become evidence automatically |
-| `supersedes` | `from` | `to` | Replace/Exclude | Does not become evidence automatically |
+- **Outgoing**: `derived_from` and `depends_on` are traversed in the outgoing direction (`from` → `to`).
+- **Incoming**: `supports`, `qualifies`, and `observes` are traversed in the incoming direction (`to` ← `from`).
+- **Bidirectional Polarity Toggle**: Traversal from either side of `contradicts` is valid, but it strictly toggles the semantic polarity (e.g., positive evidence becomes negative/mitigating).
+- **Context Only**: `responds_to`, `answers`, `asks`, `rebuttal_to`, `continues`, `quotes`, `compresses`, and `revises` provide dialogic/semantic context only. They do not automatically enter the active evidence evaluation set unless a separate, explicit evidence edge (like `supports` or `contradicts`) establishes polarity.
+- **Administrative Exclusions**: Edges belonging to the Authority (`delegates`, `consumes`, `revokes`, `permits_disclosure`) and Temporal (`precedes`, `overlaps`, `supersedes`) families NEVER become semantic evidence merely because they exist; they are strictly administrative.
 
 ## Local collapse, never final collapse
 

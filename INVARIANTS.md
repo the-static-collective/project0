@@ -45,7 +45,7 @@ The following deterministic adversarial examples and fixtures ensure the edge la
      - Edge E1 (`id`: e1, `type`: derived_from, `from`: nB, `to`: nA, `assertedBy`: modelX, `createdAt`: t1, `scopeId`: S1, `basis`: null, `disclosure`: public)
      - Node C (`id`: nC, `kind`: claim, `scopeId`: S1, `disclosure`: public)
      - Edge E2 (`id`: e2, `type`: derived_from, `from`: nC, `to`: nB, `assertedBy`: humanY, `createdAt`: t2, `scopeId`: S1, `basis`: null, `disclosure`: public)
-   - *Expected Result*: Nodes B and C remain inactive until E1 and E2 are admitted. Traversal amplifies C via B to A. A direct `derived_from` from C to A without B fails validation per the direction table (Defends Invariants 2 and 15).
+   - *Expected Result*: Node B remains inactive pending E1. Node C evaluates successfully upon admission; it does not remain inactive simply because it is a claim. Traversal correctly amplifies C via B to A. A direct `derived_from` from C to A without B fails validation per the tuple table (Defends Invariants 2 and 15).
 
 2. **rejected proposal remains queryable**:
    - *Inputs*:
@@ -99,10 +99,10 @@ The following deterministic adversarial examples and fixtures ensure the edge la
    - *Inputs*:
      - Node X (`id`: nX, `kind`: source, `scopeId`: privScope, `disclosure`: private)
      - Node Y (`id`: nY, `kind`: inference, `scopeId`: pubScope, `disclosure`: public)
-     - Receipt Lease1 (`receiptId`: lease1, `receiptType`: LeaseGrant, `outputs`: { `recipient`: humanX, `capability`: cross_scope_read }, `isValid`: true)
-     - Receipt R1 (`receiptId`: r1, `receiptType`: RevelationReceipt, `issuer`: humanX, `subject`: e1, `inputs`: { `sourceScopeId`: privScope }, `outputs`: { `destinationScopeId`: pubScope, `purpose`: audit }, `authorityRef`: lease1, `policyRefs`: [public], `previousReceiptRefs`: [], `canonicalHash`: hashR1)
+     - Receipt Lease1 (`receiptId`: lease1, `receiptType`: LeaseGrant, `issuedAt`: t0, `issuer`: admin, `subject`: privScope, `inputs`: {}, `outputs`: { `recipient`: humanX, `capability`: cross_scope_read, `scopeId`: privScope, `logicalExpiry`: futureDate, `invocationsRemaining`: 10 }, `authorityRef`: null, `policyRefs`: [private], `previousReceiptRefs`: [], `canonicalHash`: hashL1)
+     - Receipt R1 (`receiptId`: r1, `receiptType`: RevelationReceipt, `issuedAt`: t1, `issuer`: humanX, `subject`: e1, `inputs`: { `sourceScopeId`: privScope }, `outputs`: { `destinationScopeId`: pubScope, `purpose`: explicitly_declared_audit_request }, `authorityRef`: lease1, `policyRefs`: [public], `previousReceiptRefs`: [], `canonicalHash`: hashR1)
      - Edge E1 (`id`: e1, `type`: derived_from, `from`: nY, `to`: nX, `assertedBy`: humanX, `createdAt`: t1, `scopeId`: pubScope, `basis`: r1, `disclosure`: public).
-   - *Expected Result*: E1 is admitted. Traversal of E1 resolves the `basis` ID via `getReceipt(r1)` and successfully evaluates `isCrossScopeBridged(E1)` to true (since `derived_from` pulls information from `nX` in `privScope` to `nY` in `pubScope`), mapping precisely against the exact `RECEIPTS.md` envelope and properly binding capability, purpose, actor, and scope bounds (Defends Invariant 9).
+   - *Expected Result*: E1 is admitted. Traversal of E1 explicitly guards and resolves the `basis` ID via `getReceipt(r1)` and successfully evaluates `isCrossScopeBridged(E1)` to true (since `derived_from` pulls information from `nX` in `privScope` to `nY` in `pubScope`). This binds the exact `RECEIPTS.md` envelope, purpose, and capability to the bridge logic without silent exposure (Defends Invariant 9).
 
 ## Change rule
 
