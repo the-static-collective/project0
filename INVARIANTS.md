@@ -34,6 +34,17 @@ A conforming implementation MUST preserve these properties.
 19. **Offline survivability** — The core contract can be represented and verified without dependence on a proprietary inference service.
 20. **Explicit uncertainty** — Unknown, withheld, disputed, and inapplicable are distinct states.
 
+## Adversarial Examples & Required Fixtures
+
+The following adversarial examples and fixtures ensure the edge laws and invariants cannot be silently bypassed:
+
+1. **observation → inference → claim**: Demonstrates that an `observation` does not automatically become a human `claim` without an explicitly attributable intervening `inference` node carrying a `derived_from` edge. (Defends Invariants 2 and 15).
+2. **rejected proposal remains queryable**: Proves that a `rejection` node functions as a substantive target, not merely an administrative receipt, allowing subsequent nodes to refer back to the *grounds* of the rejection. (Defends Invariant 3).
+3. **duplicate relationship assertions by different authors**: Confirms that identical edges asserted by different authors are not silently collapsed; authorship and disclosure scopes remain distinct. (Defends Invariant 4).
+4. **disputed edge excluded from active evidence**: Ensures that when an edge is disputed (e.g., using a dispute receipt or superseding edge), it is excluded from active evidence traversal without being deleted from the graph. (Defends Invariants 1, 14, and 20).
+5. **competing current harvests**: Validates that plural, valid `harvest` nodes can exist concurrently over the same sources, without a deterministic engine forcing a single "canonical truth." (Defends Invariant 3).
+6. **cycle and cross-scope rejection**: Tests that Derivation and Temporal edge families reject cyclic paths at admission, and that rejections spanning different disclosure scopes respect boundary preservation. (Defends Invariants 2, 8, and 9).
+
 ## Change rule
 
 Changing an invariant requires:
