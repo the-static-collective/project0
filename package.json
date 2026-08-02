@@ -1,0 +1,10 @@
+{
+  "name": "project0-contract",
+  "private": true,
+  "scripts": {
+    "check": "node scripts/check-contract-integrity.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
