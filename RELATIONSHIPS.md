@@ -143,13 +143,31 @@ Validation requires these exact predicates to evaluate to `true` during admissio
 - **Plural current harvests**: Multiple `harvest` nodes can `compress` the same sources. No engine may force singular canonical truth; all valid harvests remain in the traversal path.
 
 ### Evidence Traversal Polarity
-When traversing the graph to compile semantic evidence, Project 0 adheres to TranchNode-compatible entry rules. Edges where `isDisputed(edge) == true` are excluded from active traversal.
+When traversing the graph to compile semantic evidence, every one of the 21 canonical edge types dictates an exact traversal entry direction and semantic polarity effect. Edges where `isDisputed(edge) == true` or `isSuperseded(edge) == true` are strictly excluded from active traversal.
 
-- **Outgoing**: `derived_from` and `depends_on` are traversed in the outgoing direction (`from` → `to`).
-- **Incoming**: `supports`, `qualifies`, and `observes` are traversed in the incoming direction (`to` ← `from`).
-- **Bidirectional Polarity Toggle**: Traversal from either side of `contradicts` is valid, but it strictly toggles the semantic polarity (e.g., positive evidence becomes negative/mitigating).
-- **Context Only**: `responds_to`, `answers`, `asks`, `rebuttal_to`, `continues`, `quotes`, `compresses`, and `revises` provide dialogic/semantic context only. They do not automatically enter the active evidence evaluation set unless a separate, explicit evidence edge (like `supports` or `contradicts`) establishes polarity.
-- **Administrative Exclusions**: Edges belonging to the Authority (`delegates`, `consumes`, `revokes`, `permits_disclosure`) and Temporal (`precedes`, `overlaps`, `supersedes`) families NEVER become semantic evidence merely because they exist; they are strictly administrative.
+| Edge Type | Traversal Entry Side | Semantic Effect | Role |
+|---|---|---|---|
+| `derived_from` | `from` → `to` (Outgoing) | Amplify | Evidence |
+| `depends_on` | `from` → `to` (Outgoing) | Amplify | Evidence |
+| `supports` | `to` ← `from` (Incoming) | Amplify | Evidence |
+| `qualifies` | `to` ← `from` (Incoming) | Amplify | Evidence |
+| `observes` | `to` ← `from` (Incoming) | Amplify | Evidence |
+| `contradicts` | Bidirectional | Mitigate (Toggles polarity) | Evidence |
+| `quotes` | Contextual | None | Context only |
+| `compresses` | Contextual | None | Context only |
+| `revises` | Contextual | None | Context only |
+| `answers` | Contextual | None | Context only |
+| `asks` | Contextual | None | Context only |
+| `rebuttal_to` | Contextual | None | Context only |
+| `responds_to` | Contextual | None | Context only |
+| `continues` | Contextual | None | Context only |
+| `delegates` | None (Admin) | None | Administrative exclusion |
+| `consumes` | None (Admin) | None | Administrative exclusion |
+| `revokes` | None (Admin) | None | Administrative exclusion |
+| `permits_disclosure` | None (Admin) | None | Administrative exclusion |
+| `precedes` | None (Admin) | None | Administrative exclusion |
+| `overlaps` | None (Admin) | None | Administrative exclusion |
+| `supersedes` | None (Admin) | Excludes target edge | Administrative exclusion |
 
 ## Local collapse, never final collapse
 
