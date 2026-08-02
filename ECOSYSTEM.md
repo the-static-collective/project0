@@ -41,20 +41,39 @@ TranchNode provides the meaning and continuity substrate, but its v0.1 evaluatio
 - **`rejection` node**: Project 0 requires `rejection` to be a substantive, targetable node kind. TranchNode v0.1 does not represent rejection as a state, a receipt, or a node; it has no v0.1 representation at all.
   - **The Mismatch**: Project 0's `rejection` node has no representation in TranchNode v0.1.
   - **Resolution**: Resolving this requires either a future TranchNode v0.2 extension (to adopt `rejection` as a node) or an explicitly lossy adapter. Until then, this remains an explicit tension.
-- **Edge Envelope and Traversal**: TranchNode uses a sequential accepted-event model. Project 0 follows this by admitting edges separately from nodes. However, TranchNode v0.1 has a highly constrained native edge schema (`id`, `kind`, `fromId`, `toId`, `scopeId`, `authorId`, `createdAt`), exactly 9 `EdgeKind` values, node-only endpoints, strict dispute/supersede operations, and an absolute prohibition on cross-scope edges. Adapters to TranchNode v0.1 MUST map Project 0 edges according to this exact table per tuple:
+- **Edge Envelope and Traversal**: TranchNode uses a sequential accepted-event model. Project 0 follows this by admitting edges separately from nodes. However, TranchNode v0.1 has a highly constrained native edge schema (`id`, `kind`, `fromId`, `toId`, `scopeId`, `authorId`, `createdAt`), exactly 9 `EdgeKind` values (`derived_from`, `supports`, `contradicts`, `qualifies`, `depends_on`, `supersedes`, `responds_to`, `witnesses`, `harvests`), node-only endpoints, strict dispute/supersede operations, and an absolute prohibition on cross-scope edges. Adapters to TranchNode v0.1 MUST classify valid Project 0 tuples exactly as follows:
 
-| Project 0 Edge Tuple (Type, From, To) | TranchNode Mapping Category | Result Notes |
+| Project 0 Edge Tuple (Type, From, To) | TranchNode Mapping Category | Translation Target |
 |---|---|---|
 | **Unavailable / Structural Mismatches** | | |
-| ANY tuple containing a `rejection` endpoint | **Unavailable** | TranchNode v0.1 has no native representation for `rejection`. Cannot be admitted. |
-| ANY tuple where `scopeId` differs (cross-scope) | **Unavailable** | TranchNode v0.1 explicitly prohibits cross-scope edges. |
-| Envelope fields `basis` & `disclosure` | **Unavailable** | Dropped; no native fields exist in TranchNode v0.1 schema. |
+| ANY tuple containing a `rejection` endpoint | **Unavailable** | Cannot be admitted. |
+| ANY cross-scope tuple | **Unavailable** | Cannot be admitted. |
+| ANY tuple mapping `(Type, From, edge)` | **Unavailable** | Cannot be admitted (unless covered by explicit operation below). |
+| Envelope fields `basis` & `disclosure` | **Unavailable** | Dropped; no native fields exist. |
+| **Direct Same-Name Native Edge** | | |
+| `(derived_from, inference/harvest/claim, source/inference/claim)` | **Direct same-name native edge** | `derived_from` |
+| `(depends_on, inference/proposal/claim, claim/inference/source)` | **Direct same-name native edge** | `depends_on` |
+| `(supports, inference/claim/observation, claim/proposal/inference)` | **Direct same-name native edge** | `supports` |
+| `(contradicts, claim/inference, claim/inference)` | **Direct same-name native edge** | `contradicts` |
+| `(qualifies, inference/claim, claim/proposal/inference)` | **Direct same-name native edge** | `qualifies` |
+| `(responds_to, claim, proposal/claim)` | **Direct same-name native edge** | `responds_to` |
+| `(supersedes, KIND, KIND)` *(except `source`)* | **Direct same-name native edge** | `supersedes` |
+| **Explicit Renamed Translation** | | |
+| `(observes, witness, ANY_NODE)` | **Explicit renamed translation** | `witnesses` (Semantics demonstrably equivalent) |
+| `(compresses, harvest, source/observation/claim/inference)` | **Explicit renamed translation** | `harvests` (Semantics demonstrably equivalent) |
 | **Conditional Operation Translations** | | |
-| `(answers, tension, edge)` | **Conditional operation translation** | Translates to `dispute_edge(tensionId=edge.from)`. Cannot be admitted if `tensionId` is cross-scope. Not generically lossless. |
-| `(supersedes, edge, edge)` | **Conditional operation translation** | Translates to `supersede_edge(reasonNodeId=edge.basis)`. Requires an explicitly sourced, existing, same-scope `reasonNodeId`. Not generically lossless. |
-| **Direct Native Edge Translations** | | |
-| Any tuple where Type is exactly one of: `derived_from`, `quotes`, `supports`, `contradicts`, `observes`, `answers`, `asks`, `precedes`, `overlaps` | **Direct native edge (Lossless)** | Envelope maps directly (`id`->`id`, `assertedBy`->`authorId`, etc). Project 0 type matches TranchNode's native `EdgeKind` directly. |
-| Any tuple where Type is exactly one of: `compresses`, `revises`, `depends_on`, `qualifies`, `rebuttal_to`, `responds_to`, `continues`, `delegates`, `consumes`, `revokes`, `permits_disclosure` | **Unavailable** | No honest native TranchNode `EdgeKind` exists. Cannot be natively admitted. |
+| `(answers, tension, edge)` | **Operation translation** | `dispute_edge(edgeId=edge.to, tensionId=edge.from)`. Requires same-scope `tensionId`. |
+| `(supersedes, edge, edge)` | **Operation translation** | `supersede_edge(edgeId=edge.to, replacementEdgeId=edge.from, reasonNodeId=edge.basis)`. Requires `reasonNodeId` to resolve to an existing same-scope node (arbitrary receipt/rule basis invalid). |
+| **Lossy Mappings** | | |
+| `(quotes, source/observation/claim, source/claim/proposal)` | **Lossy** | Must downcast into nearest `EdgeKind`. |
+| `(revises, KIND, KIND)` | **Lossy** | Must downcast into nearest `EdgeKind`. |
+| `(answers, claim/observation/tension, tension/proposal)` | **Lossy** | Must downcast into nearest `EdgeKind`. |
+| `(asks, proposal/tension, ANY_NODE)` | **Lossy** | Must downcast into nearest `EdgeKind`. |
+| `(continues, proposal/tension, proposal/tension)` | **Lossy** | Must downcast into nearest `EdgeKind`. |
+| `(rebuttal_to, rejection, claim/proposal/inference)` | **Unavailable** | Excluded due to rejection endpoint. |
+| **Administrative/Temporal Families (Unavailable)** | | |
+| `delegates`, `consumes`, `revokes`, `permits_disclosure` | **Unavailable** | No honest native capability schema exists. |
+| `precedes`, `overlaps` | **Unavailable** | No honest native timing schema exists. |
 
 *(Note: An adapter must NOT claim to preserve Project 0 semantics that TranchNode v0.1 cannot represent. Silently archiving a cross-scope edge in a local database while failing to evaluate it in the TranchNode graph breaks the invariant).*
 
