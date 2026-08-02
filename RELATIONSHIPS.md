@@ -25,7 +25,7 @@ Confidence may rank a relationship. It may not replace its basis.
 
 ## Finite Canonical Edge Set and Direction Tuples
 
-The canonical edge set is defined by strictly allowed `(Edge Type, From Kind, To Kind)` tuples. If a tuple is not explicitly listed, admission fails.
+The canonical edge set is the exhaustive `validTuples` array in `contract/edge-law.v0.1.json`. The family notation below is its human-readable compression. If a tuple is absent from the machine-readable array, admission fails; `KIND` and `ANY_NODE` never survive into the executable contract.
 
 ### Derivation Family
 - `(derived_from, inference, source)` | `(derived_from, inference, observation)` | `(derived_from, inference, inference)` | `(derived_from, inference, claim)` | `(derived_from, inference, rejection)`
@@ -79,12 +79,20 @@ Validation requires these exact predicates to evaluate to `true` during admissio
    - `let infoDestScope = (infoSourceScope == toObj.scopeId) ? fromObj.scopeId : toObj.scopeId;`
    - `let lease = getReceipt(receipt.authorityRef);`
    - `if (!lease || lease.receiptType != 'LeaseGrant') return false;`
-   - `let req = getDeclaredRequest(edge.assertedBy, infoDestScope);`
+   - `let requestRef = receipt.outputs.requestRef;`
+   - `if (!requestRef) return false;`
+   - `let req = getRequest(requestRef);`
    - `if (!req) return false;`
    - `return (`
      - `edge.scopeId == infoDestScope &&`
      - `receipt.inputs.sourceScopeId == infoSourceScope &&`
      - `receipt.outputs.destinationScopeId == infoDestScope &&`
+     - `receipt.outputs.requestRef == req.id &&`
+     - `req.requester == edge.assertedBy &&`
+     - `req.requester == receipt.issuer &&`
+     - `req.destinationScopeId == infoDestScope &&`
+     - `req.status == 'open' &&`
+     - `isRequestValidAt(req, receipt.issuedAt) &&`
      - `edge.assertedBy == receipt.issuer &&`
      - `receipt.issuer == lease.outputs.recipient &&`
      - `lease.outputs.capability == 'cross_scope_read' &&`
@@ -94,7 +102,7 @@ Validation requires these exact predicates to evaluate to `true` during admissio
      - `isValidLeaseGrant(receipt.authorityRef) &&`
      - `verifyLineage(receipt.previousReceiptRefs)`
    - `);`
-   - *Result*: Cross-scope edges fail admission unless explicitly bridged by one complete predicate validating the exact `RECEIPTS.md` envelope, strictly binding actor/recipient, capability, an independently declared purpose/request, disclosure, identity, validity, and lineage, whilst correcting for directional information flow.
+   - *Result*: Cross-scope edges fail admission unless the revelation names one exact, independently declared Request and every identity, purpose, scope, authority, disclosure, validity, and lineage binding agrees.
 
 2. **`isValidAuthorityEdge(edge)`**:
    - `const authorityTypes = ['delegates', 'consumes', 'revokes', 'permits_disclosure'];`
@@ -136,20 +144,40 @@ Validation requires these exact predicates to evaluate to `true` during admissio
 - **Stable edge identity**: Edge identity is defined by its `id`. It cannot change direction, endpoints, or type after admission.
 - **Exact direction**: Edges strictly follow the `From Kind` → `To Kind` enforcement table. Reversing an edge yields a validation failure.
 - **Acyclicity rule**: Any edge belonging to the `Derivation` family, as well as `precedes` and `supersedes` in the `Temporal` family, MUST NOT create a cycle. Cycle detection is evaluated at admission time. (The `overlaps` edge may be cyclic/symmetric).
-- **Deterministic traversal**: When multiple valid paths exist, deterministic ordering relies strictly on cryptographic tie-breaking: first by target `id`, then by edge `id`. *(Note: This intentionally differs from TranchNode v0.1 which evaluates order based on `createdAt`. Adapters to TranchNode must classify this distinction as a mismatch).*
+- **Durable order**: Accepted-event sequence is the only replay order. `createdAt` records asserted wall-clock time and never determines durable order.
+- **Deterministic traversal**: Build adjacency from one accepted snapshot; sort candidate steps by edge type, edge ID, traversal direction, then destination object ID; traverse breadth-first over `(objectId, polarity)`; retain the shortest path per `(terminalSourceId, polarity)`; break equal-length ties by edge-ID sequence and then object-ID sequence; finally sort returned paths by terminal source ID, polarity, edge-ID sequence, then object-ID sequence. No cryptographic property is assumed for IDs until Issue #5 is closed.
+- **TranchNode adapter ordering**: After mapping to TranchNode v0.1, use its exact edge-kind, edge-ID, direction, destination-node-ID order and node-only breadth-first/path tie-break rules. Project 0-only edge types and edge endpoints are classified before traversal; they are never silently inserted into TranchNode ordering.
 
 ### Conflict and Evolution
 - **Dispute and supersession**: An edge with `type: supersedes` targeting an older edge demotes the target edge from the active evaluation graph. A disputed edge (evaluated via `isDisputed(edge)`) remains in the graph but is excluded from active evidence traversal.
 - **Plural current harvests**: Multiple `harvest` nodes can `compress` the same sources. No engine may force singular canonical truth; all valid harvests remain in the traversal path.
 
-### Evidence Traversal Polarity
-When traversing the graph to compile semantic evidence, Project 0 adheres to TranchNode-compatible entry rules. Edges where `isDisputed(edge) == true` are excluded from active traversal.
+### Evidence Traversal Classification
+The machine-readable copy is `contract/edge-law.v0.1.json`. A disputed or superseded edge is never traversed as active evidence.
 
-- **Outgoing**: `derived_from` and `depends_on` are traversed in the outgoing direction (`from` → `to`).
-- **Incoming**: `supports`, `qualifies`, and `observes` are traversed in the incoming direction (`to` ← `from`).
-- **Bidirectional Polarity Toggle**: Traversal from either side of `contradicts` is valid, but it strictly toggles the semantic polarity (e.g., positive evidence becomes negative/mitigating).
-- **Context Only**: `responds_to`, `answers`, `asks`, `rebuttal_to`, `continues`, `quotes`, `compresses`, and `revises` provide dialogic/semantic context only. They do not automatically enter the active evidence evaluation set unless a separate, explicit evidence edge (like `supports` or `contradicts`) establishes polarity.
-- **Administrative Exclusions**: Edges belonging to the Authority (`delegates`, `consumes`, `revokes`, `permits_disclosure`) and Temporal (`precedes`, `overlaps`, `supersedes`) families NEVER become semantic evidence merely because they exist; they are strictly administrative.
+| Edge type | Entry direction | Polarity | Role | Disputed/superseded behavior |
+|---|---|---|---|---|
+| `derived_from` | outgoing | preserve | evidence | inactive |
+| `quotes` | none | none | context/lineage | retained as context; superseded form is historical |
+| `compresses` | none | none | harvest membership | retained for plurality; superseded form is historical |
+| `revises` | none | none | history/currentness | prior remains visible |
+| `depends_on` | outgoing | preserve | dependency | excluded from active closure |
+| `supports` | incoming | preserve | evidence | excluded |
+| `contradicts` | either | toggle | evidence | excluded |
+| `qualifies` | incoming | preserve | evidence | excluded |
+| `observes` | incoming | preserve | witness evidence | excluded; attestation never becomes proof of its subject |
+| `answers` | none | none | context/dispute operation | `answers(tension, edge)` disputes its target; target remains visible |
+| `asks` | none | none | context | never evidence by itself |
+| `rebuttal_to` | none | none | attributable dissent | never negative evidence by itself |
+| `responds_to` | none | none | context | never evidence by itself |
+| `continues` | none | none | context | never evidence by itself |
+| `delegates` | none | none | authority | ineffective when disputed, superseded, expired, revoked, or exhausted |
+| `consumes` | none | none | authority | records use and never grants capacity |
+| `revokes` | none | none | authority | affects authority only |
+| `permits_disclosure` | none | none | authority/disclosure | affects disclosure only |
+| `precedes` | none | none | temporal | never determines durable event order |
+| `overlaps` | none | none | temporal | temporal context only |
+| `supersedes` | none | none | currentness | target remains historical; inactive if the superseding assertion is disputed or superseded |
 
 ## Local collapse, never final collapse
 
