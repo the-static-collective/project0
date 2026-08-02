@@ -62,7 +62,8 @@ The following deterministic adversarial examples and fixtures ensure the edge la
      - Node B (`id`: nB, `kind`: claim, `scopeId`: pubScope, `disclosure`: public)
      - Edge E1 (`id`: e1, `type`: supports, `from`: nA, `to`: nB, `assertedBy`: humanX, `createdAt`: t1, `scopeId`: pubScope, `basis`: null, `disclosure`: public)
      - Edge E2 (`id`: e2, `type`: supports, `from`: nA, `to`: nB, `assertedBy`: humanY, `createdAt`: t2, `scopeId`: pubScope, `basis`: null, `disclosure`: private)
-   - *Expected Result*: Graph admits both edges sequentially. E1 and E2 have distinct `id`s. Because both edges belong to `pubScope`, they do not require a cross-scope bridge. A query executing under public visibility constraints returns E1. A query executing under private visibility constraints (authorized for humanY) returns E1 and E2. They do not silently collapse (Defends Invariant 4).
+     - *Query inputs*: Query Q1 (policy scope: `public`), Query Q2 (policy scope: `private`, authorized actor: `humanY`).
+   - *Expected Result*: Graph admits both edges sequentially. E1 and E2 have distinct `id`s. Because both edges belong to `pubScope`, they do not require a cross-scope bridge. Query Q1 returns E1. Query Q2 returns E1 and E2. They do not silently collapse (Defends Invariant 4).
 
 4. **disputed edge excluded from active evidence**:
    - *Inputs*:
@@ -98,9 +99,10 @@ The following deterministic adversarial examples and fixtures ensure the edge la
    - *Inputs*:
      - Node X (`id`: nX, `kind`: source, `scopeId`: privScope, `disclosure`: private)
      - Node Y (`id`: nY, `kind`: inference, `scopeId`: pubScope, `disclosure`: public)
-     - Receipt R1 (`id`: r1, `type`: RevelationReceipt, `sourceScopeId`: privScope, `destinationScopeId`: pubScope, `isValid`: true, `lineageIsIntact`: true)
+     - Receipt Lease1 (`receiptId`: lease1, `receiptType`: LeaseGrant, `outputs`: { `recipient`: humanX, `capability`: cross_scope_read }, `isValid`: true)
+     - Receipt R1 (`receiptId`: r1, `receiptType`: RevelationReceipt, `issuer`: humanX, `subject`: e1, `inputs`: { `sourceScopeId`: privScope }, `outputs`: { `destinationScopeId`: pubScope, `purpose`: audit }, `authorityRef`: lease1, `policyRefs`: [public], `previousReceiptRefs`: [], `canonicalHash`: hashR1)
      - Edge E1 (`id`: e1, `type`: derived_from, `from`: nY, `to`: nX, `assertedBy`: humanX, `createdAt`: t1, `scopeId`: pubScope, `basis`: r1, `disclosure`: public).
-   - *Expected Result*: E1 is admitted. Traversal of E1 resolves the `basis` ID via `getReceipt(r1)` and successfully executes `isValidBridgeReceipt(r1, privScope, pubScope)`, preserving boundaries explicitly without silent exposure (Defends Invariant 9).
+   - *Expected Result*: E1 is admitted. Traversal of E1 resolves the `basis` ID via `getReceipt(r1)` and successfully evaluates `isCrossScopeBridged(E1)` to true (since `derived_from` pulls information from `nX` in `privScope` to `nY` in `pubScope`), mapping precisely against the exact `RECEIPTS.md` envelope and properly binding capability, purpose, actor, and scope bounds (Defends Invariant 9).
 
 ## Change rule
 

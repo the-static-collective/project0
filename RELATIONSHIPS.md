@@ -17,7 +17,7 @@ A canonical relationship (edge) must strictly define its identity and scope. It 
 - `assertedBy`: attributable actor identifier (attribution only; this does not inherently grant authority).
 - `createdAt`: recorded time of assertion.
 - `scopeId`: the execution or context boundary the edge belongs to.
-- `basis`: ID of the source, observation, rule, or declared judgment justifying the edge.
+- `basis`: (Nullable) ID of the receipt, source, rule, or judgment justifying the edge. Mandatory for cross-scope and Authority edges.
 - `disclosure`: policy governing revelation and reuse.
 - optional `validFrom`, `validUntil`, and confidence metadata.
 
@@ -65,31 +65,43 @@ The canonical edge set is defined by strictly allowed `(Edge Type, From Kind, To
 Relationships in Project 0 follow strict constraints to ensure executable continuity and prevent silent rewrites or invalid evaluations.
 
 ### Executable Predicates
-Validation requires these exact predicates to evaluate to `true` during admission or traversal. Every `from`, `to`, and `basis` ID MUST be resolved via explicit lookup functions (`getNode`, `getEdge`, `getReceipt`) before reading fields.
+Validation requires these exact predicates to evaluate to `true` during admission or traversal. Every ID MUST be resolved via explicit lookup functions (`getNode`, `getEdge`, `getReceipt`) before reading fields.
 
 1. **`isCrossScopeBridged(edge)`**:
    - `let fromObj = getNode(edge.from) || getEdge(edge.from);`
    - `let toObj = getNode(edge.to) || getEdge(edge.to);`
    - `if (edge.scopeId == fromObj.scopeId && edge.scopeId == toObj.scopeId) return true;`
+   - `if (!edge.basis) return false;`
    - `let receipt = getReceipt(edge.basis);`
-   - `if (!receipt || receipt.type != 'RevelationReceipt') return false;`
-   - `return isValidBridgeReceipt(receipt, fromObj.scopeId, toObj.scopeId);`
-   - *Result*: Cross-scope edges fail admission unless explicitly bridged by a `RevelationReceipt`.
+   - `if (!receipt || receipt.receiptType != 'RevelationReceipt') return false;`
+   - `let infoSourceScope = (edge.type == 'derived_from' || edge.type == 'quotes' || edge.type == 'compresses' || edge.type == 'depends_on') ? toObj.scopeId : fromObj.scopeId;`
+   - `let infoDestScope = (infoSourceScope == toObj.scopeId) ? fromObj.scopeId : toObj.scopeId;`
+   - `let lease = getReceipt(receipt.authorityRef);`
+   - `return (`
+     - `edge.scopeId == infoDestScope &&`
+     - `receipt.inputs.sourceScopeId == infoSourceScope &&`
+     - `receipt.outputs.destinationScopeId == infoDestScope &&`
+     - `edge.assertedBy == receipt.issuer &&`
+     - `receipt.issuer == lease.outputs.recipient &&`
+     - `lease.outputs.capability == 'cross_scope_read' &&`
+     - `receipt.outputs.purpose != null &&`
+     - `receipt.policyRefs.includes(edge.disclosure) &&`
+     - `receipt.subject == edge.id &&`
+     - `isValidLeaseGrant(receipt.authorityRef) &&`
+     - `verifyLineage(receipt.previousReceiptRefs)`
+   - `);`
+   - *Result*: Cross-scope edges fail admission unless explicitly bridged by one complete predicate validating the exact `RECEIPTS.md` envelope, strictly binding actor/recipient, capability, purpose, disclosure, identity, validity, and lineage, whilst correcting for directional information flow (e.g. `derived_from` flows backwards).
 
-2. **`isValidBridgeReceipt(receipt, sourceScopeId, destinationScopeId)`**:
-   - `return receipt.sourceScopeId == sourceScopeId && receipt.destinationScopeId == destinationScopeId && receipt.isValid == true && receipt.lineageIsIntact == true;`
-   - *(The receipt also binds actor/recipient, capability, disclosure/purpose, and the proposed material, evaluating them internally).*
-
-3. **`isValidAuthorityEdge(edge)`**:
-   - `if (edge.family != 'Authority') return true;`
+2. **`isValidAuthorityEdge(edge)`**:
+   - `const authorityTypes = ['delegates', 'consumes', 'revokes', 'permits_disclosure'];`
+   - `if (!authorityTypes.includes(edge.type)) return true;`
+   - `if (!edge.basis) return false;`
    - `let receipt = getReceipt(edge.basis);`
-   - `if (!receipt || receipt.type == 'WitnessReceipt') return false; // WitnessReceipt grants no authority.`
-   - `if (edge.type == 'delegates' || edge.type == 'permits_disclosure') return receipt.type == 'LeaseGrant';`
-   - `if (edge.type == 'consumes' || edge.type == 'revokes') return receipt.type == 'LeaseConsumption' || receipt.type == 'LeaseGrant'; // Note: LeaseConsumption does not substitute for LeaseGrant for delegation.`
-   - `return false;`
-   - *Result*: Semantic attribution does not act as authorization.
+   - `if (!receipt || receipt.receiptType != 'LeaseGrant') return false;`
+   - `return isValidLeaseGrant(receipt.receiptId);`
+   - *Result*: Semantic attribution does not act as authorization. Operation-specific authority validation must occur against a valid `LeaseGrant`. `LeaseConsumption` records consumption and never independently grants authority, and `WitnessReceipt` grants no authority.
 
-4. **`isDisputed(edge)`**:
+3. **`isDisputed(edge)`**:
    - `return graph.exists(e => e.type == 'answers' && (getNode(e.from).kind == 'tension') && e.to == edge.id);`
 
 ### Node-Specific Edge Constraints
@@ -113,16 +125,31 @@ Validation requires these exact predicates to evaluate to `true` during admissio
 - **Plural current harvests**: Multiple `harvest` nodes can `compress` the same sources. No engine may force singular canonical truth; all valid harvests remain in the traversal path.
 
 ### Evidence Traversal Polarity
-When traversing the graph to compile evidence, every one of the 21 canonical edge types dictates an exact traversal direction and polarity effect for its origin node (`from`) in relation to its target node (`to`). Edges where `isDisputed(edge) == true` evaluate to Exclude regardless of type.
+When traversing the graph to compile semantic evidence, every one of the 21 canonical edge types dictates an exact traversal direction and semantic effect for its origin node (`from`) in relation to its target node (`to`). Edges where `isDisputed(edge) == true` evaluate to `Exclude` regardless of type.
 
-- **Amplify (Includes the origin node as positive evidence for the target)**:
-  - `supports`, `observes`, `answers`, `revises`, `compresses`, `quotes`, `derived_from`, `depends_on`, `qualifies`, `continues`.
-- **Mitigate (Includes the origin node as negative/opposing evidence for the target)**:
-  - `contradicts`, `rebuttal_to`, `responds_to`, `asks`.
-- **Replace/Exclude (Removes the target node from active evidence)**:
-  - `supersedes`, `revokes`, `consumes`.
-- **Administrative (Traversed for authorization/ordering, but do not inherently amplify or mitigate semantic evidence)**:
-  - `precedes`, `overlaps`, `delegates`, `permits_disclosure`.
+| Edge Type | Traversal Entry Side | Next Endpoint | Semantic Effect | Exclusions |
+|---|---|---|---|---|
+| `derived_from` | `from` | `to` | Amplify | Exclude if `isDisputed` |
+| `quotes` | `from` | `to` | Amplify | Exclude if `isDisputed` |
+| `compresses` | `from` | `to` | Amplify | Exclude if `isDisputed` |
+| `revises` | `from` | `to` | Amplify | Exclude if `isDisputed` |
+| `depends_on` | `from` | `to` | Amplify | Exclude if `isDisputed` |
+| `supports` | `from` | `to` | Amplify | Exclude if `isDisputed` |
+| `contradicts` | `from` | `to` | Mitigate | Exclude if `isDisputed` |
+| `qualifies` | `from` | `to` | Amplify | Exclude if `isDisputed` |
+| `observes` | `from` | `to` | Amplify | Exclude if `isDisputed` |
+| `answers` | `from` | `to` | Amplify | Exclude if `isDisputed` |
+| `asks` | `from` | `to` | Mitigate | Exclude if `isDisputed` |
+| `rebuttal_to` | `from` | `to` | Mitigate | Exclude if `isDisputed` |
+| `responds_to` | `from` | `to` | Mitigate | Exclude if `isDisputed` |
+| `continues` | `from` | `to` | Amplify | Exclude if `isDisputed` |
+| `delegates` | `from` | `to` | None (Admin) | Does not become evidence automatically |
+| `consumes` | `from` | `to` | Replace/Exclude | Does not become evidence automatically |
+| `revokes` | `from` | `to` | Replace/Exclude | Does not become evidence automatically |
+| `permits_disclosure`| `from` | `to` | None (Admin) | Does not become evidence automatically |
+| `precedes` | `from` | `to` | None (Admin) | Does not become evidence automatically |
+| `overlaps` | `from` | `to` | None (Admin) | Does not become evidence automatically |
+| `supersedes` | `from` | `to` | Replace/Exclude | Does not become evidence automatically |
 
 ## Local collapse, never final collapse
 

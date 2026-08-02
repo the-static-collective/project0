@@ -41,24 +41,44 @@ TranchNode provides the meaning and continuity substrate, but its v0.1 evaluatio
 - **`rejection` node**: Project 0 requires `rejection` to be a substantive, targetable node kind. TranchNode v0.1 does not represent rejection as a state, a receipt, or a node; it has no v0.1 representation at all.
   - **The Mismatch**: Project 0's `rejection` node has no representation in TranchNode v0.1.
   - **Resolution**: Resolving this requires either a future TranchNode v0.2 extension (to adopt `rejection` as a node) or an explicitly lossy adapter. Until then, this remains an explicit tension.
-- **Edge Envelope and Traversal**: TranchNode uses a sequential accepted-event model. Project 0 follows this by admitting edges separately from nodes. However, TranchNode v0.1 has a highly constrained native edge schema (`id`, `kind`, `fromId`, `toId`, `scopeId`, `authorId`, `createdAt`), exactly 9 `EdgeKind` values, node-only endpoints, strict dispute/supersede operations, and an absolute prohibition on cross-scope edges. Adapters to TranchNode v0.1 MUST classify and translate the Project 0 envelope exactly as follows:
-  - **Direct native edge (Lossless)**:
-    - Project 0 `id` → TranchNode `id`
-    - Project 0 `from` (Node) → TranchNode `fromId`
-    - Project 0 `to` (Node) → TranchNode `toId`
-    - Project 0 `scopeId` → TranchNode `scopeId`
-    - Project 0 `assertedBy` → TranchNode `authorId`
-    - Project 0 `createdAt` → TranchNode `createdAt`
-  - **Conditional operation translation (Lossless)**:
-    - Project 0 `answers` (targeting an edge) → Translated to TranchNode `dispute_edge` accepted operation.
-    - Project 0 `supersedes` (targeting an edge) → Translated to TranchNode `supersede_edge` accepted operation.
-  - **Lossy mappings**:
-    - Project 0 `type` (21 canonical types) → TranchNode `kind` (must be lossily downcast into one of TranchNode's 9 native `EdgeKind` values. The true Project 0 semantic type must be archived externally).
-  - **Unavailable (Unrepresentable)**:
-    - Project 0 `basis` and `disclosure` fields are unavailable (no native fields).
-    - Project 0 **cross-scope edges** are unavailable (absolutely prohibited by TranchNode v0.1).
-    - Project 0 **edge-to-edge endpoints** (other than the translated `answers`/`supersedes` operations) are unavailable.
-  *(Note: An adapter must NOT claim to preserve Project 0 semantics that TranchNode v0.1 cannot represent. Silently archiving a cross-scope edge in a local database while failing to evaluate it in the TranchNode graph breaks the invariant).*
+- **Edge Envelope and Traversal**: TranchNode uses a sequential accepted-event model. Project 0 follows this by admitting edges separately from nodes. However, TranchNode v0.1 has a highly constrained native edge schema (`id`, `kind`, `fromId`, `toId`, `scopeId`, `authorId`, `createdAt`), exactly 9 `EdgeKind` values, node-only endpoints, strict dispute/supersede operations, and an absolute prohibition on cross-scope edges. Adapters to TranchNode v0.1 MUST map Project 0 edges according to this exact table per tuple:
+
+| Project 0 Edge Tuple (Type, From, To) | TranchNode Mapping Category | Result Notes |
+|---|---|---|
+| **Unavailable / Structural Mismatches** | | |
+| ANY `(Type, From, To)` where `scopeId` differs | **Unavailable** | TranchNode v0.1 explicitly prohibits cross-scope edges. |
+| ANY `(Type, From, edge)` (e.g., `(answers, tension, edge)`) | **Lossy operation translation** | TranchNode v0.1 has no edge-to-edge linking. `answers` targeting an edge maps to the `dispute_edge` operation, but loses the `basis`/`reasonNodeId`. `supersedes` targeting an edge maps to `supersede_edge`. |
+| Envelope fields `basis` & `disclosure` | **Unavailable** | Dropped; no native fields exist in TranchNode v0.1 schema. |
+| **Derivation Family** | | |
+| `(derived_from, inference, source/observation/inference/claim/rejection)` | **Lossy direct native edge** | Envelope maps directly (`id`->`id`, `assertedBy`->`authorId`, etc). Project 0 type `derived_from` is downcast to a native TranchNode `EdgeKind`. |
+| `(derived_from, harvest, source/observation/inference/claim/rejection)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(derived_from, claim, source/inference/claim/rejection)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(quotes, source/observation/claim, source)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(quotes, claim, claim/proposal)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(compresses, harvest, source/observation/claim/inference)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(revises, KIND, KIND)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(depends_on, inference/proposal/claim, claim/inference/source)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| **Epistemic Family** | | |
+| `(supports, inference/claim/observation, claim/proposal/inference)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(contradicts, rejection/claim/inference, claim/inference)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(qualifies, inference/claim, claim/proposal/inference)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(observes, witness, ANY_NODE)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| **Dialogic Family** | | |
+| `(answers, claim/observation/tension, tension/proposal)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(asks, proposal/tension, ANY_NODE)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(rebuttal_to, rejection, claim/proposal/inference)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(responds_to, rejection/claim, proposal/claim)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(continues, proposal/tension, proposal/tension)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| **Authority & Temporal Families** | | |
+| `(delegates, claim/source, claim)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(consumes, source/inference, claim/source)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(revokes, claim/source, claim)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(permits_disclosure, claim, ANY_NODE)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(precedes, ANY_NODE, ANY_NODE)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(overlaps, ANY_NODE, ANY_NODE)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+| `(supersedes, KIND, KIND)` | **Lossy direct native edge** | Downcast to native `EdgeKind`. |
+
+*(Note: An adapter must NOT claim to preserve Project 0 semantics that TranchNode v0.1 cannot represent. Silently archiving a cross-scope edge in a local database while failing to evaluate it in the TranchNode graph breaks the invariant).*
 
 ## Canonical versus local
 
