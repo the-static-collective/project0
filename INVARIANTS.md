@@ -39,29 +39,29 @@ A conforming implementation MUST preserve these properties.
 The following deterministic adversarial examples and fixtures ensure the edge laws and invariants cannot be silently bypassed. Expected evaluation results are strict.
 
 1. **observation → inference → claim**:
-   - *Inputs*: Node A (`observation`), Node B (`inference`, derived_from: A, assertedBy: model), Node C (`claim`, derived_from: B, assertedBy: human).
-   - *Expected Result*: Traversal successfully traces human claim C back to observation A while preserving the model's intermediate inference boundary. Direct `derived_from` between C and A without B fails validation (Defends Invariants 2 and 15).
+   - *Inputs*: Node A (`observation`), Node B (`inference`), Edge E1 (`derived_from`, B -> A, assertedBy: model), Node C (`claim`), Edge E2 (`derived_from`, C -> B, assertedBy: human).
+   - *Expected Result*: Nodes are admitted sequentially but B and C remain inactive until E1 and E2 (respectively) are admitted. Traversal successfully traces human claim C back to observation A while preserving the model's intermediate inference boundary. Direct `derived_from` between C and A without B fails validation per the edge direction table (Defends Invariants 2 and 15).
 
 2. **rejected proposal remains queryable**:
-   - *Inputs*: Node A (`proposal`), Node B (`rejection`, rebuttal_to: A), Node C (`inference`, derived_from: B).
-   - *Expected Result*: Node C evaluates as valid and correctly decompresses the grounds in B. If B is purely a receipt or state, C fails admission due to missing derivation target (Defends Invariant 3).
+   - *Inputs*: Node A (`proposal`), Node B (`rejection`), Edge E1 (`rebuttal_to`, B -> A), Node C (`inference`), Edge E2 (`derived_from`, C -> B).
+   - *Expected Result*: Node C evaluates as valid and correctly decompresses the grounds in B once E2 is admitted. If B were purely a receipt or state (as in TranchNode v0.1), C would fail admission entirely due to a missing valid node target (Defends Invariant 3).
 
 3. **duplicate relationship assertions by different authors**:
-   - *Inputs*: Edge E1 (`supports`, A -> B, assertedBy: humanX, disclosure: public), Edge E2 (`supports`, A -> B, assertedBy: humanY, disclosure: private).
-   - *Expected Result*: The graph contains two distinct edge IDs. A public query returns only E1; a private query by humanY returns E1 and E2. They do not silently collapse (Defends Invariant 4).
+   - *Inputs*: Edge E1 (`supports`, A -> B, assertedBy: humanX, scopeId: publicScope), Edge E2 (`supports`, A -> B, assertedBy: humanY, scopeId: privateScope).
+   - *Expected Result*: The graph contains two distinct edge IDs (cryptographically distinct due to `assertedBy` and `scopeId`). A query in publicScope returns only E1; a query authorized for privateScope returns E1 and E2. They do not silently collapse (Defends Invariant 4).
 
 4. **disputed edge excluded from active evidence**:
-   - *Inputs*: Edge E1 (`supports`, A -> B), Node C (`tension`, answers: E1).
-   - *Expected Result*: E1 remains in the graph with state `disputed`. An active evidence traversal from B excludes A. (Defends Invariants 1, 14, and 20).
+   - *Inputs*: Edge E1 (`supports`, NodeA -> NodeB), Node C (`tension`), Edge E2 (`answers`, C -> E1).
+   - *Expected Result*: E1 remains in the graph but traversal marks it `disputed` (due to E2). An active evidence traversal from NodeB excludes NodeA. (Defends Invariants 1, 14, and 20).
 
 5. **competing current harvests**:
-   - *Inputs*: Node A (`source`), Node B (`harvest`, compresses: A, assertedBy: X), Node C (`harvest`, compresses: A, assertedBy: Y).
-   - *Expected Result*: Both B and C are accepted atomically with their edges. A query for "current harvests of A" returns both deterministic records sorted by cryptographic ID, without forcing consensus (Defends Invariant 3).
+   - *Inputs*: Node A (`source`), Node B (`harvest`), Edge E1 (`compresses`, B -> A, assertedBy: X), Node C (`harvest`), Edge E2 (`compresses`, C -> A, assertedBy: Y).
+   - *Expected Result*: Both harvests and their edges are admitted sequentially. A query for "current harvests of A" returns both deterministic records sorted by cryptographic ID, without forcing consensus (Defends Invariant 3).
 
 6. **cycle and cross-scope rejection**:
    - *Inputs (Cycle)*: Edge E1 (`derived_from`, A -> B), Edge E2 (`derived_from`, B -> C). Request to admit Edge E3 (`derived_from`, C -> A).
-   - *Inputs (Cross-scope)*: Node A (disclosure: private), Node B (disclosure: public), Edge E4 (`derived_from`, B -> A, disclosure: public).
-   - *Expected Result*: E3 admission is deterministically rejected (Cycle check fails). E4 admission is rejected (Edge disclosure 'public' exceeds target node A's 'private' constraint) (Defends Invariants 2, 8, and 9).
+   - *Inputs (Cross-scope)*: Node A (scopeId: privateScope), Node B (scopeId: publicScope), Edge E4 (`derived_from`, B -> A, scopeId: publicScope).
+   - *Expected Result*: E3 admission is deterministically rejected (acyclic rule check fails). E4 admission is rejected (Edge scopeId 'publicScope' attempts to expose target node A outside its 'privateScope' constraint) (Defends Invariants 2, 8, and 9).
 
 ## Change rule
 

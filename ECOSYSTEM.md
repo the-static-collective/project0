@@ -40,7 +40,8 @@ TranchNode provides the meaning and continuity substrate, but its v0.1 evaluatio
 - **`inference` node**: Added to Project 0 explicitly to meet TranchNode's frozen requirement for a computationally derived node. This maps perfectly.
 - **`rejection` node**: Project 0 requires `rejection` to be a substantive, targetable node kind. TranchNode v0.1 does not represent rejection as a state, a receipt, or a node; it has no v0.1 representation at all.
   - **The Mismatch**: Project 0's `rejection` node has no representation in TranchNode v0.1.
-  - **Resolution**: Resolving this requires either a future TranchNode v0.2 extension (to adopt `rejection` as a node) or an explicitly lossy adapter (which downcasts the Project 0 node into a TranchNode state while archiving the meaning). Until then, this remains an explicit tension.
+  - **Resolution**: Resolving this requires either a future TranchNode v0.2 extension (to adopt `rejection` as a node) or an explicitly lossy adapter. Until then, this remains an explicit tension.
+- **Edge Envelope and Traversal**: TranchNode uses a sequential accepted-event model. Project 0 follows this by admitting edges separately from nodes. However, Project 0 defines a much richer set of directed edge types. Any adapter to TranchNode v0.1 must map Project 0's typed edges into TranchNode's simpler linkage model without losing the canonical Project 0 cryptographic ID or scope boundaries.
 
 ## Canonical versus local
 
