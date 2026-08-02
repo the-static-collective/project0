@@ -70,6 +70,7 @@ Validation requires these exact predicates to evaluate to `true` during admissio
 1. **`isCrossScopeBridged(edge)`**:
    - `let fromObj = getNode(edge.from) || getEdge(edge.from);`
    - `let toObj = getNode(edge.to) || getEdge(edge.to);`
+   - `if (!fromObj || !toObj) return false;`
    - `if (edge.scopeId == fromObj.scopeId && edge.scopeId == toObj.scopeId) return true;`
    - `if (!edge.basis) return false;`
    - `let receipt = getReceipt(edge.basis);`
@@ -77,7 +78,9 @@ Validation requires these exact predicates to evaluate to `true` during admissio
    - `let infoSourceScope = (edge.type == 'derived_from' || edge.type == 'quotes' || edge.type == 'compresses' || edge.type == 'depends_on') ? toObj.scopeId : fromObj.scopeId;`
    - `let infoDestScope = (infoSourceScope == toObj.scopeId) ? fromObj.scopeId : toObj.scopeId;`
    - `let lease = getReceipt(receipt.authorityRef);`
-   - `if (!lease) return false;`
+   - `if (!lease || lease.receiptType != 'LeaseGrant') return false;`
+   - `let req = getDeclaredRequest(edge.assertedBy, infoDestScope);`
+   - `if (!req) return false;`
    - `return (`
      - `edge.scopeId == infoDestScope &&`
      - `receipt.inputs.sourceScopeId == infoSourceScope &&`
@@ -85,13 +88,13 @@ Validation requires these exact predicates to evaluate to `true` during admissio
      - `edge.assertedBy == receipt.issuer &&`
      - `receipt.issuer == lease.outputs.recipient &&`
      - `lease.outputs.capability == 'cross_scope_read' &&`
-     - `receipt.outputs.purpose != null &&`
+     - `receipt.outputs.purpose == req.purpose &&`
      - `receipt.policyRefs.includes(edge.disclosure) &&`
      - `receipt.subject == edge.id &&`
      - `isValidLeaseGrant(receipt.authorityRef) &&`
      - `verifyLineage(receipt.previousReceiptRefs)`
    - `);`
-   - *Result*: Cross-scope edges fail admission unless explicitly bridged by one complete predicate validating the exact `RECEIPTS.md` envelope, strictly binding actor/recipient, capability, purpose, disclosure, identity, validity, and lineage, whilst correcting for directional information flow (e.g. `derived_from` flows backwards).
+   - *Result*: Cross-scope edges fail admission unless explicitly bridged by one complete predicate validating the exact `RECEIPTS.md` envelope, strictly binding actor/recipient, capability, an independently declared purpose/request, disclosure, identity, validity, and lineage, whilst correcting for directional information flow.
 
 2. **`isValidAuthorityEdge(edge)`**:
    - `const authorityTypes = ['delegates', 'consumes', 'revokes', 'permits_disclosure'];`
@@ -114,7 +117,10 @@ Validation requires these exact predicates to evaluate to `true` during admissio
    - *Result*: Semantic attribution does not act as authorization. Operation-specific authority validation must occur against a valid `LeaseGrant`, binding capability, recipient, actor, scope, expiry, invocation availability, disclosure, and the requested operation. `LeaseConsumption` records consumption and never independently grants authority; `WitnessReceipt` grants no authority.
 
 3. **`isDisputed(edge)`**:
-   - `return graph.exists(e => e.type == 'answers' && (getNode(e.from).kind == 'tension') && e.to == edge.id);`
+   - `return graph.exists(e => {`
+   - `  let fromNode = getNode(e.from);`
+   - `  return e.type == 'answers' && fromNode && fromNode.kind == 'tension' && e.to == edge.id;`
+   - `});`
 
 ### Node-Specific Edge Constraints
 - **`inference` node**: MUST have at least one outgoing `derived_from` edge to its sources or evidence. `compresses` CANNOT substitute for `derived_from`, as compression belongs strictly to the `harvest` node kind.
@@ -130,7 +136,7 @@ Validation requires these exact predicates to evaluate to `true` during admissio
 - **Stable edge identity**: Edge identity is defined by its `id`. It cannot change direction, endpoints, or type after admission.
 - **Exact direction**: Edges strictly follow the `From Kind` → `To Kind` enforcement table. Reversing an edge yields a validation failure.
 - **Acyclicity rule**: Any edge belonging to the `Derivation` family, as well as `precedes` and `supersedes` in the `Temporal` family, MUST NOT create a cycle. Cycle detection is evaluated at admission time. (The `overlaps` edge may be cyclic/symmetric).
-- **Deterministic traversal**: When multiple valid paths exist, deterministic ordering relies strictly on cryptographic tie-breaking. Sort edges by the target node/edge `id`, then by the edge's `id`. `createdAt` MUST NOT be used for deterministic ordering.
+- **Deterministic traversal**: When multiple valid paths exist, deterministic ordering relies strictly on cryptographic tie-breaking: first by target `id`, then by edge `id`. *(Note: This intentionally differs from TranchNode v0.1 which evaluates order based on `createdAt`. Adapters to TranchNode must classify this distinction as a mismatch).*
 
 ### Conflict and Evolution
 - **Dispute and supersession**: An edge with `type: supersedes` targeting an older edge demotes the target edge from the active evaluation graph. A disputed edge (evaluated via `isDisputed(edge)`) remains in the graph but is excluded from active evidence traversal.

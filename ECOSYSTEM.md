@@ -50,11 +50,11 @@ TranchNode provides the meaning and continuity substrate, but its v0.1 evaluatio
 | ANY tuple where `scopeId` differs (cross-scope) | **Unavailable** | TranchNode v0.1 explicitly prohibits cross-scope edges. |
 | Envelope fields `basis` & `disclosure` | **Unavailable** | Dropped; no native fields exist in TranchNode v0.1 schema. |
 | **Conditional Operation Translations** | | |
-| `(answers, tension, edge)` | **Conditional operation translation** | Translates to `dispute_edge`. Requires an existing same-scope `reasonNodeId`. Not generically lossless. |
-| `(supersedes, edge, edge)` | **Conditional operation translation** | Translates to `supersede_edge`. Requires an existing same-scope `reasonNodeId`. Not generically lossless. |
+| `(answers, tension, edge)` | **Conditional operation translation** | Translates to `dispute_edge(tensionId=edge.from)`. Cannot be admitted if `tensionId` is cross-scope. Not generically lossless. |
+| `(supersedes, edge, edge)` | **Conditional operation translation** | Translates to `supersede_edge(reasonNodeId=edge.basis)`. Requires an explicitly sourced, existing, same-scope `reasonNodeId`. Not generically lossless. |
 | **Direct Native Edge Translations** | | |
-| ANY tuple mapping exactly to one of TranchNode's 9 native `EdgeKind` values | **Lossy direct native edge** | Envelope maps directly (`id`->`id`, `assertedBy`->`authorId`, etc). Project 0 type must be lossily downcast. True type archived externally. |
-| ANY tuple where no honest native TranchNode `EdgeKind` exists | **Unavailable** | Cannot be admitted to TranchNode v0.1. |
+| Any tuple where Type is exactly one of: `derived_from`, `quotes`, `supports`, `contradicts`, `observes`, `answers`, `asks`, `precedes`, `overlaps` | **Direct native edge (Lossless)** | Envelope maps directly (`id`->`id`, `assertedBy`->`authorId`, etc). Project 0 type matches TranchNode's native `EdgeKind` directly. |
+| Any tuple where Type is exactly one of: `compresses`, `revises`, `depends_on`, `qualifies`, `rebuttal_to`, `responds_to`, `continues`, `delegates`, `consumes`, `revokes`, `permits_disclosure` | **Unavailable** | No honest native TranchNode `EdgeKind` exists. Cannot be natively admitted. |
 
 *(Note: An adapter must NOT claim to preserve Project 0 semantics that TranchNode v0.1 cannot represent. Silently archiving a cross-scope edge in a local database while failing to evaluate it in the TranchNode graph breaks the invariant).*
 
