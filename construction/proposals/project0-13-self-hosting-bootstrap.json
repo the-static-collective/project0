@@ -1,0 +1,149 @@
+{
+  "schemaVersion": "project0.construction-manifest.v0",
+  "recordType": "construction_proposal",
+  "proposalRef": "https://github.com/the-static-collective/project0/issues/13",
+  "repository": "the-static-collective/project0",
+  "baseRef": "https://github.com/the-static-collective/project0/commit/9bf3870dfcbe573d1a94c69bb2e2b846da3d91cd",
+  "createdBy": "https://github.com/the-static-collective",
+  "recordedAt": "2026-08-02T20:51:20Z",
+  "visibility": "public",
+  "changeClass": "structural",
+  "roadmapRefs": [
+    "https://github.com/the-static-collective/project0/issues/13",
+    "https://github.com/the-static-collective/project0/issues/5",
+    "https://github.com/the-static-collective/project0/issues/2"
+  ],
+  "summary": "Add a provisional construction protocol so Project 0 changes declare lineage, invariants, authority scope, verification, compatibility, and tensions before the canonical receipt runtime exists.",
+  "sources": [
+    {
+      "ref": "https://github.com/the-static-collective/project0/issues/13",
+      "role": "proposal and bounded authorization"
+    },
+    {
+      "ref": "https://github.com/the-static-collective/project0/blob/9bf3870dfcbe573d1a94c69bb2e2b846da3d91cd/FOUNDATION.md",
+      "role": "constitutional precedence and project boundary"
+    },
+    {
+      "ref": "https://github.com/the-static-collective/project0/blob/9bf3870dfcbe573d1a94c69bb2e2b846da3d91cd/INVARIANTS.md",
+      "role": "invariant source"
+    },
+    {
+      "ref": "https://github.com/the-static-collective/project0/blob/9bf3870dfcbe573d1a94c69bb2e2b846da3d91cd/RECEIPTS.md",
+      "role": "receipt non-claims and append-only target"
+    },
+    {
+      "ref": "https://github.com/the-static-collective/project0/blob/9bf3870dfcbe573d1a94c69bb2e2b846da3d91cd/AGENTS.md",
+      "role": "existing contribution contract"
+    },
+    {
+      "ref": "https://github.com/the-static-collective/tranchnode/blob/30cb0c16878e4a42a603a34f51b43ca497e9cab1/PROJECT_LEGO_FLOOR_1_0.md",
+      "role": "layer classification and anti-drift precedent"
+    }
+  ],
+  "contract": {
+    "termsChanged": [],
+    "invariantRefs": [
+      "P0-I1",
+      "P0-I2",
+      "P0-I3",
+      "P0-I4",
+      "P0-I5",
+      "P0-I11",
+      "P0-I12",
+      "P0-I13",
+      "P0-I14",
+      "P0-I15",
+      "P0-I16",
+      "P0-I17",
+      "P0-I18",
+      "P0-I19"
+    ]
+  },
+  "declaredRelationships": [
+    {
+      "type": "derived_from",
+      "fromRef": "https://github.com/the-static-collective/project0/issues/13",
+      "toRef": "https://github.com/the-static-collective/project0/blob/9bf3870dfcbe573d1a94c69bb2e2b846da3d91cd/AGENTS.md",
+      "basisRef": "https://github.com/the-static-collective/project0/issues/13",
+      "note": "The bootstrap extends the existing contributor contract without changing the ontology."
+    },
+    {
+      "type": "depends_on",
+      "fromRef": "https://github.com/the-static-collective/project0/issues/13",
+      "toRef": "https://github.com/the-static-collective/project0/issues/5",
+      "basisRef": null,
+      "note": "Canonical construction receipts remain blocked on the addressing contract."
+    },
+    {
+      "type": "depends_on",
+      "fromRef": "https://github.com/the-static-collective/project0/issues/13",
+      "toRef": "https://github.com/the-static-collective/project0/issues/2",
+      "basisRef": null,
+      "note": "Append-only admission events remain blocked on the reference kernel."
+    }
+  ],
+  "verification": {
+    "status": "partial",
+    "commands": [
+      "node -e \"JSON.parse(require('node:fs').readFileSync('construction/manifest.schema.json','utf8'))\"",
+      "node -e \"JSON.parse(require('node:fs').readFileSync('construction/proposals/project0-13-self-hosting-bootstrap.json','utf8'))\""
+    ],
+    "fixtures": [
+      "construction/proposals/project0-13-self-hosting-bootstrap.json"
+    ],
+    "limitations": [
+      "No canonical serializer or Project 0 canonical hash exists until issue #5 is resolved.",
+      "Structural schema agreement does not establish semantic truth, authority, or admission.",
+      "GitHub remains the administrative source for merge state until issue #2 provides the append-only reference graph."
+    ]
+  },
+  "compatibility": {
+    "effect": "compatible",
+    "migration": "Preserve this provisional proposal after issue #5, then mint a separately addressed migration or admission receipt with the adopted canonicalizer; do not rewrite this record to simulate prior canonical identity."
+  },
+  "authority": {
+    "requestedAction": "merge",
+    "scope": "Admit a repository-scoped construction protocol and contributor metadata requirements in the-static-collective/project0 only.",
+    "basisRefs": [
+      "https://github.com/the-static-collective/project0/issues/13",
+      "https://github.com/the-static-collective/project0/blob/9bf3870dfcbe573d1a94c69bb2e2b846da3d91cd/AGENTS.md"
+    ]
+  },
+  "tensions": [
+    "The proposal can preserve provenance references now but cannot yet possess Project 0 canonical identity.",
+    "GitHub-hosted merge and review state is not independently offline-verifiable until exported into the future receipt graph.",
+    "GitHub issues and pull requests are construction containers with contextual mappings, not canonical node or receipt kinds."
+  ],
+  "rejectedAlternatives": [
+    {
+      "alternative": "Treat Git commit SHAs as Project 0 canonical hashes.",
+      "reason": "That would preempt issue #5 and silently conflate Git object identity with the contract's canonical addressing law."
+    },
+    {
+      "alternative": "Invent a ConstructionReceipt family before the kernel is frozen.",
+      "reason": "That would expand receipt semantics without fixtures, addressing, or demonstrated necessity."
+    },
+    {
+      "alternative": "Allow green CI or reviewer agreement to authorize automatic admission.",
+      "reason": "Verification and witnessing do not manufacture authority."
+    },
+    {
+      "alternative": "Wait for the entire Floor 1.1 kernel before recording construction structure.",
+      "reason": "That would force the future kernel to reconstruct its own origin from unstructured history."
+    }
+  ],
+  "stopConditions": [
+    "Implementation requires a new universal node kind, edge kind, or receipt family.",
+    "Implementation requires a canonicalizer, simulated digest, or second hash chain before issue #5.",
+    "Implementation treats review, CI, model confidence, or popularity as merge authority.",
+    "Implementation mutates a prior proposal to erase a tension, rejection, or incompatible interpretation."
+  ],
+  "identity": {
+    "status": "provisional",
+    "canonicalHash": null,
+    "externalRefs": [
+      "https://github.com/the-static-collective/project0/issues/13",
+      "https://github.com/the-static-collective/project0/commit/9bf3870dfcbe573d1a94c69bb2e2b846da3d91cd"
+    ]
+  }
+}
