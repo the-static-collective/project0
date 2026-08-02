@@ -29,7 +29,7 @@ The canonical edge set is finite and strictly directed. The `To Kind` can be a n
 
 | Edge Type | From Kind | To Kind | Family |
 |---|---|---|---|
-| `derived_from` | `inference`, `harvest`, `claim` | `source`, `inference`, `claim`, `rejection` | Derivation |
+| `derived_from` | `inference`, `harvest`, `claim` | `source`, `observation`, `inference`, `claim`, `rejection` | Derivation |
 | `quotes` | `source`, `observation`, `claim` | `source`, `claim`, `proposal` | Derivation |
 | `compresses` | `harvest` | `source`, `observation`, `claim`, `inference` | Derivation |
 | `revises` | ANY (except `source`) | Same Kind | Derivation |
@@ -70,15 +70,15 @@ Relationships in Project 0 follow strict constraints to ensure executable contin
 ### Traversal and Integrity
 - **Stable edge identity**: Edge identity is defined by its `id`. It cannot change direction, endpoints, or type after admission.
 - **Exact direction**: Edges strictly follow the `From Kind` → `To Kind` enforcement table. Reversing an edge yields a validation failure.
-- **Cross-scope rules**: A relationship between two contexts evaluates `scopeId`. An edge crossing scopes must retain explicit lineage and boundaries without silently exposing material to an unauthorized scope.
+- **Cross-scope rules**: A relationship between two contexts evaluates `scopeId`. An edge crossing scopes is rejected at admission unless its `basis` references a valid `permits_disclosure` edge or `RevelationReceipt` explicitly bridging the two scopes.
 - **Acyclicity rule**: Any edge belonging to the `Derivation` family, as well as `precedes` and `supersedes` in the `Temporal` family, MUST NOT create a cycle. Cycle detection is evaluated at admission time. (The `overlaps` edge may be cyclic/symmetric).
 - **Deterministic traversal**: When multiple valid paths exist, deterministic ordering relies strictly on cryptographic tie-breaking. Sort edges by the target node/edge `id`, then by the edge's `id`. `createdAt` MUST NOT be used for deterministic ordering.
-- **Polarity and Evidence**: Traversal rules explicitly dictate whether an edge amplifies, mitigates, or excludes its target from the current evidence set (precise polarity rules are deferred to downstream traversal definitions).
+- **Polarity and Evidence**: Traversal rules explicitly dictate evidence polarity: `supports` and `answers` amplify the target, `contradicts` and `rebuttal_to` mitigate it, and edges marked as `disputed` (e.g., via a tension node) entirely exclude their target from active evidence traversal.
 
 ### Conflict and Evolution
 - **Dispute and supersession**: An edge with `type: supersedes` targeting an older edge demotes the target edge from the active evaluation graph. A disputed edge (e.g., via a `tension` node that `answers` the edge) remains in the graph but is marked as `disputed` and excluded from active evidence traversal.
 - **Plural current harvests**: Multiple `harvest` nodes can `compress` the same sources. No engine may force singular canonical truth; all valid harvests remain in the traversal path.
-- **Basis and authority**: An edge's `assertedBy` provides attribution. Authority is evaluated by bounded lease paths, not merely by attribution. Conflating attribution with authorization violates bounded authority.
+- **Basis and authority**: An edge's `assertedBy` provides attribution. Authority is evaluated by bounded lease paths, not merely by attribution. Conflating attribution with authorization violates bounded authority. Any edge in the `Authority` family (`delegates`, `consumes`, `revokes`, `permits_disclosure`) MUST have its `basis` point to a valid `LeaseGrant` or `Receipt`. An authority edge without a cryptographic receipt basis is rejected at admission.
 
 ## Local collapse, never final collapse
 

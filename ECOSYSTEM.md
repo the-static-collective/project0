@@ -41,7 +41,15 @@ TranchNode provides the meaning and continuity substrate, but its v0.1 evaluatio
 - **`rejection` node**: Project 0 requires `rejection` to be a substantive, targetable node kind. TranchNode v0.1 does not represent rejection as a state, a receipt, or a node; it has no v0.1 representation at all.
   - **The Mismatch**: Project 0's `rejection` node has no representation in TranchNode v0.1.
   - **Resolution**: Resolving this requires either a future TranchNode v0.2 extension (to adopt `rejection` as a node) or an explicitly lossy adapter. Until then, this remains an explicit tension.
-- **Edge Envelope and Traversal**: TranchNode uses a sequential accepted-event model. Project 0 follows this by admitting edges separately from nodes. However, Project 0 defines a much richer set of directed edge types. Any adapter to TranchNode v0.1 must map Project 0's typed edges into TranchNode's simpler linkage model without losing the canonical Project 0 cryptographic ID or scope boundaries.
+- **Edge Envelope and Traversal**: TranchNode uses a sequential accepted-event model. Project 0 follows this by admitting edges separately from nodes. However, Project 0 defines a much richer set of directed edge types. Adapters to TranchNode v0.1 MUST apply the following exact mapping to preserve the Project 0 edge envelope:
+  - Project 0 `id` → TranchNode `link_id`
+  - Project 0 `type` → TranchNode `link_type`
+  - Project 0 `from`/`to` → TranchNode `source`/`target`
+  - Project 0 `assertedBy` → TranchNode `metadata.assertedBy`
+  - Project 0 `scopeId` → TranchNode `metadata.scopeId`
+  - Project 0 `basis` → TranchNode `metadata.basis`
+  - Project 0 `disclosure` → TranchNode `metadata.disclosure`
+  *(Note: TranchNode does not natively enforce bounded authority via `basis` or cross-scope boundary evaluations. The adapter must perform these checks computationally prior to yielding traversal results).*
 
 ## Canonical versus local
 
