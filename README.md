@@ -27,6 +27,9 @@ Project 0 therefore treats relationship as part of the decompression mechanism�
 - [RELATIONSHIPS.md](RELATIONSHIPS.md) — relationship-first meaning and decompression
 - [RECEIPTS.md](RECEIPTS.md) — evidence, lineage, authority, and witnessing
 - [ECOSYSTEM.md](ECOSYSTEM.md) — how current projects relate without collapsing together
+- [MERGE-CIRCUIT.md](MERGE-CIRCUIT.md) — independent claims, conformance receipts, contradiction receipts, and human merge authority
+- [contract/edge-law.v0.1.json](contract/edge-law.v0.1.json) — exhaustive tuple, traversal, and TranchNode v0.1 adapter contract
+- [contract/status.json](contract/status.json) — machine-readable floor and blocker status
 - [AGENTS.md](AGENTS.md) — instructions for Jules and other coding agents
 - [ROADMAP.md](ROADMAP.md) — staged path from contract to executable reference kernel
 
@@ -38,6 +41,8 @@ A downstream project may extend the contract. It may not silently weaken or rein
 
 ## Status
 
-**Floor 1.0 — meaning-contract formation.**
+**Floor 1.0 — meaning-contract formation. Issues #1, #3, #5, and #10 remain blocked; executable Floor 1.1 work is not yet authorized.**
 
 The documents in this repository are normative drafts until a tagged release. Code should follow the contract; the contract should not be retrofitted to excuse accidental code.
+
+Run `npm run check` before reporting that a normative correction is complete.
