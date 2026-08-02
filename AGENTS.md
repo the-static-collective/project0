@@ -37,6 +37,17 @@ Every pull request should state:
 - tests run
 - unresolved tensions
 
+The PR body is a claim, not proof. For a normative change:
+
+- update the relevant machine-readable contract artifact;
+- run `npm run check` and report its literal result;
+- never claim an issue is unblocked when `contract/status.json` marks it blocked;
+- keep author claim, conformance receipt, and contradiction review independent;
+- never treat a green check or witness as merge authority;
+- do not merge your own normative change without a non-author review.
+
+If a task summary and the committed files disagree, the committed files control and the contradiction remains open.
+
 ## First implementation target
 
 Build only enough TypeScript to:
