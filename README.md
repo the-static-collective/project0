@@ -27,6 +27,7 @@ Project 0 therefore treats relationship as part of the decompression mechanism�
 - [RELATIONSHIPS.md](RELATIONSHIPS.md) — relationship-first meaning and decompression
 - [RECEIPTS.md](RECEIPTS.md) — evidence, lineage, authority, and witnessing
 - [ECOSYSTEM.md](ECOSYSTEM.md) — how current projects relate without collapsing together
+- [CONSTRUCTION.md](CONSTRUCTION.md) — provisional self-hosting protocol for attributable changes
 - [AGENTS.md](AGENTS.md) — instructions for Jules and other coding agents
 - [ROADMAP.md](ROADMAP.md) — staged path from contract to executable reference kernel
 
@@ -41,3 +42,5 @@ A downstream project may extend the contract. It may not silently weaken or rein
 **Floor 1.0 — meaning-contract formation.**
 
 The documents in this repository are normative drafts until a tagged release. Code should follow the contract; the contract should not be retrofitted to excuse accidental code.
+
+Construction manifests are provisional bootstrap records until issue #5 freezes canonical addressing. Their Git and GitHub references preserve provenance but are not Project 0 canonical identities.
