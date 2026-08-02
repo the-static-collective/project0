@@ -1,0 +1,128 @@
+name: Construction proposal
+description: Declare a scoped Project 0 change with lineage, invariants, authority, and tensions.
+title: "Construction: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form creates a construction candidate, not a canonical node or receipt. Before issue #5 is resolved, all identity remains provisional.
+  - type: dropdown
+    id: epistemic_role
+    attributes:
+      label: Candidate role
+      description: What role does this issue primarily serve?
+      options:
+        - proposal
+        - tension
+        - claim
+        - source
+    validations:
+      required: true
+  - type: dropdown
+    id: change_class
+    attributes:
+      label: Change class
+      options:
+        - constitutional
+        - structural
+        - domain
+        - adapter
+        - interface
+        - research
+    validations:
+      required: true
+  - type: input
+    id: roadmap
+    attributes:
+      label: Roadmap or parent issue
+      description: Link the roadmap slice, parent issue, or explicitly state that this is a new tension.
+      placeholder: https://github.com/the-static-collective/project0/issues/...
+    validations:
+      required: true
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Proposed change and purpose
+      description: State the smallest change, why it belongs here, and what it deliberately does not do.
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources and provenance
+      description: Cite exact issues, commits, paths, fixtures, or prior decisions. Use immutable refs where available.
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Meaning-contract surface
+      description: Name every normative term, node/edge mapping, receipt meaning, or boundary changed. Say "none" when none changes.
+    validations:
+      required: true
+  - type: textarea
+    id: invariants
+    attributes:
+      label: Invariants and adversarial cases
+      description: List Project 0 invariant references and the failure cases that will exercise them.
+      placeholder: P0-I2 — provenance closure; adversarial case: ...
+    validations:
+      required: true
+  - type: textarea
+    id: authority
+    attributes:
+      label: Requested authority and scope
+      description: State who is being asked to do what, within which repository or contract boundary, and on what basis.
+    validations:
+      required: true
+  - type: dropdown
+    id: compatibility
+    attributes:
+      label: Compatibility effect
+      options:
+        - none
+        - compatible
+        - migration_required
+        - breaking
+        - unknown
+    validations:
+      required: true
+  - type: textarea
+    id: migration
+    attributes:
+      label: Migration or transition
+      description: Describe the migration effect, or explain why no migration is needed.
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification plan and non-claims
+      description: Name fixtures and deterministic checks, plus what they will not prove.
+    validations:
+      required: true
+  - type: textarea
+    id: tensions
+    attributes:
+      label: Unresolved tensions and rejected alternatives
+      description: Preserve uncertainties and rejected paths with grounds. Say "none known" only after checking.
+    validations:
+      required: true
+  - type: textarea
+    id: stop_conditions
+    attributes:
+      label: Stop conditions
+      description: State the conditions that require work to stop and return to review.
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Bootstrap boundaries
+      options:
+        - label: I will not treat Git identity as Project 0 canonical identity.
+          required: true
+        - label: I will not treat review, CI, confidence, or popularity as authority.
+          required: true
+        - label: I will preserve source lineage, tensions, and rejected alternatives.
+          required: true
