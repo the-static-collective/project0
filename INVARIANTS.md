@@ -58,11 +58,11 @@ The following deterministic adversarial examples and fixtures ensure the edge la
 
 3. **duplicate relationship assertions by different authors**:
    - *Inputs*:
-     - Node A (`id`: nA, `kind`: claim, `scopeId`: S1, `disclosure`: public)
-     - Node B (`id`: nB, `kind`: claim, `scopeId`: S1, `disclosure`: public)
+     - Node A (`id`: nA, `kind`: claim, `scopeId`: pubScope, `disclosure`: public)
+     - Node B (`id`: nB, `kind`: claim, `scopeId`: pubScope, `disclosure`: public)
      - Edge E1 (`id`: e1, `type`: supports, `from`: nA, `to`: nB, `assertedBy`: humanX, `createdAt`: t1, `scopeId`: pubScope, `basis`: null, `disclosure`: public)
-     - Edge E2 (`id`: e2, `type`: supports, `from`: nA, `to`: nB, `assertedBy`: humanY, `createdAt`: t2, `scopeId`: privScope, `basis`: null, `disclosure`: private)
-   - *Expected Result*: Graph admits both edges. E1 and E2 have distinct `id`s. Querying in `pubScope` returns E1. Querying in `privScope` returns E1 and E2. (Defends Invariant 4).
+     - Edge E2 (`id`: e2, `type`: supports, `from`: nA, `to`: nB, `assertedBy`: humanY, `createdAt`: t2, `scopeId`: pubScope, `basis`: null, `disclosure`: private)
+   - *Expected Result*: Graph admits both edges sequentially. E1 and E2 have distinct `id`s. Because both edges belong to `pubScope`, they do not require a cross-scope bridge. A query executing under public visibility constraints returns E1. A query executing under private visibility constraints (authorized for humanY) returns E1 and E2. They do not silently collapse (Defends Invariant 4).
 
 4. **disputed edge excluded from active evidence**:
    - *Inputs*:
@@ -88,11 +88,19 @@ The following deterministic adversarial examples and fixtures ensure the edge la
      - Edge E1 (`id`: e1, `type`: derived_from, `from`: nB, `to`: nA, `assertedBy`: modelX, `createdAt`: t1, `scopeId`: S1, `basis`: null, `disclosure`: public)
      - Edge E2 (`id`: e2, `type`: derived_from, `from`: nC, `to`: nB, `assertedBy`: modelX, `createdAt`: t2, `scopeId`: S1, `basis`: null, `disclosure`: public)
      - Request to admit Edge E3 (`id`: e3, `type`: derived_from, `from`: nA, `to`: nC, `assertedBy`: modelX, `createdAt`: t3, `scopeId`: S1, `basis`: null, `disclosure`: public).
-   - *Inputs (Cross-scope)*:
+   - *Inputs (Cross-scope rejection)*:
      - Node X (`id`: nX, `kind`: claim, `scopeId`: privScope, `disclosure`: private)
      - Node Y (`id`: nY, `kind`: inference, `scopeId`: pubScope, `disclosure`: public)
      - Request to admit Edge E4 (`id`: e4, `type`: derived_from, `from`: nY, `to`: nX, `assertedBy`: humanX, `createdAt`: t4, `scopeId`: pubScope, `basis`: null, `disclosure`: public).
-   - *Expected Result*: E3 is deterministically rejected at admission (cycle). E4 is deterministically rejected at admission (crosses scopes without a valid bridging `basis`). (Defends Invariants 2, 8, and 9).
+   - *Expected Result*: E3 is deterministically rejected at admission (cycle). E4 is deterministically rejected at admission (crosses scopes without a valid bridging `basis` resolving to a `RevelationReceipt`). (Defends Invariants 2, 8, and 9).
+
+7. **positive cross-scope bridge**:
+   - *Inputs*:
+     - Node X (`id`: nX, `kind`: source, `scopeId`: privScope, `disclosure`: private)
+     - Node Y (`id`: nY, `kind`: inference, `scopeId`: pubScope, `disclosure`: public)
+     - Receipt R1 (`id`: r1, `type`: RevelationReceipt, `sourceScopeId`: privScope, `destinationScopeId`: pubScope, `isValid`: true, `lineageIsIntact`: true)
+     - Edge E1 (`id`: e1, `type`: derived_from, `from`: nY, `to`: nX, `assertedBy`: humanX, `createdAt`: t1, `scopeId`: pubScope, `basis`: r1, `disclosure`: public).
+   - *Expected Result*: E1 is admitted. Traversal of E1 resolves the `basis` ID via `getReceipt(r1)` and successfully executes `isValidBridgeReceipt(r1, privScope, pubScope)`, preserving boundaries explicitly without silent exposure (Defends Invariant 9).
 
 ## Change rule
 

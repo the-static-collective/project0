@@ -65,18 +65,32 @@ The canonical edge set is defined by strictly allowed `(Edge Type, From Kind, To
 Relationships in Project 0 follow strict constraints to ensure executable continuity and prevent silent rewrites or invalid evaluations.
 
 ### Executable Predicates
-Validation requires these exact predicates to evaluate to `true` during admission or traversal:
+Validation requires these exact predicates to evaluate to `true` during admission or traversal. Every `from`, `to`, and `basis` ID MUST be resolved via explicit lookup functions (`getNode`, `getEdge`, `getReceipt`) before reading fields.
 
 1. **`isCrossScopeBridged(edge)`**:
-   - `if (edge.from.scopeId == edge.to.scopeId) return true;`
-   - `else return isValidReceipt(edge.basis) && (edge.basis.type == 'permits_disclosure' || edge.basis.type == 'RevelationReceipt');`
-   - *Result*: Cross-scope edges fail admission unless explicitly bridged.
-2. **`isValidAuthorityEdge(edge)`**:
+   - `let fromObj = getNode(edge.from) || getEdge(edge.from);`
+   - `let toObj = getNode(edge.to) || getEdge(edge.to);`
+   - `if (edge.scopeId == fromObj.scopeId && edge.scopeId == toObj.scopeId) return true;`
+   - `let receipt = getReceipt(edge.basis);`
+   - `if (!receipt || receipt.type != 'RevelationReceipt') return false;`
+   - `return isValidBridgeReceipt(receipt, fromObj.scopeId, toObj.scopeId);`
+   - *Result*: Cross-scope edges fail admission unless explicitly bridged by a `RevelationReceipt`.
+
+2. **`isValidBridgeReceipt(receipt, sourceScopeId, destinationScopeId)`**:
+   - `return receipt.sourceScopeId == sourceScopeId && receipt.destinationScopeId == destinationScopeId && receipt.isValid == true && receipt.lineageIsIntact == true;`
+   - *(The receipt also binds actor/recipient, capability, disclosure/purpose, and the proposed material, evaluating them internally).*
+
+3. **`isValidAuthorityEdge(edge)`**:
    - `if (edge.family != 'Authority') return true;`
-   - `else return isValidReceipt(edge.basis) && (edge.basis.type == 'LeaseGrant' || edge.basis.type == 'LeaseConsumption' || edge.basis.type == 'WitnessReceipt');`
+   - `let receipt = getReceipt(edge.basis);`
+   - `if (!receipt || receipt.type == 'WitnessReceipt') return false; // WitnessReceipt grants no authority.`
+   - `if (edge.type == 'delegates' || edge.type == 'permits_disclosure') return receipt.type == 'LeaseGrant';`
+   - `if (edge.type == 'consumes' || edge.type == 'revokes') return receipt.type == 'LeaseConsumption' || receipt.type == 'LeaseGrant'; // Note: LeaseConsumption does not substitute for LeaseGrant for delegation.`
+   - `return false;`
    - *Result*: Semantic attribution does not act as authorization.
-3. **`isDisputed(edge)`**:
-   - `return graph.exists(e => e.type == 'answers' && e.from.kind == 'tension' && e.to == edge.id);`
+
+4. **`isDisputed(edge)`**:
+   - `return graph.exists(e => e.type == 'answers' && (getNode(e.from).kind == 'tension') && e.to == edge.id);`
 
 ### Node-Specific Edge Constraints
 - **`inference` node**: MUST have at least one outgoing `derived_from` edge to its sources or evidence. `compresses` CANNOT substitute for `derived_from`, as compression belongs strictly to the `harvest` node kind.
@@ -99,11 +113,16 @@ Validation requires these exact predicates to evaluate to `true` during admissio
 - **Plural current harvests**: Multiple `harvest` nodes can `compress` the same sources. No engine may force singular canonical truth; all valid harvests remain in the traversal path.
 
 ### Evidence Traversal Polarity
-When traversing the graph to compile evidence, an edge strictly applies the following polarity to its origin node (`from`) in relation to the target node (`to`):
-- **Amplify**: `supports`, `observes`, `answers`, `revises`, `compresses`, `quotes`, `derived_from`, `depends_on`.
-- **Mitigate**: `contradicts`, `rebuttal_to`, `responds_to`.
-- **Replace/Exclude**: `supersedes`, `revokes`, `consumes`, or any edge where `isDisputed(edge) == true`.
-- **Contextual**: `asks`, `continues`, `precedes`, `overlaps`, `delegates`, `permits_disclosure` (meaning depends entirely on target evaluation).
+When traversing the graph to compile evidence, every one of the 21 canonical edge types dictates an exact traversal direction and polarity effect for its origin node (`from`) in relation to its target node (`to`). Edges where `isDisputed(edge) == true` evaluate to Exclude regardless of type.
+
+- **Amplify (Includes the origin node as positive evidence for the target)**:
+  - `supports`, `observes`, `answers`, `revises`, `compresses`, `quotes`, `derived_from`, `depends_on`, `qualifies`, `continues`.
+- **Mitigate (Includes the origin node as negative/opposing evidence for the target)**:
+  - `contradicts`, `rebuttal_to`, `responds_to`, `asks`.
+- **Replace/Exclude (Removes the target node from active evidence)**:
+  - `supersedes`, `revokes`, `consumes`.
+- **Administrative (Traversed for authorization/ordering, but do not inherently amplify or mitigate semantic evidence)**:
+  - `precedes`, `overlaps`, `delegates`, `permits_disclosure`.
 
 ## Local collapse, never final collapse
 
