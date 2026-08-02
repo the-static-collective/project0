@@ -38,6 +38,19 @@ A conforming implementation MUST preserve these properties.
 
 The following deterministic adversarial examples and fixtures ensure the edge laws and invariants cannot be silently bypassed. Expected evaluation results are strict.
 
+### Fixture shorthand expansion
+
+These are readable normative examples, not canonical hash vectors. Unless a field is written explicitly, every `Node X (...)` declaration expands to the complete `ONTOLOGY.md` envelope as follows:
+
+- `id`, `kind`, `scopeId`, and `disclosure` are the values printed in the fixture;
+- `body` is `{"fixtureNode":"<id>"}`;
+- `createdAt` is `t0`;
+- `createdBy` is `fixture-author`;
+- `provenance` is `[]` for a `source` and `["fixture:<fixture-number>"]` otherwise;
+- `relationships` is `[]` at node admission; separately admitted fixture edges populate the graph projection.
+
+Any fixture that overrides one of these defaults prints the override. Placeholder values such as `hashL1` and `hashR1` are visibly non-canonical until Issue #5 freezes canonical bytes and hashes.
+
 1. **observation → inference → claim**:
    - *Inputs*:
      - Node A (`id`: nA, `kind`: observation, `scopeId`: S1, `disclosure`: public)
@@ -81,7 +94,7 @@ The following deterministic adversarial examples and fixtures ensure the edge la
      - Edge E1 (`id`: e1, `type`: compresses, `from`: nB, `to`: nA, `assertedBy`: X, `createdAt`: t1, `scopeId`: S1, `basis`: null, `disclosure`: public)
      - Node C (`id`: nC, `kind`: harvest, `scopeId`: S1, `disclosure`: public)
      - Edge E2 (`id`: e2, `type`: compresses, `from`: nC, `to`: nA, `assertedBy`: Y, `createdAt`: t2, `scopeId`: S1, `basis`: null, `disclosure`: public)
-   - *Expected Result*: Both nodes and edges admit successfully. Both harvests remain current without forcing consensus, sorted deterministically by target `nA` then edge IDs `e1` and `e2`. (Defends Invariant 3).
+   - *Expected Result*: Both nodes and edges admit successfully. Both harvests remain current without forcing consensus. Candidate membership steps sort by edge type, edge ID, direction, then destination object ID, so `e1` precedes `e2`; returned harvest nodes are deduplicated and sorted by node ID. (Defends Invariant 3).
 
 6. **cycle and cross-scope rejection**:
    - *Inputs (Cycle)*:
@@ -99,11 +112,11 @@ The following deterministic adversarial examples and fixtures ensure the edge la
    - *Inputs*:
      - Node X (`id`: nX, `kind`: source, `scopeId`: privScope, `disclosure`: private)
      - Node Y (`id`: nY, `kind`: inference, `scopeId`: pubScope, `disclosure`: public)
-     - Request Req1 (`id`: req1, `purpose`: 'explicitly_declared_audit_request', `scopeId`: pubScope) *(Independently declared request)*
+     - Request Req1 (`id`: req1, `requester`: humanX, `purpose`: 'explicitly_declared_audit_request', `destinationScopeId`: pubScope, `declaredAt`: t0, `validFrom`: t0, `validUntil`: futureDate, `status`: open) *(Independently declared request)*
      - Receipt Lease1 (`receiptId`: lease1, `receiptType`: LeaseGrant, `issuedAt`: t0, `issuer`: admin, `subject`: privScope, `inputs`: {}, `outputs`: { `recipient`: humanX, `capability`: cross_scope_read, `scopeId`: privScope, `logicalExpiry`: futureDate, `invocationsRemaining`: 10 }, `authorityRef`: null, `policyRefs`: [private], `previousReceiptRefs`: [], `canonicalHash`: hashL1)
-     - Receipt R1 (`receiptId`: r1, `receiptType`: RevelationReceipt, `issuedAt`: t1, `issuer`: humanX, `subject`: e1, `inputs`: { `sourceScopeId`: privScope }, `outputs`: { `destinationScopeId`: pubScope, `purpose`: 'explicitly_declared_audit_request' }, `authorityRef`: lease1, `policyRefs`: [public], `previousReceiptRefs`: [], `canonicalHash`: hashR1)
+     - Receipt R1 (`receiptId`: r1, `receiptType`: RevelationReceipt, `issuedAt`: t1, `issuer`: humanX, `subject`: e1, `inputs`: { `sourceScopeId`: privScope }, `outputs`: { `destinationScopeId`: pubScope, `purpose`: 'explicitly_declared_audit_request', `requestRef`: req1 }, `authorityRef`: lease1, `policyRefs`: [public], `previousReceiptRefs`: [], `canonicalHash`: hashR1)
      - Edge E1 (`id`: e1, `type`: derived_from, `from`: nY, `to`: nX, `assertedBy`: humanX, `createdAt`: t1, `scopeId`: pubScope, `basis`: r1, `disclosure`: public).
-   - *Expected Result*: E1 is admitted. Traversal of E1 explicitly guards and resolves the `basis` ID via `getReceipt(r1)` and successfully evaluates `isCrossScopeBridged(E1)` to true (since `derived_from` pulls information from `nX` in `privScope` to `nY` in `pubScope`). This binds the exact `RECEIPTS.md` envelope, explicitly validates the receipt `purpose` against the independently declared `Req1`, and safely bridges bounds without silent exposure (Defends Invariant 9).
+   - *Expected Result*: E1 is admitted. Validation resolves `r1.outputs.requestRef` to exactly `Req1`, then matches requester, receipt issuer, edge actor, purpose, destination scope, open status, and validity. It also guards and resolves `basis` and `authorityRef` before dereferencing either receipt. Because `derived_from` pulls information from `nX` in `privScope` to `nY` in `pubScope`, the bridge is purpose-bound without silent exposure (Defends Invariant 9).
 
 ## Change rule
 
