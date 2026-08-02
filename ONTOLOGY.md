@@ -4,6 +4,8 @@ The ontology is deliberately small. Kinds describe a node's epistemic role, not 
 
 ## Node kinds
 
+The Project 0 canonical set is explicitly frozen at exactly nine kinds.
+
 | Kind | Meaning |
 |---|---|
 | `source` | An imported or directly produced artifact |
@@ -14,6 +16,7 @@ The ontology is deliberately small. Kinds describe a node's epistemic role, not 
 | `rejection` | A proposal or claim declined with attributable grounds |
 | `witness` | An attributable report that an event, state, or statement was observed |
 | `harvest` | A useful synthesis derived from prior nodes without replacing them |
+| `inference` | A computationally derived proposition or judgment |
 
 ## Required node envelope
 
@@ -51,6 +54,13 @@ Lanes are retrieval views over typed relationships, not competing copies of the 
 - Retrieval is not endorsement.
 - A witness attests to observation, not necessarily to the truth of the observed content.
 - A harvest is derived and must cite what it compresses.
+- Node kinds (like `rejection`) represent substantive, meaning-bearing, attributable records. They are distinct from administrative states (like `withheld` or `disputed`) and distinct from administrative receipts (like `DispositionReceipt`).
+- `inference` is a distinct epistemic role from a human claim or a harvest, added to satisfy TranchNode's frozen evaluation requirements.
+
+## Tensions and TranchNode Compatibility
+- Project 0 explicitly treats `rejection` as a meaning-bearing node kind so that it can be targeted by relationships and debated.
+- TranchNode v0.1 does not treat `rejection` as a node, a state, or a receipt; it has no v0.1 representation at all.
+- **Mismatch**: Project 0's `rejection` node has no representation in TranchNode v0.1. Resolving this will require either a TranchNode v0.2 extension or an explicitly lossy adapter. See `ECOSYSTEM.md` for the compatibility mapping.
 
 ## Extension rule
 
