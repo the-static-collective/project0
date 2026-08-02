@@ -91,7 +91,7 @@ The following deterministic adversarial examples and fixtures ensure the edge la
    - *Inputs (Cross-scope)*:
      - Node X (`id`: nX, `kind`: claim, `scopeId`: privScope, `disclosure`: private)
      - Node Y (`id`: nY, `kind`: inference, `scopeId`: pubScope, `disclosure`: public)
-     - Request to admit Edge E4 (`id`: e4, `type`: derived_from, `from`: nY, `to`: nX, `scopeId`: pubScope, `basis`: null).
+     - Request to admit Edge E4 (`id`: e4, `type`: derived_from, `from`: nY, `to`: nX, `assertedBy`: humanX, `createdAt`: t4, `scopeId`: pubScope, `basis`: null, `disclosure`: public).
    - *Expected Result*: E3 is deterministically rejected at admission (cycle). E4 is deterministically rejected at admission (crosses scopes without a valid bridging `basis`). (Defends Invariants 2, 8, and 9).
 
 ## Change rule

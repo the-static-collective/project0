@@ -41,15 +41,24 @@ TranchNode provides the meaning and continuity substrate, but its v0.1 evaluatio
 - **`rejection` node**: Project 0 requires `rejection` to be a substantive, targetable node kind. TranchNode v0.1 does not represent rejection as a state, a receipt, or a node; it has no v0.1 representation at all.
   - **The Mismatch**: Project 0's `rejection` node has no representation in TranchNode v0.1.
   - **Resolution**: Resolving this requires either a future TranchNode v0.2 extension (to adopt `rejection` as a node) or an explicitly lossy adapter. Until then, this remains an explicit tension.
-- **Edge Envelope and Traversal**: TranchNode uses a sequential accepted-event model. Project 0 follows this by admitting edges separately from nodes. However, Project 0 defines a much richer set of directed edge types. Adapters to TranchNode v0.1 MUST apply the following exact mapping to preserve the Project 0 edge envelope:
-  - Project 0 `id` → TranchNode `link_id`
-  - Project 0 `type` → TranchNode `link_type`
-  - Project 0 `from`/`to` → TranchNode `source`/`target`
-  - Project 0 `assertedBy` → TranchNode `metadata.assertedBy`
-  - Project 0 `scopeId` → TranchNode `metadata.scopeId`
-  - Project 0 `basis` → TranchNode `metadata.basis`
-  - Project 0 `disclosure` → TranchNode `metadata.disclosure`
-  *(Note: TranchNode does not natively enforce bounded authority via `basis` or cross-scope boundary evaluations. The adapter must perform these checks computationally prior to yielding traversal results).*
+- **Edge Envelope and Traversal**: TranchNode uses a sequential accepted-event model. Project 0 follows this by admitting edges separately from nodes. However, TranchNode v0.1 has a highly constrained native edge schema (`id`, `kind`, `fromId`, `toId`, `scopeId`, `authorId`, `createdAt`), exactly 9 `EdgeKind` values, node-only endpoints, strict dispute/supersede operations, and an absolute prohibition on cross-scope edges. Adapters to TranchNode v0.1 MUST classify and translate the Project 0 envelope as follows:
+  - **Lossless direct mappings**:
+    - Project 0 `id` → TranchNode `id`
+    - Project 0 `from` (Node) → TranchNode `fromId`
+    - Project 0 `to` (Node) → TranchNode `toId`
+    - Project 0 `scopeId` → TranchNode `scopeId`
+    - Project 0 `assertedBy` → TranchNode `authorId`
+    - Project 0 `createdAt` → TranchNode `createdAt`
+  - **Lossless operation translation**:
+    - Project 0 `answers` (targeting an edge) → TranchNode `dispute_edge` operation
+    - Project 0 `supersedes` → TranchNode `supersede_edge` operation
+  - **Lossy mappings**:
+    - Project 0 `type` (20 types) → TranchNode `kind` (must be lossily mapped into the nearest of TranchNode's 9 `EdgeKind` values; true semantic type must be archived elsewhere).
+  - **Unavailable (Unrepresentable semantics)**:
+    - Project 0 `basis` and `disclosure` fields have no native fields in TranchNode v0.1.
+    - Project 0 **cross-scope edges** are absolutely prohibited by TranchNode v0.1 and cannot be admitted.
+    - Project 0 **edge-to-edge** endpoints (other than `answers` or `supersedes` operations) cannot be represented.
+  *(Note: An adapter must NOT claim to preserve Project 0 semantics that TranchNode v0.1 cannot represent, such as cross-scope relations. Doing so silently breaks the invariants).*
 
 ## Canonical versus local
 
