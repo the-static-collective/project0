@@ -34,6 +34,12 @@ A conforming implementation MUST preserve these properties.
 19. **Offline survivability** — The core contract can be represented and verified without dependence on a proprietary inference service.
 20. **Explicit uncertainty** — Unknown, withheld, disputed, and inapplicable are distinct states.
 
+## Candidate invariant for the next version boundary
+
+21. **Resonance preserves difference** — Evaluation may discover more coherent relationships among participating nodes, but it must not erase attributable disagreement, provenance, disclosure boundaries, or unresolved remainder. A resonance result is a proposal or receipt, not authority to mutate or adopt.
+
+This invariant remains explicitly provisional until its fixtures, receipt envelope, migration consequence, and version boundary are implemented. See `docs/resonant-tension.md`.
+
 ## Adversarial Examples & Required Fixtures
 
 The following deterministic adversarial examples and fixtures ensure the edge laws and invariants cannot be silently bypassed. Expected evaluation results are strict.
@@ -104,6 +110,22 @@ The following deterministic adversarial examples and fixtures ensure the edge la
      - Receipt R1 (`receiptId`: r1, `receiptType`: RevelationReceipt, `issuedAt`: t1, `issuer`: humanX, `subject`: e1, `inputs`: { `sourceScopeId`: privScope }, `outputs`: { `destinationScopeId`: pubScope, `purpose`: 'explicitly_declared_audit_request' }, `authorityRef`: lease1, `policyRefs`: [public], `previousReceiptRefs`: [], `canonicalHash`: hashR1)
      - Edge E1 (`id`: e1, `type`: derived_from, `from`: nY, `to`: nX, `assertedBy`: humanX, `createdAt`: t1, `scopeId`: pubScope, `basis`: r1, `disclosure`: public).
    - *Expected Result*: E1 is admitted. Traversal of E1 explicitly guards and resolves the `basis` ID via `getReceipt(r1)` and successfully evaluates `isCrossScopeBridged(E1)` to true (since `derived_from` pulls information from `nX` in `privScope` to `nY` in `pubScope`). This binds the exact `RECEIPTS.md` envelope, explicitly validates the receipt `purpose` against the independently declared `Req1`, and safely bridges bounds without silent exposure (Defends Invariant 9).
+
+## Proposed resonance fixtures for the next version boundary
+
+These fixtures are normative design requirements but are not yet part of the current frozen fixture set.
+
+8. **resonance preserves source tension**:
+   - *Inputs*: two attributable claims, one `tension` node linking their incompatibility, and a pure resonance evaluation producing a third `proposal` or `harvest`.
+   - *Expected Result*: the proposal may be admitted when ordinary edge law permits it; both original claims and the tension remain queryable and unchanged. No evaluator output marks them resolved by deletion or replacement. (Defends Invariants 1, 3, 16, and proposed 21.)
+
+9. **resonance cannot manufacture authority or disclosure**:
+   - *Inputs*: a valid resonance candidate whose adoption would execute a capability or reveal material across scopes, but with no valid authority lease or revelation basis.
+   - *Expected Result*: the evaluation receipt remains admissible as a proposal, while execution and cross-scope traversal fail deterministically. (Defends Invariants 6–10, 16, and proposed 21.)
+
+10. **productive dissonance is a valid result**:
+   - *Inputs*: an active tension whose participants retain incompatible purposes after all shared constraints are evaluated.
+   - *Expected Result*: the deterministic disposition is `productive_dissonance`; no synthetic compromise is generated, and the unresolved remainder is explicit and attributable. (Defends Invariants 3, 11, 20, and proposed 21.)
 
 ## Change rule
 
