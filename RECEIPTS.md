@@ -16,6 +16,21 @@ Receipts are immutable, attributable records of system-significant events. They 
 - `previousReceiptRefs`
 - `canonicalHash`
 
+## Declared request envelope
+
+A purpose-bound revelation must name one independently declared Request by ID. A Request is not a receipt and does not grant authority. It records the purpose against which an already-authorized act may be evaluated.
+
+- `id`
+- `requester`: actor asking for the bounded act
+- `purpose`: exact declared purpose
+- `destinationScopeId`
+- `declaredAt`
+- `validFrom`
+- `validUntil`
+- `status`: `open`, `fulfilled`, `withdrawn`, or `expired`
+
+A `RevelationReceipt` exercising that request must carry `outputs.requestRef`. Validation resolves that exact ID and binds requester, receipt issuer, edge actor, purpose, destination scope, status, and validity. Selecting a request by actor or scope alone is invalid.
+
 ## Initial receipt families
 
 | Receipt | Records |
