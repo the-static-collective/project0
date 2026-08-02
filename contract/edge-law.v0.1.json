@@ -1,0 +1,4523 @@
+{
+  "schemaVersion": "project0-edge-law-0.1",
+  "status": "normative-draft",
+  "nodeKinds": [
+    "source",
+    "observation",
+    "claim",
+    "proposal",
+    "tension",
+    "rejection",
+    "witness",
+    "harvest",
+    "inference"
+  ],
+  "edgeTypes": [
+    "derived_from",
+    "quotes",
+    "compresses",
+    "revises",
+    "depends_on",
+    "supports",
+    "contradicts",
+    "qualifies",
+    "observes",
+    "answers",
+    "asks",
+    "rebuttal_to",
+    "responds_to",
+    "continues",
+    "delegates",
+    "consumes",
+    "revokes",
+    "permits_disclosure",
+    "precedes",
+    "overlaps",
+    "supersedes"
+  ],
+  "validTuples": [
+    {
+      "type": "derived_from",
+      "from": "inference",
+      "to": "source"
+    },
+    {
+      "type": "derived_from",
+      "from": "inference",
+      "to": "observation"
+    },
+    {
+      "type": "derived_from",
+      "from": "inference",
+      "to": "inference"
+    },
+    {
+      "type": "derived_from",
+      "from": "inference",
+      "to": "claim"
+    },
+    {
+      "type": "derived_from",
+      "from": "inference",
+      "to": "rejection"
+    },
+    {
+      "type": "derived_from",
+      "from": "harvest",
+      "to": "source"
+    },
+    {
+      "type": "derived_from",
+      "from": "harvest",
+      "to": "observation"
+    },
+    {
+      "type": "derived_from",
+      "from": "harvest",
+      "to": "inference"
+    },
+    {
+      "type": "derived_from",
+      "from": "harvest",
+      "to": "claim"
+    },
+    {
+      "type": "derived_from",
+      "from": "harvest",
+      "to": "rejection"
+    },
+    {
+      "type": "derived_from",
+      "from": "claim",
+      "to": "source"
+    },
+    {
+      "type": "derived_from",
+      "from": "claim",
+      "to": "inference"
+    },
+    {
+      "type": "derived_from",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "derived_from",
+      "from": "claim",
+      "to": "rejection"
+    },
+    {
+      "type": "quotes",
+      "from": "source",
+      "to": "source"
+    },
+    {
+      "type": "quotes",
+      "from": "observation",
+      "to": "source"
+    },
+    {
+      "type": "quotes",
+      "from": "claim",
+      "to": "source"
+    },
+    {
+      "type": "quotes",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "quotes",
+      "from": "claim",
+      "to": "proposal"
+    },
+    {
+      "type": "compresses",
+      "from": "harvest",
+      "to": "source"
+    },
+    {
+      "type": "compresses",
+      "from": "harvest",
+      "to": "observation"
+    },
+    {
+      "type": "compresses",
+      "from": "harvest",
+      "to": "claim"
+    },
+    {
+      "type": "compresses",
+      "from": "harvest",
+      "to": "inference"
+    },
+    {
+      "type": "revises",
+      "from": "observation",
+      "to": "observation"
+    },
+    {
+      "type": "revises",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "revises",
+      "from": "proposal",
+      "to": "proposal"
+    },
+    {
+      "type": "revises",
+      "from": "tension",
+      "to": "tension"
+    },
+    {
+      "type": "revises",
+      "from": "rejection",
+      "to": "rejection"
+    },
+    {
+      "type": "revises",
+      "from": "witness",
+      "to": "witness"
+    },
+    {
+      "type": "revises",
+      "from": "harvest",
+      "to": "harvest"
+    },
+    {
+      "type": "revises",
+      "from": "inference",
+      "to": "inference"
+    },
+    {
+      "type": "depends_on",
+      "from": "inference",
+      "to": "claim"
+    },
+    {
+      "type": "depends_on",
+      "from": "inference",
+      "to": "inference"
+    },
+    {
+      "type": "depends_on",
+      "from": "inference",
+      "to": "source"
+    },
+    {
+      "type": "depends_on",
+      "from": "proposal",
+      "to": "claim"
+    },
+    {
+      "type": "depends_on",
+      "from": "proposal",
+      "to": "source"
+    },
+    {
+      "type": "depends_on",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "depends_on",
+      "from": "claim",
+      "to": "source"
+    },
+    {
+      "type": "supports",
+      "from": "inference",
+      "to": "claim"
+    },
+    {
+      "type": "supports",
+      "from": "inference",
+      "to": "proposal"
+    },
+    {
+      "type": "supports",
+      "from": "inference",
+      "to": "inference"
+    },
+    {
+      "type": "supports",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "supports",
+      "from": "claim",
+      "to": "proposal"
+    },
+    {
+      "type": "supports",
+      "from": "claim",
+      "to": "inference"
+    },
+    {
+      "type": "supports",
+      "from": "observation",
+      "to": "claim"
+    },
+    {
+      "type": "supports",
+      "from": "observation",
+      "to": "proposal"
+    },
+    {
+      "type": "contradicts",
+      "from": "rejection",
+      "to": "claim"
+    },
+    {
+      "type": "contradicts",
+      "from": "rejection",
+      "to": "inference"
+    },
+    {
+      "type": "contradicts",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "contradicts",
+      "from": "claim",
+      "to": "inference"
+    },
+    {
+      "type": "contradicts",
+      "from": "inference",
+      "to": "claim"
+    },
+    {
+      "type": "contradicts",
+      "from": "inference",
+      "to": "inference"
+    },
+    {
+      "type": "qualifies",
+      "from": "inference",
+      "to": "claim"
+    },
+    {
+      "type": "qualifies",
+      "from": "inference",
+      "to": "proposal"
+    },
+    {
+      "type": "qualifies",
+      "from": "inference",
+      "to": "inference"
+    },
+    {
+      "type": "qualifies",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "qualifies",
+      "from": "claim",
+      "to": "proposal"
+    },
+    {
+      "type": "qualifies",
+      "from": "claim",
+      "to": "inference"
+    },
+    {
+      "type": "observes",
+      "from": "witness",
+      "to": "source"
+    },
+    {
+      "type": "observes",
+      "from": "witness",
+      "to": "observation"
+    },
+    {
+      "type": "observes",
+      "from": "witness",
+      "to": "claim"
+    },
+    {
+      "type": "observes",
+      "from": "witness",
+      "to": "proposal"
+    },
+    {
+      "type": "observes",
+      "from": "witness",
+      "to": "tension"
+    },
+    {
+      "type": "observes",
+      "from": "witness",
+      "to": "rejection"
+    },
+    {
+      "type": "observes",
+      "from": "witness",
+      "to": "witness"
+    },
+    {
+      "type": "observes",
+      "from": "witness",
+      "to": "harvest"
+    },
+    {
+      "type": "observes",
+      "from": "witness",
+      "to": "inference"
+    },
+    {
+      "type": "answers",
+      "from": "claim",
+      "to": "tension"
+    },
+    {
+      "type": "answers",
+      "from": "claim",
+      "to": "proposal"
+    },
+    {
+      "type": "answers",
+      "from": "observation",
+      "to": "tension"
+    },
+    {
+      "type": "answers",
+      "from": "observation",
+      "to": "proposal"
+    },
+    {
+      "type": "answers",
+      "from": "tension",
+      "to": "tension"
+    },
+    {
+      "type": "answers",
+      "from": "tension",
+      "to": "edge"
+    },
+    {
+      "type": "asks",
+      "from": "proposal",
+      "to": "source"
+    },
+    {
+      "type": "asks",
+      "from": "proposal",
+      "to": "observation"
+    },
+    {
+      "type": "asks",
+      "from": "proposal",
+      "to": "claim"
+    },
+    {
+      "type": "asks",
+      "from": "proposal",
+      "to": "proposal"
+    },
+    {
+      "type": "asks",
+      "from": "proposal",
+      "to": "tension"
+    },
+    {
+      "type": "asks",
+      "from": "proposal",
+      "to": "rejection"
+    },
+    {
+      "type": "asks",
+      "from": "proposal",
+      "to": "witness"
+    },
+    {
+      "type": "asks",
+      "from": "proposal",
+      "to": "harvest"
+    },
+    {
+      "type": "asks",
+      "from": "proposal",
+      "to": "inference"
+    },
+    {
+      "type": "asks",
+      "from": "tension",
+      "to": "source"
+    },
+    {
+      "type": "asks",
+      "from": "tension",
+      "to": "observation"
+    },
+    {
+      "type": "asks",
+      "from": "tension",
+      "to": "claim"
+    },
+    {
+      "type": "asks",
+      "from": "tension",
+      "to": "proposal"
+    },
+    {
+      "type": "asks",
+      "from": "tension",
+      "to": "tension"
+    },
+    {
+      "type": "asks",
+      "from": "tension",
+      "to": "rejection"
+    },
+    {
+      "type": "asks",
+      "from": "tension",
+      "to": "witness"
+    },
+    {
+      "type": "asks",
+      "from": "tension",
+      "to": "harvest"
+    },
+    {
+      "type": "asks",
+      "from": "tension",
+      "to": "inference"
+    },
+    {
+      "type": "rebuttal_to",
+      "from": "rejection",
+      "to": "claim"
+    },
+    {
+      "type": "rebuttal_to",
+      "from": "rejection",
+      "to": "proposal"
+    },
+    {
+      "type": "rebuttal_to",
+      "from": "rejection",
+      "to": "inference"
+    },
+    {
+      "type": "responds_to",
+      "from": "rejection",
+      "to": "proposal"
+    },
+    {
+      "type": "responds_to",
+      "from": "rejection",
+      "to": "claim"
+    },
+    {
+      "type": "responds_to",
+      "from": "claim",
+      "to": "proposal"
+    },
+    {
+      "type": "responds_to",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "continues",
+      "from": "proposal",
+      "to": "proposal"
+    },
+    {
+      "type": "continues",
+      "from": "tension",
+      "to": "tension"
+    },
+    {
+      "type": "delegates",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "delegates",
+      "from": "source",
+      "to": "claim"
+    },
+    {
+      "type": "consumes",
+      "from": "source",
+      "to": "claim"
+    },
+    {
+      "type": "consumes",
+      "from": "source",
+      "to": "source"
+    },
+    {
+      "type": "consumes",
+      "from": "inference",
+      "to": "claim"
+    },
+    {
+      "type": "consumes",
+      "from": "inference",
+      "to": "source"
+    },
+    {
+      "type": "revokes",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "revokes",
+      "from": "source",
+      "to": "claim"
+    },
+    {
+      "type": "permits_disclosure",
+      "from": "claim",
+      "to": "source"
+    },
+    {
+      "type": "permits_disclosure",
+      "from": "claim",
+      "to": "observation"
+    },
+    {
+      "type": "permits_disclosure",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "permits_disclosure",
+      "from": "claim",
+      "to": "proposal"
+    },
+    {
+      "type": "permits_disclosure",
+      "from": "claim",
+      "to": "tension"
+    },
+    {
+      "type": "permits_disclosure",
+      "from": "claim",
+      "to": "rejection"
+    },
+    {
+      "type": "permits_disclosure",
+      "from": "claim",
+      "to": "witness"
+    },
+    {
+      "type": "permits_disclosure",
+      "from": "claim",
+      "to": "harvest"
+    },
+    {
+      "type": "permits_disclosure",
+      "from": "claim",
+      "to": "inference"
+    },
+    {
+      "type": "precedes",
+      "from": "source",
+      "to": "source"
+    },
+    {
+      "type": "precedes",
+      "from": "source",
+      "to": "observation"
+    },
+    {
+      "type": "precedes",
+      "from": "source",
+      "to": "claim"
+    },
+    {
+      "type": "precedes",
+      "from": "source",
+      "to": "proposal"
+    },
+    {
+      "type": "precedes",
+      "from": "source",
+      "to": "tension"
+    },
+    {
+      "type": "precedes",
+      "from": "source",
+      "to": "rejection"
+    },
+    {
+      "type": "precedes",
+      "from": "source",
+      "to": "witness"
+    },
+    {
+      "type": "precedes",
+      "from": "source",
+      "to": "harvest"
+    },
+    {
+      "type": "precedes",
+      "from": "source",
+      "to": "inference"
+    },
+    {
+      "type": "precedes",
+      "from": "observation",
+      "to": "source"
+    },
+    {
+      "type": "precedes",
+      "from": "observation",
+      "to": "observation"
+    },
+    {
+      "type": "precedes",
+      "from": "observation",
+      "to": "claim"
+    },
+    {
+      "type": "precedes",
+      "from": "observation",
+      "to": "proposal"
+    },
+    {
+      "type": "precedes",
+      "from": "observation",
+      "to": "tension"
+    },
+    {
+      "type": "precedes",
+      "from": "observation",
+      "to": "rejection"
+    },
+    {
+      "type": "precedes",
+      "from": "observation",
+      "to": "witness"
+    },
+    {
+      "type": "precedes",
+      "from": "observation",
+      "to": "harvest"
+    },
+    {
+      "type": "precedes",
+      "from": "observation",
+      "to": "inference"
+    },
+    {
+      "type": "precedes",
+      "from": "claim",
+      "to": "source"
+    },
+    {
+      "type": "precedes",
+      "from": "claim",
+      "to": "observation"
+    },
+    {
+      "type": "precedes",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "precedes",
+      "from": "claim",
+      "to": "proposal"
+    },
+    {
+      "type": "precedes",
+      "from": "claim",
+      "to": "tension"
+    },
+    {
+      "type": "precedes",
+      "from": "claim",
+      "to": "rejection"
+    },
+    {
+      "type": "precedes",
+      "from": "claim",
+      "to": "witness"
+    },
+    {
+      "type": "precedes",
+      "from": "claim",
+      "to": "harvest"
+    },
+    {
+      "type": "precedes",
+      "from": "claim",
+      "to": "inference"
+    },
+    {
+      "type": "precedes",
+      "from": "proposal",
+      "to": "source"
+    },
+    {
+      "type": "precedes",
+      "from": "proposal",
+      "to": "observation"
+    },
+    {
+      "type": "precedes",
+      "from": "proposal",
+      "to": "claim"
+    },
+    {
+      "type": "precedes",
+      "from": "proposal",
+      "to": "proposal"
+    },
+    {
+      "type": "precedes",
+      "from": "proposal",
+      "to": "tension"
+    },
+    {
+      "type": "precedes",
+      "from": "proposal",
+      "to": "rejection"
+    },
+    {
+      "type": "precedes",
+      "from": "proposal",
+      "to": "witness"
+    },
+    {
+      "type": "precedes",
+      "from": "proposal",
+      "to": "harvest"
+    },
+    {
+      "type": "precedes",
+      "from": "proposal",
+      "to": "inference"
+    },
+    {
+      "type": "precedes",
+      "from": "tension",
+      "to": "source"
+    },
+    {
+      "type": "precedes",
+      "from": "tension",
+      "to": "observation"
+    },
+    {
+      "type": "precedes",
+      "from": "tension",
+      "to": "claim"
+    },
+    {
+      "type": "precedes",
+      "from": "tension",
+      "to": "proposal"
+    },
+    {
+      "type": "precedes",
+      "from": "tension",
+      "to": "tension"
+    },
+    {
+      "type": "precedes",
+      "from": "tension",
+      "to": "rejection"
+    },
+    {
+      "type": "precedes",
+      "from": "tension",
+      "to": "witness"
+    },
+    {
+      "type": "precedes",
+      "from": "tension",
+      "to": "harvest"
+    },
+    {
+      "type": "precedes",
+      "from": "tension",
+      "to": "inference"
+    },
+    {
+      "type": "precedes",
+      "from": "rejection",
+      "to": "source"
+    },
+    {
+      "type": "precedes",
+      "from": "rejection",
+      "to": "observation"
+    },
+    {
+      "type": "precedes",
+      "from": "rejection",
+      "to": "claim"
+    },
+    {
+      "type": "precedes",
+      "from": "rejection",
+      "to": "proposal"
+    },
+    {
+      "type": "precedes",
+      "from": "rejection",
+      "to": "tension"
+    },
+    {
+      "type": "precedes",
+      "from": "rejection",
+      "to": "rejection"
+    },
+    {
+      "type": "precedes",
+      "from": "rejection",
+      "to": "witness"
+    },
+    {
+      "type": "precedes",
+      "from": "rejection",
+      "to": "harvest"
+    },
+    {
+      "type": "precedes",
+      "from": "rejection",
+      "to": "inference"
+    },
+    {
+      "type": "precedes",
+      "from": "witness",
+      "to": "source"
+    },
+    {
+      "type": "precedes",
+      "from": "witness",
+      "to": "observation"
+    },
+    {
+      "type": "precedes",
+      "from": "witness",
+      "to": "claim"
+    },
+    {
+      "type": "precedes",
+      "from": "witness",
+      "to": "proposal"
+    },
+    {
+      "type": "precedes",
+      "from": "witness",
+      "to": "tension"
+    },
+    {
+      "type": "precedes",
+      "from": "witness",
+      "to": "rejection"
+    },
+    {
+      "type": "precedes",
+      "from": "witness",
+      "to": "witness"
+    },
+    {
+      "type": "precedes",
+      "from": "witness",
+      "to": "harvest"
+    },
+    {
+      "type": "precedes",
+      "from": "witness",
+      "to": "inference"
+    },
+    {
+      "type": "precedes",
+      "from": "harvest",
+      "to": "source"
+    },
+    {
+      "type": "precedes",
+      "from": "harvest",
+      "to": "observation"
+    },
+    {
+      "type": "precedes",
+      "from": "harvest",
+      "to": "claim"
+    },
+    {
+      "type": "precedes",
+      "from": "harvest",
+      "to": "proposal"
+    },
+    {
+      "type": "precedes",
+      "from": "harvest",
+      "to": "tension"
+    },
+    {
+      "type": "precedes",
+      "from": "harvest",
+      "to": "rejection"
+    },
+    {
+      "type": "precedes",
+      "from": "harvest",
+      "to": "witness"
+    },
+    {
+      "type": "precedes",
+      "from": "harvest",
+      "to": "harvest"
+    },
+    {
+      "type": "precedes",
+      "from": "harvest",
+      "to": "inference"
+    },
+    {
+      "type": "precedes",
+      "from": "inference",
+      "to": "source"
+    },
+    {
+      "type": "precedes",
+      "from": "inference",
+      "to": "observation"
+    },
+    {
+      "type": "precedes",
+      "from": "inference",
+      "to": "claim"
+    },
+    {
+      "type": "precedes",
+      "from": "inference",
+      "to": "proposal"
+    },
+    {
+      "type": "precedes",
+      "from": "inference",
+      "to": "tension"
+    },
+    {
+      "type": "precedes",
+      "from": "inference",
+      "to": "rejection"
+    },
+    {
+      "type": "precedes",
+      "from": "inference",
+      "to": "witness"
+    },
+    {
+      "type": "precedes",
+      "from": "inference",
+      "to": "harvest"
+    },
+    {
+      "type": "precedes",
+      "from": "inference",
+      "to": "inference"
+    },
+    {
+      "type": "overlaps",
+      "from": "source",
+      "to": "source"
+    },
+    {
+      "type": "overlaps",
+      "from": "source",
+      "to": "observation"
+    },
+    {
+      "type": "overlaps",
+      "from": "source",
+      "to": "claim"
+    },
+    {
+      "type": "overlaps",
+      "from": "source",
+      "to": "proposal"
+    },
+    {
+      "type": "overlaps",
+      "from": "source",
+      "to": "tension"
+    },
+    {
+      "type": "overlaps",
+      "from": "source",
+      "to": "rejection"
+    },
+    {
+      "type": "overlaps",
+      "from": "source",
+      "to": "witness"
+    },
+    {
+      "type": "overlaps",
+      "from": "source",
+      "to": "harvest"
+    },
+    {
+      "type": "overlaps",
+      "from": "source",
+      "to": "inference"
+    },
+    {
+      "type": "overlaps",
+      "from": "observation",
+      "to": "source"
+    },
+    {
+      "type": "overlaps",
+      "from": "observation",
+      "to": "observation"
+    },
+    {
+      "type": "overlaps",
+      "from": "observation",
+      "to": "claim"
+    },
+    {
+      "type": "overlaps",
+      "from": "observation",
+      "to": "proposal"
+    },
+    {
+      "type": "overlaps",
+      "from": "observation",
+      "to": "tension"
+    },
+    {
+      "type": "overlaps",
+      "from": "observation",
+      "to": "rejection"
+    },
+    {
+      "type": "overlaps",
+      "from": "observation",
+      "to": "witness"
+    },
+    {
+      "type": "overlaps",
+      "from": "observation",
+      "to": "harvest"
+    },
+    {
+      "type": "overlaps",
+      "from": "observation",
+      "to": "inference"
+    },
+    {
+      "type": "overlaps",
+      "from": "claim",
+      "to": "source"
+    },
+    {
+      "type": "overlaps",
+      "from": "claim",
+      "to": "observation"
+    },
+    {
+      "type": "overlaps",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "overlaps",
+      "from": "claim",
+      "to": "proposal"
+    },
+    {
+      "type": "overlaps",
+      "from": "claim",
+      "to": "tension"
+    },
+    {
+      "type": "overlaps",
+      "from": "claim",
+      "to": "rejection"
+    },
+    {
+      "type": "overlaps",
+      "from": "claim",
+      "to": "witness"
+    },
+    {
+      "type": "overlaps",
+      "from": "claim",
+      "to": "harvest"
+    },
+    {
+      "type": "overlaps",
+      "from": "claim",
+      "to": "inference"
+    },
+    {
+      "type": "overlaps",
+      "from": "proposal",
+      "to": "source"
+    },
+    {
+      "type": "overlaps",
+      "from": "proposal",
+      "to": "observation"
+    },
+    {
+      "type": "overlaps",
+      "from": "proposal",
+      "to": "claim"
+    },
+    {
+      "type": "overlaps",
+      "from": "proposal",
+      "to": "proposal"
+    },
+    {
+      "type": "overlaps",
+      "from": "proposal",
+      "to": "tension"
+    },
+    {
+      "type": "overlaps",
+      "from": "proposal",
+      "to": "rejection"
+    },
+    {
+      "type": "overlaps",
+      "from": "proposal",
+      "to": "witness"
+    },
+    {
+      "type": "overlaps",
+      "from": "proposal",
+      "to": "harvest"
+    },
+    {
+      "type": "overlaps",
+      "from": "proposal",
+      "to": "inference"
+    },
+    {
+      "type": "overlaps",
+      "from": "tension",
+      "to": "source"
+    },
+    {
+      "type": "overlaps",
+      "from": "tension",
+      "to": "observation"
+    },
+    {
+      "type": "overlaps",
+      "from": "tension",
+      "to": "claim"
+    },
+    {
+      "type": "overlaps",
+      "from": "tension",
+      "to": "proposal"
+    },
+    {
+      "type": "overlaps",
+      "from": "tension",
+      "to": "tension"
+    },
+    {
+      "type": "overlaps",
+      "from": "tension",
+      "to": "rejection"
+    },
+    {
+      "type": "overlaps",
+      "from": "tension",
+      "to": "witness"
+    },
+    {
+      "type": "overlaps",
+      "from": "tension",
+      "to": "harvest"
+    },
+    {
+      "type": "overlaps",
+      "from": "tension",
+      "to": "inference"
+    },
+    {
+      "type": "overlaps",
+      "from": "rejection",
+      "to": "source"
+    },
+    {
+      "type": "overlaps",
+      "from": "rejection",
+      "to": "observation"
+    },
+    {
+      "type": "overlaps",
+      "from": "rejection",
+      "to": "claim"
+    },
+    {
+      "type": "overlaps",
+      "from": "rejection",
+      "to": "proposal"
+    },
+    {
+      "type": "overlaps",
+      "from": "rejection",
+      "to": "tension"
+    },
+    {
+      "type": "overlaps",
+      "from": "rejection",
+      "to": "rejection"
+    },
+    {
+      "type": "overlaps",
+      "from": "rejection",
+      "to": "witness"
+    },
+    {
+      "type": "overlaps",
+      "from": "rejection",
+      "to": "harvest"
+    },
+    {
+      "type": "overlaps",
+      "from": "rejection",
+      "to": "inference"
+    },
+    {
+      "type": "overlaps",
+      "from": "witness",
+      "to": "source"
+    },
+    {
+      "type": "overlaps",
+      "from": "witness",
+      "to": "observation"
+    },
+    {
+      "type": "overlaps",
+      "from": "witness",
+      "to": "claim"
+    },
+    {
+      "type": "overlaps",
+      "from": "witness",
+      "to": "proposal"
+    },
+    {
+      "type": "overlaps",
+      "from": "witness",
+      "to": "tension"
+    },
+    {
+      "type": "overlaps",
+      "from": "witness",
+      "to": "rejection"
+    },
+    {
+      "type": "overlaps",
+      "from": "witness",
+      "to": "witness"
+    },
+    {
+      "type": "overlaps",
+      "from": "witness",
+      "to": "harvest"
+    },
+    {
+      "type": "overlaps",
+      "from": "witness",
+      "to": "inference"
+    },
+    {
+      "type": "overlaps",
+      "from": "harvest",
+      "to": "source"
+    },
+    {
+      "type": "overlaps",
+      "from": "harvest",
+      "to": "observation"
+    },
+    {
+      "type": "overlaps",
+      "from": "harvest",
+      "to": "claim"
+    },
+    {
+      "type": "overlaps",
+      "from": "harvest",
+      "to": "proposal"
+    },
+    {
+      "type": "overlaps",
+      "from": "harvest",
+      "to": "tension"
+    },
+    {
+      "type": "overlaps",
+      "from": "harvest",
+      "to": "rejection"
+    },
+    {
+      "type": "overlaps",
+      "from": "harvest",
+      "to": "witness"
+    },
+    {
+      "type": "overlaps",
+      "from": "harvest",
+      "to": "harvest"
+    },
+    {
+      "type": "overlaps",
+      "from": "harvest",
+      "to": "inference"
+    },
+    {
+      "type": "overlaps",
+      "from": "inference",
+      "to": "source"
+    },
+    {
+      "type": "overlaps",
+      "from": "inference",
+      "to": "observation"
+    },
+    {
+      "type": "overlaps",
+      "from": "inference",
+      "to": "claim"
+    },
+    {
+      "type": "overlaps",
+      "from": "inference",
+      "to": "proposal"
+    },
+    {
+      "type": "overlaps",
+      "from": "inference",
+      "to": "tension"
+    },
+    {
+      "type": "overlaps",
+      "from": "inference",
+      "to": "rejection"
+    },
+    {
+      "type": "overlaps",
+      "from": "inference",
+      "to": "witness"
+    },
+    {
+      "type": "overlaps",
+      "from": "inference",
+      "to": "harvest"
+    },
+    {
+      "type": "overlaps",
+      "from": "inference",
+      "to": "inference"
+    },
+    {
+      "type": "supersedes",
+      "from": "observation",
+      "to": "observation"
+    },
+    {
+      "type": "supersedes",
+      "from": "claim",
+      "to": "claim"
+    },
+    {
+      "type": "supersedes",
+      "from": "proposal",
+      "to": "proposal"
+    },
+    {
+      "type": "supersedes",
+      "from": "tension",
+      "to": "tension"
+    },
+    {
+      "type": "supersedes",
+      "from": "rejection",
+      "to": "rejection"
+    },
+    {
+      "type": "supersedes",
+      "from": "witness",
+      "to": "witness"
+    },
+    {
+      "type": "supersedes",
+      "from": "harvest",
+      "to": "harvest"
+    },
+    {
+      "type": "supersedes",
+      "from": "inference",
+      "to": "inference"
+    },
+    {
+      "type": "supersedes",
+      "from": "edge",
+      "to": "edge"
+    }
+  ],
+  "traversal": [
+    {
+      "type": "derived_from",
+      "entryDirection": "outgoing",
+      "polarity": "preserve",
+      "role": "evidence",
+      "inactiveBehavior": "inactive when disputed or superseded"
+    },
+    {
+      "type": "quotes",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "context/lineage",
+      "inactiveBehavior": "retained as context; inactive when superseded"
+    },
+    {
+      "type": "compresses",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "harvest membership",
+      "inactiveBehavior": "retained for plurality; inactive when superseded"
+    },
+    {
+      "type": "revises",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "history/currentness",
+      "inactiveBehavior": "prior remains visible; inactive when superseded"
+    },
+    {
+      "type": "depends_on",
+      "entryDirection": "outgoing",
+      "polarity": "preserve",
+      "role": "dependency",
+      "inactiveBehavior": "excluded from active closure when disputed or superseded"
+    },
+    {
+      "type": "supports",
+      "entryDirection": "incoming",
+      "polarity": "preserve",
+      "role": "evidence",
+      "inactiveBehavior": "excluded when disputed or superseded"
+    },
+    {
+      "type": "contradicts",
+      "entryDirection": "either",
+      "polarity": "toggle",
+      "role": "evidence",
+      "inactiveBehavior": "excluded when disputed or superseded"
+    },
+    {
+      "type": "qualifies",
+      "entryDirection": "incoming",
+      "polarity": "preserve",
+      "role": "evidence",
+      "inactiveBehavior": "excluded when disputed or superseded"
+    },
+    {
+      "type": "observes",
+      "entryDirection": "incoming",
+      "polarity": "preserve",
+      "role": "witness evidence",
+      "inactiveBehavior": "records attestation, not truth; excluded when disputed or superseded"
+    },
+    {
+      "type": "answers",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "context/dispute operation",
+      "inactiveBehavior": "an answers(tension, edge) operation disputes its target; edge remains visible"
+    },
+    {
+      "type": "asks",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "context",
+      "inactiveBehavior": "retained as context; never evidence by itself"
+    },
+    {
+      "type": "rebuttal_to",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "context",
+      "inactiveBehavior": "retained as attributable dissent; never negative evidence by itself"
+    },
+    {
+      "type": "responds_to",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "context",
+      "inactiveBehavior": "retained as context; never evidence by itself"
+    },
+    {
+      "type": "continues",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "context",
+      "inactiveBehavior": "retained as context; never evidence by itself"
+    },
+    {
+      "type": "delegates",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "authority",
+      "inactiveBehavior": "ineffective when disputed, superseded, expired, revoked, or exhausted"
+    },
+    {
+      "type": "consumes",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "authority",
+      "inactiveBehavior": "records use; never grants capacity"
+    },
+    {
+      "type": "revokes",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "authority",
+      "inactiveBehavior": "affects authority only; never semantic evidence"
+    },
+    {
+      "type": "permits_disclosure",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "authority/disclosure",
+      "inactiveBehavior": "affects disclosure only; never semantic evidence"
+    },
+    {
+      "type": "precedes",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "temporal",
+      "inactiveBehavior": "retained as ordering assertion; never durable event order"
+    },
+    {
+      "type": "overlaps",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "temporal",
+      "inactiveBehavior": "retained as temporal context; never durable event order"
+    },
+    {
+      "type": "supersedes",
+      "entryDirection": "none",
+      "polarity": "none",
+      "role": "currentness",
+      "inactiveBehavior": "target remains historical; inactive if the superseding assertion is itself disputed or superseded"
+    }
+  ],
+  "tranchnodeV01": {
+    "nodeKinds": [
+      "source",
+      "observation",
+      "claim",
+      "inference",
+      "proposal",
+      "tension",
+      "witness",
+      "harvest"
+    ],
+    "edgeKinds": [
+      "derived_from",
+      "supports",
+      "contradicts",
+      "qualifies",
+      "depends_on",
+      "supersedes",
+      "responds_to",
+      "witnesses",
+      "harvests"
+    ],
+    "globalConstraints": [
+      "same scope",
+      "node-only endpoints",
+      "createdAt never determines durable order",
+      "accepted-event sequence is replay order"
+    ],
+    "mappings": [
+      {
+        "type": "derived_from",
+        "from": "inference",
+        "to": "source",
+        "category": "direct",
+        "target": "derived_from",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "derived_from",
+        "from": "inference",
+        "to": "observation",
+        "category": "direct",
+        "target": "derived_from",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "derived_from",
+        "from": "inference",
+        "to": "inference",
+        "category": "direct",
+        "target": "derived_from",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "derived_from",
+        "from": "inference",
+        "to": "claim",
+        "category": "direct",
+        "target": "derived_from",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "derived_from",
+        "from": "inference",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "derived_from",
+        "from": "harvest",
+        "to": "source",
+        "category": "direct",
+        "target": "derived_from",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "derived_from",
+        "from": "harvest",
+        "to": "observation",
+        "category": "direct",
+        "target": "derived_from",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "derived_from",
+        "from": "harvest",
+        "to": "inference",
+        "category": "direct",
+        "target": "derived_from",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "derived_from",
+        "from": "harvest",
+        "to": "claim",
+        "category": "direct",
+        "target": "derived_from",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "derived_from",
+        "from": "harvest",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "derived_from",
+        "from": "claim",
+        "to": "source",
+        "category": "direct",
+        "target": "derived_from",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "derived_from",
+        "from": "claim",
+        "to": "inference",
+        "category": "direct",
+        "target": "derived_from",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "derived_from",
+        "from": "claim",
+        "to": "claim",
+        "category": "direct",
+        "target": "derived_from",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "derived_from",
+        "from": "claim",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "quotes",
+        "from": "source",
+        "to": "source",
+        "category": "lossy",
+        "target": "derived_from",
+        "loss": "verbatim-quotation semantics are reduced to generic derivation",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "derived node accepted no earlier than antecedent"
+        ]
+      },
+      {
+        "type": "quotes",
+        "from": "observation",
+        "to": "source",
+        "category": "lossy",
+        "target": "derived_from",
+        "loss": "verbatim-quotation semantics are reduced to generic derivation",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "derived node accepted no earlier than antecedent"
+        ]
+      },
+      {
+        "type": "quotes",
+        "from": "claim",
+        "to": "source",
+        "category": "lossy",
+        "target": "derived_from",
+        "loss": "verbatim-quotation semantics are reduced to generic derivation",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "derived node accepted no earlier than antecedent"
+        ]
+      },
+      {
+        "type": "quotes",
+        "from": "claim",
+        "to": "claim",
+        "category": "lossy",
+        "target": "derived_from",
+        "loss": "verbatim-quotation semantics are reduced to generic derivation",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "derived node accepted no earlier than antecedent"
+        ]
+      },
+      {
+        "type": "quotes",
+        "from": "claim",
+        "to": "proposal",
+        "category": "lossy",
+        "target": "derived_from",
+        "loss": "verbatim-quotation semantics are reduced to generic derivation",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "derived node accepted no earlier than antecedent"
+        ]
+      },
+      {
+        "type": "compresses",
+        "from": "harvest",
+        "to": "source",
+        "category": "renamed",
+        "target": "harvests",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "harvest origin",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "compresses",
+        "from": "harvest",
+        "to": "observation",
+        "category": "renamed",
+        "target": "harvests",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "harvest origin",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "compresses",
+        "from": "harvest",
+        "to": "claim",
+        "category": "renamed",
+        "target": "harvests",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "harvest origin",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "compresses",
+        "from": "harvest",
+        "to": "inference",
+        "category": "renamed",
+        "target": "harvests",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "harvest origin",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "revises",
+        "from": "observation",
+        "to": "observation",
+        "category": "lossy",
+        "target": "supersedes",
+        "loss": "revision semantics are reduced to current-form replacement",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "replacement accepted later than prior node"
+        ]
+      },
+      {
+        "type": "revises",
+        "from": "claim",
+        "to": "claim",
+        "category": "lossy",
+        "target": "supersedes",
+        "loss": "revision semantics are reduced to current-form replacement",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "replacement accepted later than prior node"
+        ]
+      },
+      {
+        "type": "revises",
+        "from": "proposal",
+        "to": "proposal",
+        "category": "lossy",
+        "target": "supersedes",
+        "loss": "revision semantics are reduced to current-form replacement",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "replacement accepted later than prior node"
+        ]
+      },
+      {
+        "type": "revises",
+        "from": "tension",
+        "to": "tension",
+        "category": "lossy",
+        "target": "supersedes",
+        "loss": "revision semantics are reduced to current-form replacement",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "replacement accepted later than prior node"
+        ]
+      },
+      {
+        "type": "revises",
+        "from": "rejection",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "revises",
+        "from": "witness",
+        "to": "witness",
+        "category": "lossy",
+        "target": "supersedes",
+        "loss": "revision semantics are reduced to current-form replacement",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "replacement accepted later than prior node"
+        ]
+      },
+      {
+        "type": "revises",
+        "from": "harvest",
+        "to": "harvest",
+        "category": "lossy",
+        "target": "supersedes",
+        "loss": "revision semantics are reduced to current-form replacement",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "replacement accepted later than prior node"
+        ]
+      },
+      {
+        "type": "revises",
+        "from": "inference",
+        "to": "inference",
+        "category": "lossy",
+        "target": "supersedes",
+        "loss": "revision semantics are reduced to current-form replacement",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "replacement accepted later than prior node"
+        ]
+      },
+      {
+        "type": "depends_on",
+        "from": "inference",
+        "to": "claim",
+        "category": "direct",
+        "target": "depends_on",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "depends_on",
+        "from": "inference",
+        "to": "inference",
+        "category": "direct",
+        "target": "depends_on",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "depends_on",
+        "from": "inference",
+        "to": "source",
+        "category": "direct",
+        "target": "depends_on",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "depends_on",
+        "from": "proposal",
+        "to": "claim",
+        "category": "direct",
+        "target": "depends_on",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "depends_on",
+        "from": "proposal",
+        "to": "source",
+        "category": "direct",
+        "target": "depends_on",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "depends_on",
+        "from": "claim",
+        "to": "claim",
+        "category": "direct",
+        "target": "depends_on",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "depends_on",
+        "from": "claim",
+        "to": "source",
+        "category": "direct",
+        "target": "depends_on",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supports",
+        "from": "inference",
+        "to": "claim",
+        "category": "direct",
+        "target": "supports",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supports",
+        "from": "inference",
+        "to": "proposal",
+        "category": "direct",
+        "target": "supports",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supports",
+        "from": "inference",
+        "to": "inference",
+        "category": "direct",
+        "target": "supports",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supports",
+        "from": "claim",
+        "to": "claim",
+        "category": "direct",
+        "target": "supports",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supports",
+        "from": "claim",
+        "to": "proposal",
+        "category": "direct",
+        "target": "supports",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supports",
+        "from": "claim",
+        "to": "inference",
+        "category": "direct",
+        "target": "supports",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supports",
+        "from": "observation",
+        "to": "claim",
+        "category": "direct",
+        "target": "supports",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supports",
+        "from": "observation",
+        "to": "proposal",
+        "category": "direct",
+        "target": "supports",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "contradicts",
+        "from": "rejection",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "contradicts",
+        "from": "rejection",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "contradicts",
+        "from": "claim",
+        "to": "claim",
+        "category": "direct",
+        "target": "contradicts",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "contradicts",
+        "from": "claim",
+        "to": "inference",
+        "category": "direct",
+        "target": "contradicts",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "contradicts",
+        "from": "inference",
+        "to": "claim",
+        "category": "direct",
+        "target": "contradicts",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "contradicts",
+        "from": "inference",
+        "to": "inference",
+        "category": "direct",
+        "target": "contradicts",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "qualifies",
+        "from": "inference",
+        "to": "claim",
+        "category": "direct",
+        "target": "qualifies",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "qualifies",
+        "from": "inference",
+        "to": "proposal",
+        "category": "direct",
+        "target": "qualifies",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "qualifies",
+        "from": "inference",
+        "to": "inference",
+        "category": "direct",
+        "target": "qualifies",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "qualifies",
+        "from": "claim",
+        "to": "claim",
+        "category": "direct",
+        "target": "qualifies",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "qualifies",
+        "from": "claim",
+        "to": "proposal",
+        "category": "direct",
+        "target": "qualifies",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "qualifies",
+        "from": "claim",
+        "to": "inference",
+        "category": "direct",
+        "target": "qualifies",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "observes",
+        "from": "witness",
+        "to": "source",
+        "category": "renamed",
+        "target": "witnesses",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "witness origin",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "observes",
+        "from": "witness",
+        "to": "observation",
+        "category": "renamed",
+        "target": "witnesses",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "witness origin",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "observes",
+        "from": "witness",
+        "to": "claim",
+        "category": "renamed",
+        "target": "witnesses",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "witness origin",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "observes",
+        "from": "witness",
+        "to": "proposal",
+        "category": "renamed",
+        "target": "witnesses",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "witness origin",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "observes",
+        "from": "witness",
+        "to": "tension",
+        "category": "renamed",
+        "target": "witnesses",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "witness origin",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "observes",
+        "from": "witness",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "observes",
+        "from": "witness",
+        "to": "witness",
+        "category": "renamed",
+        "target": "witnesses",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "witness origin",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "observes",
+        "from": "witness",
+        "to": "harvest",
+        "category": "renamed",
+        "target": "witnesses",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "witness origin",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "observes",
+        "from": "witness",
+        "to": "inference",
+        "category": "renamed",
+        "target": "witnesses",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "witness origin",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "answers",
+        "from": "claim",
+        "to": "tension",
+        "category": "lossy",
+        "target": "responds_to",
+        "loss": "answer semantics are reduced to generic response context",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "response accepted later than target"
+        ]
+      },
+      {
+        "type": "answers",
+        "from": "claim",
+        "to": "proposal",
+        "category": "lossy",
+        "target": "responds_to",
+        "loss": "answer semantics are reduced to generic response context",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "response accepted later than target"
+        ]
+      },
+      {
+        "type": "answers",
+        "from": "observation",
+        "to": "tension",
+        "category": "lossy",
+        "target": "responds_to",
+        "loss": "answer semantics are reduced to generic response context",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "response accepted later than target"
+        ]
+      },
+      {
+        "type": "answers",
+        "from": "observation",
+        "to": "proposal",
+        "category": "lossy",
+        "target": "responds_to",
+        "loss": "answer semantics are reduced to generic response context",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "response accepted later than target"
+        ]
+      },
+      {
+        "type": "answers",
+        "from": "tension",
+        "to": "tension",
+        "category": "lossy",
+        "target": "responds_to",
+        "loss": "answer semantics are reduced to generic response context",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "response accepted later than target"
+        ]
+      },
+      {
+        "type": "answers",
+        "from": "tension",
+        "to": "edge",
+        "category": "operation",
+        "target": "dispute_edge",
+        "loss": null,
+        "requiredFields": [
+          "edgeId=edge.to",
+          "tensionId=edge.from",
+          "same scope",
+          "existing edge",
+          "existing tension node"
+        ]
+      },
+      {
+        "type": "asks",
+        "from": "proposal",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "proposal",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "proposal",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "proposal",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "proposal",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "proposal",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "proposal",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "proposal",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "proposal",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "tension",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "tension",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "tension",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "tension",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "tension",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "tension",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "tension",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "tension",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "asks",
+        "from": "tension",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "rebuttal_to",
+        "from": "rejection",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "rebuttal_to",
+        "from": "rejection",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "rebuttal_to",
+        "from": "rejection",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "responds_to",
+        "from": "rejection",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "responds_to",
+        "from": "rejection",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "responds_to",
+        "from": "claim",
+        "to": "proposal",
+        "category": "direct",
+        "target": "responds_to",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "responds_to",
+        "from": "claim",
+        "to": "claim",
+        "category": "direct",
+        "target": "responds_to",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "continues",
+        "from": "proposal",
+        "to": "proposal",
+        "category": "lossy",
+        "target": "responds_to",
+        "loss": "continuation semantics are reduced to generic response context",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "response accepted later than target"
+        ]
+      },
+      {
+        "type": "continues",
+        "from": "tension",
+        "to": "tension",
+        "category": "lossy",
+        "target": "responds_to",
+        "loss": "continuation semantics are reduced to generic response context",
+        "requiredFields": [
+          "same scope",
+          "node endpoints",
+          "response accepted later than target"
+        ]
+      },
+      {
+        "type": "delegates",
+        "from": "claim",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "delegates",
+        "from": "source",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "consumes",
+        "from": "source",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "consumes",
+        "from": "source",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "consumes",
+        "from": "inference",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "consumes",
+        "from": "inference",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "revokes",
+        "from": "claim",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "revokes",
+        "from": "source",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "permits_disclosure",
+        "from": "claim",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "permits_disclosure",
+        "from": "claim",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "permits_disclosure",
+        "from": "claim",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "permits_disclosure",
+        "from": "claim",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "permits_disclosure",
+        "from": "claim",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "permits_disclosure",
+        "from": "claim",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "permits_disclosure",
+        "from": "claim",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "permits_disclosure",
+        "from": "claim",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "permits_disclosure",
+        "from": "claim",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "source",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "source",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "source",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "source",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "source",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "source",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "source",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "source",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "source",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "observation",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "observation",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "observation",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "observation",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "observation",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "observation",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "observation",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "observation",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "observation",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "claim",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "claim",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "claim",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "claim",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "claim",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "claim",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "claim",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "claim",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "claim",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "proposal",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "proposal",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "proposal",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "proposal",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "proposal",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "proposal",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "proposal",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "proposal",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "proposal",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "tension",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "tension",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "tension",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "tension",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "tension",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "tension",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "tension",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "tension",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "tension",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "rejection",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "rejection",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "rejection",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "rejection",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "rejection",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "rejection",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "rejection",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "rejection",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "rejection",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "witness",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "witness",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "witness",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "witness",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "witness",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "witness",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "witness",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "witness",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "witness",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "harvest",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "harvest",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "harvest",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "harvest",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "harvest",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "harvest",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "harvest",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "harvest",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "harvest",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "inference",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "inference",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "inference",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "inference",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "inference",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "inference",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "inference",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "inference",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "precedes",
+        "from": "inference",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "source",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "source",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "source",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "source",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "source",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "source",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "source",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "source",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "source",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "observation",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "observation",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "observation",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "observation",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "observation",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "observation",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "observation",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "observation",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "observation",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "claim",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "claim",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "claim",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "claim",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "claim",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "claim",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "claim",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "claim",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "claim",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "proposal",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "proposal",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "proposal",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "proposal",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "proposal",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "proposal",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "proposal",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "proposal",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "proposal",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "tension",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "tension",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "tension",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "tension",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "tension",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "tension",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "tension",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "tension",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "tension",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "rejection",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "rejection",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "rejection",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "rejection",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "rejection",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "rejection",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "rejection",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "rejection",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "rejection",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "witness",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "witness",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "witness",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "witness",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "witness",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "witness",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "witness",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "witness",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "witness",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "harvest",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "harvest",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "harvest",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "harvest",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "harvest",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "harvest",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "harvest",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "harvest",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "harvest",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "inference",
+        "to": "source",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "inference",
+        "to": "observation",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "inference",
+        "to": "claim",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "inference",
+        "to": "proposal",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "inference",
+        "to": "tension",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "inference",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "inference",
+        "to": "witness",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "inference",
+        "to": "harvest",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "overlaps",
+        "from": "inference",
+        "to": "inference",
+        "category": "unavailable",
+        "target": null,
+        "loss": "no honest TranchNode v0.1 native relation or accepted operation",
+        "requiredFields": []
+      },
+      {
+        "type": "supersedes",
+        "from": "observation",
+        "to": "observation",
+        "category": "direct",
+        "target": "supersedes",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supersedes",
+        "from": "claim",
+        "to": "claim",
+        "category": "direct",
+        "target": "supersedes",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supersedes",
+        "from": "proposal",
+        "to": "proposal",
+        "category": "direct",
+        "target": "supersedes",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supersedes",
+        "from": "tension",
+        "to": "tension",
+        "category": "direct",
+        "target": "supersedes",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supersedes",
+        "from": "rejection",
+        "to": "rejection",
+        "category": "unavailable",
+        "target": null,
+        "loss": "TranchNode v0.1 has no rejection node kind",
+        "requiredFields": []
+      },
+      {
+        "type": "supersedes",
+        "from": "witness",
+        "to": "witness",
+        "category": "direct",
+        "target": "supersedes",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supersedes",
+        "from": "harvest",
+        "to": "harvest",
+        "category": "direct",
+        "target": "supersedes",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supersedes",
+        "from": "inference",
+        "to": "inference",
+        "category": "direct",
+        "target": "supersedes",
+        "loss": null,
+        "requiredFields": [
+          "same scope",
+          "node endpoints"
+        ]
+      },
+      {
+        "type": "supersedes",
+        "from": "edge",
+        "to": "edge",
+        "category": "operation",
+        "target": "supersede_edge",
+        "loss": null,
+        "requiredFields": [
+          "edgeId=edge.to",
+          "replacementEdgeId=edge.from",
+          "reasonNodeId=edge.basis",
+          "existing same-scope reason node"
+        ]
+      }
+    ]
+  }
+}
+
