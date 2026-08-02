@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "floor": "1.0",
+  "releaseStatus": "normative-draft",
+  "executionImplementationAllowed": false,
+  "blockedIssues": [
+    1,
+    3,
+    5,
+    10
+  ],
+  "hardDependency": 5,
+  "reason": "Canonical addressing, fixtures, and the executable kernel are not yet frozen.",
+  "lastCorrectedFrom": "PR #12 merge 9bf3870dfcbe573d1a94c69bb2e2b846da3d91cd"
+}
+
