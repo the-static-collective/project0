@@ -50,6 +50,10 @@ Every proposal declares exactly one primary class:
 
 A vivid domain or interface change does not become constitutional by importance. A constitutional change cannot be hidden inside implementation work.
 
+## Reference convention
+
+Within `project0.construction-manifest.v0`, `P0-I<n>` is bootstrap shorthand for invariant number `<n>` in `INVARIANTS.md` at the proposal's exact `baseRef`. It does not create a second invariant set or detach the reference from its source revision. If invariant numbering changes, a later proposal must name the migration rather than silently retargeting an old reference.
+
 ## The construction circuit
 
 ### 1. Declare
