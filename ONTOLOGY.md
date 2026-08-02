@@ -59,8 +59,8 @@ Lanes are retrieval views over typed relationships, not competing copies of the 
 
 ## Tensions and TranchNode Compatibility
 - Project 0 explicitly treats `rejection` as a meaning-bearing node kind so that it can be targeted by relationships and debated.
-- TranchNode v0.1 does not treat `rejection` as a node kind, instead treating it purely as an evaluation state.
-- **Mismatch**: Project 0's `rejection` node has no lossless representation in TranchNode v0.1. Resolving this will require either a TranchNode v0.2 extension or an explicitly lossy adapter. See `ECOSYSTEM.md` for the compatibility mapping.
+- TranchNode v0.1 does not treat `rejection` as a node, a state, or a receipt; it has no v0.1 representation at all.
+- **Mismatch**: Project 0's `rejection` node has no representation in TranchNode v0.1. Resolving this will require either a TranchNode v0.2 extension or an explicitly lossy adapter. See `ECOSYSTEM.md` for the compatibility mapping.
 
 ## Extension rule
 

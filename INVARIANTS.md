@@ -36,14 +36,32 @@ A conforming implementation MUST preserve these properties.
 
 ## Adversarial Examples & Required Fixtures
 
-The following adversarial examples and fixtures ensure the edge laws and invariants cannot be silently bypassed:
+The following deterministic adversarial examples and fixtures ensure the edge laws and invariants cannot be silently bypassed. Expected evaluation results are strict.
 
-1. **observation → inference → claim**: Demonstrates that an `observation` does not automatically become a human `claim` without an explicitly attributable intervening `inference` node carrying a `derived_from` edge. (Defends Invariants 2 and 15).
-2. **rejected proposal remains queryable**: Proves that a `rejection` node functions as a substantive target, not merely an administrative receipt, allowing subsequent nodes to refer back to the *grounds* of the rejection. (Defends Invariant 3).
-3. **duplicate relationship assertions by different authors**: Confirms that identical edges asserted by different authors are not silently collapsed; authorship and disclosure scopes remain distinct. (Defends Invariant 4).
-4. **disputed edge excluded from active evidence**: Ensures that when an edge is disputed (e.g., using a dispute receipt or superseding edge), it is excluded from active evidence traversal without being deleted from the graph. (Defends Invariants 1, 14, and 20).
-5. **competing current harvests**: Validates that plural, valid `harvest` nodes can exist concurrently over the same sources, without a deterministic engine forcing a single "canonical truth." (Defends Invariant 3).
-6. **cycle and cross-scope rejection**: Tests that Derivation and Temporal edge families reject cyclic paths at admission, and that rejections spanning different disclosure scopes respect boundary preservation. (Defends Invariants 2, 8, and 9).
+1. **observation → inference → claim**:
+   - *Inputs*: Node A (`observation`), Node B (`inference`, derived_from: A, assertedBy: model), Node C (`claim`, derived_from: B, assertedBy: human).
+   - *Expected Result*: Traversal successfully traces human claim C back to observation A while preserving the model's intermediate inference boundary. Direct `derived_from` between C and A without B fails validation (Defends Invariants 2 and 15).
+
+2. **rejected proposal remains queryable**:
+   - *Inputs*: Node A (`proposal`), Node B (`rejection`, rebuttal_to: A), Node C (`inference`, derived_from: B).
+   - *Expected Result*: Node C evaluates as valid and correctly decompresses the grounds in B. If B is purely a receipt or state, C fails admission due to missing derivation target (Defends Invariant 3).
+
+3. **duplicate relationship assertions by different authors**:
+   - *Inputs*: Edge E1 (`supports`, A -> B, assertedBy: humanX, disclosure: public), Edge E2 (`supports`, A -> B, assertedBy: humanY, disclosure: private).
+   - *Expected Result*: The graph contains two distinct edge IDs. A public query returns only E1; a private query by humanY returns E1 and E2. They do not silently collapse (Defends Invariant 4).
+
+4. **disputed edge excluded from active evidence**:
+   - *Inputs*: Edge E1 (`supports`, A -> B), Node C (`tension`, answers: E1).
+   - *Expected Result*: E1 remains in the graph with state `disputed`. An active evidence traversal from B excludes A. (Defends Invariants 1, 14, and 20).
+
+5. **competing current harvests**:
+   - *Inputs*: Node A (`source`), Node B (`harvest`, compresses: A, assertedBy: X), Node C (`harvest`, compresses: A, assertedBy: Y).
+   - *Expected Result*: Both B and C are accepted atomically with their edges. A query for "current harvests of A" returns both deterministic records sorted by cryptographic ID, without forcing consensus (Defends Invariant 3).
+
+6. **cycle and cross-scope rejection**:
+   - *Inputs (Cycle)*: Edge E1 (`derived_from`, A -> B), Edge E2 (`derived_from`, B -> C). Request to admit Edge E3 (`derived_from`, C -> A).
+   - *Inputs (Cross-scope)*: Node A (disclosure: private), Node B (disclosure: public), Edge E4 (`derived_from`, B -> A, disclosure: public).
+   - *Expected Result*: E3 admission is deterministically rejected (Cycle check fails). E4 admission is rejected (Edge disclosure 'public' exceeds target node A's 'private' constraint) (Defends Invariants 2, 8, and 9).
 
 ## Change rule
 

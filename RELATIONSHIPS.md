@@ -6,56 +6,73 @@ Artifacts do not carry singular, self-sufficient meaning. Meaning is partially r
 
 A bit becomes useful through position and convention. A word becomes useful through syntax, speaker, history, and response. A receipt becomes useful through the authority and event lineage it closes. Project 0 therefore models relationships as load-bearing semantic material.
 
-## Typed relationship
+## Required Edge Envelope
 
-A canonical relationship records:
+A canonical relationship (edge) must strictly define its identity and scope. It records:
 
-- `type`
-- `from`
-- `to`
-- `assertedBy`
-- `createdAt`
-- `basis` — source, observation, rule, or declared judgment
-- `disclosure`
-- optional `validFrom`, `validUntil`, `supersedes`, and confidence metadata
+- `id`: cryptographic hash of the edge's core fields (type, from, to, assertedBy, basis, disclosure).
+- `type`: one of the finite canonical edge types.
+- `from`: ID of the origin node.
+- `to`: ID of the target node.
+- `assertedBy`: attributable actor identifier.
+- `createdAt`: recorded time of assertion.
+- `basis`: ID of the source, observation, rule, or declared judgment justifying the edge.
+- `disclosure`: policy governing revelation and reuse (must not exceed the constraints of its target nodes).
+- optional `validFrom`, `validUntil`, `supersedes`, and confidence metadata.
 
 Confidence may rank a relationship. It may not replace its basis.
 
-## Core relationship types
+## Finite Canonical Edge Set and Direction Table
 
-| Family | Examples |
-|---|---|
-| Derivation | `derived_from`, `quotes`, `compresses`, `revises` |
-| Epistemic | `supports`, `contradicts`, `qualifies`, `observes` |
-| Dialogic | `answers`, `asks`, `rebuttal_to`, `responds_to`, `continues` |
-| Authority | `delegates`, `consumes`, `revokes`, `permits_disclosure` |
-| Temporal | `precedes`, `overlaps`, `supersedes` |
-| Product | downstream namespaced relationships |
+The canonical edge set is finite and strictly directed.
+
+| Edge Type | From Kind | To Kind | Family |
+|---|---|---|---|
+| `derived_from` | `inference`, `harvest`, `claim` | `source`, `observation`, `inference`, `claim` | Derivation |
+| `quotes` | `source`, `observation`, `claim` | `source`, `claim`, `proposal` | Derivation |
+| `compresses` | `harvest` | `source`, `observation`, `claim`, `inference` | Derivation |
+| `revises` | ANY (except `source`) | Same Kind | Derivation |
+| `supports` | `inference`, `claim`, `observation` | `claim`, `proposal`, `inference` | Epistemic |
+| `contradicts` | `rejection`, `claim`, `inference` | `claim`, `inference` | Epistemic |
+| `qualifies` | `inference`, `claim` | `claim`, `proposal`, `inference` | Epistemic |
+| `observes` | `witness` | ANY | Epistemic |
+| `answers` | `claim`, `observation` | `tension`, `proposal` | Dialogic |
+| `asks` | `proposal`, `tension` | ANY | Dialogic |
+| `rebuttal_to` | `rejection` | `claim`, `proposal`, `inference` | Dialogic |
+| `responds_to` | `rejection`, `claim` | `proposal`, `claim` | Dialogic |
+| `continues` | `proposal`, `tension` | `proposal`, `tension` | Dialogic |
+| `delegates` | `claim`, `source` | `claim` | Authority |
+| `consumes` | `source`, `inference` | `claim`, `source` | Authority |
+| `revokes` | `claim`, `source` | `claim` | Authority |
+| `permits_disclosure`| `claim` | ANY | Authority |
+| `precedes` | ANY | ANY | Temporal |
+| `overlaps` | ANY | ANY | Temporal |
+| `supersedes` | ANY (except `source`) | Same Kind | Temporal |
 
 ## Edge Laws
 
-Relationships in Project 0 follow strict constraints to ensure continuity and prevent silent rewrites or invalid evaluations.
+Relationships in Project 0 follow strict constraints to ensure executable continuity and prevent silent rewrites or invalid evaluations.
 
 ### Node-Specific Edge Constraints
 - **`inference` node**: MUST have at least one outgoing `derived_from` edge to its sources or evidence. `compresses` CANNOT substitute for `derived_from`, as compression belongs strictly to the `harvest` node kind.
 - **`rejection` node**: MUST target the specific node it rejects.
-  - Dialogic rejection: Uses `responds_to` or `rebuttal_to`.
-  - Epistemic rejection: The `contradicts` edge applies ONLY when the rejection's grounds actually oppose a truth-apt assertion.
+  - Dialogic rejection: Uses `responds_to` or `rebuttal_to` against a `proposal` or `claim`.
+  - Epistemic rejection: The `contradicts` edge applies ONLY against a truth-apt assertion (i.e., a `claim` or `inference`).
 
 ### Edge Admissions and Timing
-- **Atomic admission**: Admission of a node and its mandatory edges MUST be atomic. If admitted separately, an `inference` node missing its `derived_from` edge is temporarily non-conforming and non-evaluable until its lineage closes.
+- **Strictly Atomic Admission**: Admission of a node and its mandatory lineage edges MUST be atomic. An `inference` node cannot be admitted without its required `derived_from` edges. Partial or fallback admission is invalid.
 
 ### Traversal and Integrity
-- **Stable edge identity**: A relationship must maintain a stable identity and cannot change direction or type after admission.
-- **Exact direction**: Core relationships are directed edges. Traversal must respect the defined `from` and `to` nodes.
-- **Same-scope and cross-scope**: Rules governing scope transitions (e.g., cross-scope rejection) must retain explicit lineage and preserve boundaries between contexts.
-- **Acyclic families**: Certain families (like Derivation and Temporal) MUST remain acyclic to prevent paradoxes in lineage and traversal. Cycle checks are mandatory before admission.
-- **Deterministic traversal**: When multiple valid paths exist, traversal must define explicit, deterministic tie-breaking (e.g., ordering by `createdAt` then `id`).
+- **Stable edge identity**: Edge identity is defined by its cryptographic `id`. It cannot change direction, endpoints, or type after admission.
+- **Exact direction**: Edges strictly follow the `From Kind` → `To Kind` enforcement table. Reversing an edge yields a validation failure.
+- **Cross-scope rules**: A relationship between two nodes with differing `disclosure` policies MUST inherit the strictest policy of the two nodes. An edge cannot expose a target node beyond its explicit boundary.
+- **Acyclicity rule**: Any edge belonging to the `Derivation` or `Temporal` family MUST NOT create a cycle. Cycle detection is evaluated at admission time; cyclic admissions must be rejected.
+- **Deterministic traversal**: When multiple valid paths exist, deterministic ordering relies strictly on cryptographic tie-breaking. Sort edges by the target node's `id`, then by the edge's `id`. `createdAt` MUST NOT be used for deterministic ordering due to clock drift and serialization disparities.
 
 ### Conflict and Evolution
-- **Dispute and supersession**: A newer relationship can `supersede` an older one, or an edge can be disputed. Disputed edges must be excluded from active evidence while preserving their presence in the graph.
-- **Plural current harvests**: Multiple valid, competing `harvest` nodes can exist concurrently over the same sources. No single harvest is forced as the singular canonical truth.
-- **Basis, authorship, and disclosure**: Relationships inherit their standing from their explicitly recorded `basis` and `assertedBy` properties. The relationship cannot exceed the `disclosure` constraints of its target nodes, and it must respect creation order (`createdAt`).
+- **Dispute and supersession**: An edge with `type: supersedes` targeting an older edge demotes the target edge from the active evaluation graph. A disputed edge (logged via a `Tension` node targeting the edge) remains in the graph but is marked as `disputed` and excluded from active evidence traversal.
+- **Plural current harvests**: Multiple `harvest` nodes can `compress` the same sources. No engine may force singular canonical truth; all valid harvests remain in the traversal path.
+- **Basis and authorship**: An edge's `assertedBy` dictates its authority. Edges without a demonstrable `basis` or valid authority signature are excluded from canonical evaluation.
 
 ## Local collapse, never final collapse
 

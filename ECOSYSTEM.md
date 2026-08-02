@@ -38,8 +38,8 @@ A product integration should declare:
 TranchNode provides the meaning and continuity substrate, but its v0.1 evaluation contract is frozen and misaligned with Project 0 in specific ways. Implementers building adapters to TranchNode v0.1 must apply the following compatibility mapping:
 
 - **`inference` node**: Added to Project 0 explicitly to meet TranchNode's frozen requirement for a computationally derived node. This maps perfectly.
-- **`rejection` node**: Project 0 requires `rejection` to be a substantive, targetable node kind. TranchNode v0.1 only recognizes rejection as an administrative state or receipt.
-  - **The Mismatch**: Project 0's `rejection` node has no lossless representation in TranchNode v0.1.
+- **`rejection` node**: Project 0 requires `rejection` to be a substantive, targetable node kind. TranchNode v0.1 does not represent rejection as a state, a receipt, or a node; it has no v0.1 representation at all.
+  - **The Mismatch**: Project 0's `rejection` node has no representation in TranchNode v0.1.
   - **Resolution**: Resolving this requires either a future TranchNode v0.2 extension (to adopt `rejection` as a node) or an explicitly lossy adapter (which downcasts the Project 0 node into a TranchNode state while archiving the meaning). Until then, this remains an explicit tension.
 
 ## Canonical versus local
