@@ -1,0 +1,20 @@
+{
+  "name": "array_order_a",
+  "type": "Node",
+  "input": {
+    "kind": "claim",
+    "body": [
+      1,
+      2
+    ],
+    "createdAt": "2026-08-01T22:17:39Z",
+    "createdBy": "u1",
+    "provenance": [],
+    "disclosure": "public"
+  },
+  "domainPrefixHex": "50726f6a656374302d4e6f64652d76317c",
+  "preimageHex": "50726f6a656374302d4e6f64652d76317c7b22626f6479223a5b312c325d2c22637265617465644174223a22323032362d30382d30315432323a31373a33395a222c22637265617465644279223a227531222c22646973636c6f73757265223a227075626c6963222c226b696e64223a22636c61696d222c2270726f76656e616e6365223a5b5d7d",
+  "digestHex": "38bfae0aaa9ae615c95bfd1e399c9b7d4ffbd960dcb20f6bbc6c4bf4cccb8e4a",
+  "textualAddress": "node-4pXMWsGM2ZGfcCtzRaEYS87yigZDjkADouuJ4m9VkRc5",
+  "expectedStatus": "accepted"
+}

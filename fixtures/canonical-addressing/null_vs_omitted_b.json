@@ -1,0 +1,20 @@
+{
+  "name": "null_vs_omitted_b",
+  "type": "Node",
+  "input": {
+    "kind": "claim",
+    "body": {
+      "a": 1,
+      "b": null
+    },
+    "createdAt": "2026-08-01T22:17:39Z",
+    "createdBy": "u1",
+    "provenance": [],
+    "disclosure": "public"
+  },
+  "domainPrefixHex": "50726f6a656374302d4e6f64652d76317c",
+  "preimageHex": "50726f6a656374302d4e6f64652d76317c7b22626f6479223a7b2261223a312c2262223a6e756c6c7d2c22637265617465644174223a22323032362d30382d30315432323a31373a33395a222c22637265617465644279223a227531222c22646973636c6f73757265223a227075626c6963222c226b696e64223a22636c61696d222c2270726f76656e616e6365223a5b5d7d",
+  "digestHex": "0e6c7b6750ebe833462118f9641f61970ba5566e7512ae7a6b748fc8c83a7578",
+  "textualAddress": "node-yJeh4TuaNukNkNoGovTMvB1j2wGk7dHRZPHp1i1Gsuq",
+  "expectedStatus": "accepted"
+}

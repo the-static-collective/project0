@@ -1,0 +1,17 @@
+{
+  "name": "minimally_different_a",
+  "type": "Node",
+  "input": {
+    "kind": "claim",
+    "body": "a",
+    "createdAt": "2026-08-01T22:17:39Z",
+    "createdBy": "u1",
+    "provenance": [],
+    "disclosure": "public"
+  },
+  "domainPrefixHex": "50726f6a656374302d4e6f64652d76317c",
+  "preimageHex": "50726f6a656374302d4e6f64652d76317c7b22626f6479223a2261222c22637265617465644174223a22323032362d30382d30315432323a31373a33395a222c22637265617465644279223a227531222c22646973636c6f73757265223a227075626c6963222c226b696e64223a22636c61696d222c2270726f76656e616e6365223a5b5d7d",
+  "digestHex": "24b5435cebd567ff3558d3df17c872dbcb1fa23eaa1f603b8916f77c111cf53b",
+  "textualAddress": "node-3UHzFo3YE85sgmddZBWsUPd2cXSYx6hAXGFuee5ixWHY",
+  "expectedStatus": "accepted"
+}
