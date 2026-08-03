@@ -1,0 +1,10 @@
+{
+  "input": {
+    "a": 1,
+    "b": null
+  },
+  "canonicalBytesString": "Project0-Node-v1|{\"a\":1,\"b\":null}",
+  "canonicalBytesHex": "50726f6a656374302d4e6f64652d76317c7b2261223a312c2262223a6e756c6c7d",
+  "hash": "2biodUL5GZewVup6zyAcnaZzgmLxukhzRa4thT4MpMPS",
+  "textualId": "node-2biodUL5GZewVup6zyAcnaZzgmLxukhzRa4thT4MpMPS"
+}

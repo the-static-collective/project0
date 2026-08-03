@@ -1,0 +1,11 @@
+{
+  "input": {
+    "kind": "claim",
+    "body": "Hello world",
+    "disclosure": "public"
+  },
+  "canonicalBytesString": "Project0-Node-v1|{\"body\":\"Hello world\",\"disclosure\":\"public\",\"kind\":\"claim\"}",
+  "canonicalBytesHex": "50726f6a656374302d4e6f64652d76317c7b22626f6479223a2248656c6c6f20776f726c64222c22646973636c6f73757265223a227075626c6963222c226b696e64223a22636c61696d227d",
+  "hash": "H3ybKzsYH9472RMGxBXSEmveVhpMbrYj9Jw9KwVb5gkf",
+  "textualId": "node-H3ybKzsYH9472RMGxBXSEmveVhpMbrYj9Jw9KwVb5gkf"
+}

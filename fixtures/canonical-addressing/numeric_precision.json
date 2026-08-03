@@ -1,0 +1,9 @@
+{
+  "input": {
+    "num": 1
+  },
+  "canonicalBytesString": "Project0-Node-v1|{\"num\":1}",
+  "canonicalBytesHex": "50726f6a656374302d4e6f64652d76317c7b226e756d223a317d",
+  "hash": "2cRj69ruQUwoE3CTe8V5aVT1ceGYnyercxW6Y6EZiX5D",
+  "textualId": "node-2cRj69ruQUwoE3CTe8V5aVT1ceGYnyercxW6Y6EZiX5D"
+}
