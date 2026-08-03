@@ -2,6 +2,7 @@ import {
   address,
   type ArtifactAddress,
   type ContentAddress,
+  type HistoricalAddress,
   type QuestionAddress,
   type TrailAddress,
   type ViewAddress,
@@ -122,13 +123,7 @@ export function evaluateAuthority(input: {
     };
   }
 
-  const creationStatus = statusAt(
-    input.grant,
-    input.revocations,
-    input.actTime,
-    input.evaluationTime,
-    input.proposedUse,
-  );
+  const creationStatus = statusAt(input.grant, input.revocations, input.actTime, input.evaluationTime, input.proposedUse);
   const systemBeliefAtCutoff = statusAt(
     input.grant,
     input.revocations,
@@ -153,11 +148,7 @@ export function evaluateAuthority(input: {
     systemBeliefAtCutoff,
     currentStatus,
     currentUseStatus:
-      currentStatus === "valid"
-        ? "permitted"
-        : currentStatus === "indeterminate"
-          ? "indeterminate"
-          : "denied",
+      currentStatus === "valid" ? "permitted" : currentStatus === "indeterminate" ? "indeterminate" : "denied",
     revocationRefs: input.revocations
       .filter((item) => item.authorityRef === input.grant?.address)
       .map((item) => item.address),
@@ -214,11 +205,7 @@ export function evaluateAdmission(input: Parameters<typeof checks>[0]): Admissio
   const conservationChecks = checks(input);
   const results = conservationChecks.map((item) => item.result);
   return {
-    disposition: results.includes("fail")
-      ? "rejected"
-      : results.includes("indeterminate")
-        ? "indeterminate"
-        : "admitted",
+    disposition: results.includes("fail") ? "rejected" : results.includes("indeterminate") ? "indeterminate" : "admitted",
     conservationChecks,
   };
 }
@@ -243,7 +230,7 @@ export type ArtifactEnvelope = {
 };
 
 export type StoredArtifact = { address: ArtifactAddress; envelope: ArtifactEnvelope };
-export type StoredTrail = { address: TrailAddress; roots: ArtifactAddress[]; members: ArtifactAddress[] };
+export type StoredTrail = { address: TrailAddress; roots: HistoricalAddress[]; members: HistoricalAddress[] };
 export type DiscernmentReceipt = {
   address: ArtifactAddress;
   questionRef: QuestionAddress;
@@ -278,7 +265,7 @@ export class AppendOnlyHistoricalStore {
     return this.createArtifact(envelope, admission);
   }
 
-  createTrail(roots: ArtifactAddress[], members: ArtifactAddress[]): TrailAddress {
+  createTrail(roots: HistoricalAddress[], members: HistoricalAddress[]): TrailAddress {
     const trailAddress = address.trail({ roots, members });
     this.trails.set(trailAddress, { address: trailAddress, roots, members });
     return trailAddress;
@@ -290,8 +277,7 @@ export class AppendOnlyHistoricalStore {
     if (!this.trails.has(receipt.subjectTrailRef) || !this.trails.has(receipt.questionTrailRef)) {
       throw new Error("Discernment must cite bounded trails");
     }
-    const artifactAddress = address.artifact(receipt);
-    return artifactAddress;
+    return address.artifact(receipt);
   }
 
   pointView(seed: unknown, trailRef: TrailAddress): ViewAddress {
