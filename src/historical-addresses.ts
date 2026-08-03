@@ -6,7 +6,8 @@ export type ContentAddress = Brand<string, "ContentAddress">;
 export type ArtifactAddress = Brand<string, "ArtifactAddress">;
 export type TrailAddress = Brand<string, "TrailAddress">;
 export type ViewAddress = Brand<string, "ViewAddress">;
-export type QuestionAddress = Brand<ArtifactAddress, "QuestionAddress">;
+export type QuestionAddress = Brand<string, "QuestionAddress">;
+export type HistoricalAddress = ArtifactAddress | QuestionAddress;
 
 export function canonicalize(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
@@ -29,7 +30,7 @@ function digest(namespace: string, value: unknown): string {
 
 export const address = {
   content(bytes: Uint8Array | string): ContentAddress {
-    const normalized = typeof bytes === "string" ? Buffer.from(bytes) : Buffer.from(bytes);
+    const normalized = Buffer.from(bytes);
     return `content:sha256:${createHash("sha256").update(normalized).digest("hex")}` as ContentAddress;
   },
   artifact(value: unknown): ArtifactAddress {
