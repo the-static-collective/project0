@@ -10,7 +10,24 @@ export const DOMAIN_PREFIXES = {
 };
 
 // Strict pre-canonicalization validation
-function validateForCanonicalization(obj: any, seen = new WeakSet()): void {
+export type SemanticAddressKind = keyof typeof DOMAIN_PREFIXES;
+
+function validateString(value: string): void {
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    if (code < 0xD800 || code > 0xDFFF) continue;
+    if (code <= 0xDBFF) {
+      if (i === value.length - 1) throw new Error("Lone high surrogate");
+      const next = value.charCodeAt(i + 1);
+      if (next < 0xDC00 || next > 0xDFFF) throw new Error("Lone high surrogate");
+      i++;
+      continue;
+    }
+    throw new Error("Lone low surrogate");
+  }
+}
+
+export function validateForCanonicalization(obj: unknown, seen = new WeakSet<object>()): void {
   if (obj === undefined) throw new Error("undefined is not allowed");
   if (typeof obj === 'number') {
     if (Number.isNaN(obj)) throw new Error("NaN is not allowed");
@@ -20,22 +37,7 @@ function validateForCanonicalization(obj: any, seen = new WeakSet()): void {
   if (typeof obj === 'symbol') throw new Error("symbol is not allowed");
   if (typeof obj === 'function') throw new Error("function is not allowed");
 
-  if (typeof obj === 'string') {
-    // Check for lone surrogates
-    for (let i = 0; i < obj.length; i++) {
-      const code = obj.charCodeAt(i);
-      if (code >= 0xD800 && code <= 0xDFFF) {
-        if (code <= 0xDBFF) { // High surrogate
-          if (i === obj.length - 1) throw new Error("Lone high surrogate");
-          const next = obj.charCodeAt(i + 1);
-          if (next < 0xDC00 || next > 0xDFFF) throw new Error("Lone high surrogate");
-          i++; // Skip low surrogate
-        } else { // Low surrogate without preceding high
-          throw new Error("Lone low surrogate");
-        }
-      }
-    }
-  }
+  if (typeof obj === 'string') validateString(obj);
 
   if (typeof obj === 'object' && obj !== null) {
     if (seen.has(obj)) throw new Error("Cyclic object detected");
@@ -48,9 +50,17 @@ function validateForCanonicalization(obj: any, seen = new WeakSet()): void {
         validateForCanonicalization(obj[i], seen);
       }
     } else {
+      if (Object.getPrototypeOf(obj) !== Object.prototype) {
+        throw new Error("Only plain objects are allowed");
+      }
       for (const key of Object.keys(obj)) {
-        if (obj[key] === undefined) throw new Error("undefined property values are not allowed");
-        validateForCanonicalization(obj[key], seen);
+        validateString(key);
+        const descriptor = Object.getOwnPropertyDescriptor(obj, key);
+        if (descriptor === undefined || "get" in descriptor || "set" in descriptor) {
+          throw new Error("Accessor properties are not allowed");
+        }
+        if (descriptor.value === undefined) throw new Error("undefined property values are not allowed");
+        validateForCanonicalization(descriptor.value, seen);
       }
     }
     seen.delete(obj);
@@ -111,7 +121,7 @@ export function constructRequestBody(request: any): any {
   };
 }
 
-export function computeSemanticAddress(type: 'Node' | 'Edge' | 'Receipt' | 'Request', body: any): { canonicalBytes: Buffer, textualId: string, digestHex: string } {
+export function computeSemanticAddress(type: SemanticAddressKind, body: any): { canonicalBytes: Buffer, textualId: string, digestHex: string } {
   let hashedBody;
   if (type === 'Node') hashedBody = constructNodeBody(body);
   else if (type === 'Edge') hashedBody = constructEdgeBody(body);
@@ -142,7 +152,28 @@ export function computeSemanticAddress(type: 'Node' | 'Edge' | 'Receipt' | 'Requ
   return { canonicalBytes, textualId: `${prefixMap[type]}${b58}`, digestHex };
 }
 
-export function computeArtifactAddress(rawBytes: Buffer): { digestHex: string, textualId: string } {
+export function parseSemanticAddress(type: SemanticAddressKind, textualId: string): Buffer {
+  const prefixMap: Record<SemanticAddressKind, string> = {
+    Node: 'node-',
+    Edge: 'edge-',
+    Receipt: 'rect-',
+    Request: 'reqt-'
+  };
+  const prefix = prefixMap[type];
+  if (!textualId.startsWith(prefix)) throw new Error(`Invalid ${type} address prefix`);
+  const encodedDigest = textualId.slice(prefix.length);
+  if (encodedDigest.length === 0) throw new Error("Missing address digest");
+  let digest: Uint8Array;
+  try {
+    digest = bs58.decode(encodedDigest);
+  } catch {
+    throw new Error("Invalid base58 address digest");
+  }
+  if (digest.length !== 32) throw new Error("Invalid address digest length");
+  return Buffer.from(digest);
+}
+
+export function computeArtifactAddress(rawBytes: Uint8Array): { digestHex: string, textualId: string } {
   const hash = crypto.createHash('sha256').update(rawBytes).digest();
   const digestHex = hash.toString('hex');
   return { digestHex, textualId: digestHex };
