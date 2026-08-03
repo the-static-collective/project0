@@ -1,35 +1,14 @@
 {
-  "name": "app",
-  "version": "1.0.0",
-  "description": "**The shared meaning contract beneath the Static Collective ecosystem.**",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
-  "scripts": {
-    "test": "jest"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/the-static-collective/project0.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/the-static-collective/project0/issues"
-  },
-  "homepage": "https://github.com/the-static-collective/project0#readme",
   "dependencies": {
     "bs58": "^6.0.0",
     "json-canonicalize": "^2.0.0"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
-    "jest": "^30.4.2",
-    "ts-jest": "^29.4.12",
+    "@types/node": "^26.1.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }

@@ -9,7 +9,7 @@ Project 0 requires an exact, deterministic canonicalization format to compute cr
 We must select a canonical format that:
 1. Is deterministic across languages.
 2. Supports the complex, schema-less (or loosely schema'd) object envelopes required by Project 0.
-3. Provides a clean mechanism to exclude signatures and self-referential `id` fields during hashing.
+3. Provides a clean mechanism to construct hashable bodies strictly.
 
 We evaluated three options:
 1. **RFC 8785 (JSON Canonicalization Scheme - JCS)**

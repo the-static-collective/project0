@@ -1,9 +1,0 @@
-{
-  "input": {
-    "text": "こんにちは世界"
-  },
-  "canonicalBytesString": "Project0-Node-v1|{\"text\":\"こんにちは世界\"}",
-  "canonicalBytesHex": "50726f6a656374302d4e6f64652d76317c7b2274657874223a22e38193e38293e381abe381a1e381afe4b896e7958c227d",
-  "hash": "EuvW5rW51h1UE4nGafMgJui8quWCzRvpepWS3hG2ZPZh",
-  "textualId": "node-EuvW5rW51h1UE4nGafMgJui8quWCzRvpepWS3hG2ZPZh"
-}

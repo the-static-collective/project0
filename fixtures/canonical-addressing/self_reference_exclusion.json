@@ -1,7 +1,10 @@
 {
-  "name": "minimally_different_a",
+  "name": "self_reference_exclusion",
   "type": "Node",
   "input": {
+    "id": "node-123",
+    "signature": "sig",
+    "canonicalHash": "hash",
     "kind": "claim",
     "body": "a",
     "createdAt": "2026-08-01T22:17:39Z",

@@ -1,0 +1,17 @@
+{
+  "name": "unicode_non_bmp",
+  "type": "Node",
+  "input": {
+    "kind": "claim",
+    "body": "𐐷",
+    "createdAt": "2026-08-01T22:17:39Z",
+    "createdBy": "u1",
+    "provenance": [],
+    "disclosure": "public"
+  },
+  "domainPrefixHex": "50726f6a656374302d4e6f64652d76317c",
+  "preimageHex": "50726f6a656374302d4e6f64652d76317c7b22626f6479223a22f09090b7222c22637265617465644174223a22323032362d30382d30315432323a31373a33395a222c22637265617465644279223a227531222c22646973636c6f73757265223a227075626c6963222c226b696e64223a22636c61696d222c2270726f76656e616e6365223a5b5d7d",
+  "digestHex": "bb85b226581f3ae33e450ee12f8c5fe54fbf30be7baa261eb1ed925441d3b68a",
+  "textualAddress": "node-Dd1UtSz1n9iCWeVrLohEw4YpNLr1WarNUbNPXhhXnY2D",
+  "expectedStatus": "accepted"
+}

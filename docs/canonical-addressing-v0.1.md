@@ -1,66 +1,119 @@
 # Canonical Addressing v0.1
 
-This specification defines the deterministic byte serialization and hashing rules for Project 0. All implementations must adhere strictly to these rules to guarantee stable cryptographic identities for nodes, edges, receipts, and requests.
+This specification defines the deterministic byte serialization and hashing rules for Project 0. All implementations must adhere strictly to these rules to guarantee stable cryptographic identities for nodes, edges, receipts, requests, and artifacts.
 
-## 1. Canonical Serialization Format
+## 1. Addressing Equations
 
-Project 0 uses **RFC 8785 JSON Canonicalization Scheme (JCS)** as the absolute byte-level representation prior to hashing.
+Project 0 defines two distinct addressing equations.
 
-### Formatting Rules
-1. **Whitespace**: No whitespace (spaces, tabs, newlines) is permitted outside of string values.
-2. **Object Key Ordering**: Object keys MUST be sorted lexicographically by their UTF-16 code units (as defined in RFC 8785).
-3. **Array Ordering**: Arrays retain their original order.
-4. **String Normalization**: Strings must be encoded in valid UTF-8. No Unicode normalization (e.g., NFC/NFD) is forced by the hashing layer; the exact codepoints provided are serialized. Characters must be escaped according to RFC 8785 rules.
-5. **Numbers**: Numbers must be serialized according to the strict JSON number formatting rules of RFC 8785 (e.g., no trailing zeroes, no `e` notation for specific ranges, no `-0`).
-6. **Timestamps**: All timestamps must be serialized as ISO-8601 string representations in UTC, ending in `Z` (e.g., `"2026-08-01T22:17:39Z"`).
-7. **Omitted Fields vs. Null**: A field that is structurally omitted is absent from the byte array. A field explicitly set to `null` is serialized as `"field":null`. These two states hash differently.
-8. **Binary Data**: Binary artifacts must be serialized as `base64url` (RFC 4648 without padding) strings.
+### ArtifactAddress
+Raw binary or textual artifacts (media, blobs, raw files) are addressed by the lowercase hex encoding of their raw SHA-256 digest. **Raw artifact bytes must never be base64url-wrapped, JSON-canonicalized, or domain-prefixed before hashing.**
 
-## 2. Cryptographic Hashing and Domain Separation
+```text
+ArtifactAddress = lowercase_hex(SHA-256(exactRawArtifactBytes))
+```
 
-To prevent collision attacks across different data types (e.g., crafting a node that parses identically to a receipt), Project 0 enforces strict **Domain Separation**.
+### SemanticAddress
+Meaning-bearing JSON objects (Nodes, Edges, Receipts, Requests) use a typed textual encoding derived from a domain-prefixed JCS canonicalization.
 
-### Domain Prefixes
-Before hashing, the canonical JCS byte array is prefixed with a domain tag.
+```text
+SemanticAddress(type, body) = typed textual encoding of SHA-256(UTF8(registeredDomainSeparator(type)) || RFC8785(body))
+```
 
-| Object Type | Prefix String (UTF-8) |
+## 2. Pre-Canonicalization Validation
+
+Before `RFC8785` serialization occurs, the object MUST pass a recursive validation phase. The system MUST explicitly reject objects containing:
+- `undefined` in object properties
+- `undefined` and holes in arrays
+- `NaN`
+- positive and negative `Infinity`
+- `bigint`, `symbol`, `function`, and unsupported object types
+- lone Unicode surrogates
+- cyclic objects
+
+Rejection must happen explicitly before calling the `json-canonicalize` library.
+
+## 3. Timestamp Representation
+
+All timestamps (`createdAt`, `issuedAt`, etc.) MUST be strictly formatted as ISO-8601 UTC strings ending in `Z`. They MUST include exactly three digits of millisecond precision if fractional seconds are present, and MUST omit the fractional segment entirely if zero (e.g., `"2026-08-01T22:17:39Z"` vs `"2026-08-01T22:17:39.123Z"`). Timezone offsets (e.g., `+00:00`) are strictly prohibited prior to canonicalization.
+
+## 4. Explicit Hashed-Body Schemas
+
+To prevent hidden data via generic exclusion, we do NOT generically delete every root field named `id`, `signature`, or `canonicalHash`. Instead, each semantic type defines an exact explicit constructor for its hashed body.
+
+### Node Hashed Body
+```json
+{
+  "kind": "string",
+  "body": "any",
+  "createdAt": "string",
+  "createdBy": "string",
+  "provenance": "array",
+  "disclosure": "string"
+}
+```
+
+### Edge Hashed Body
+```json
+{
+  "type": "string",
+  "from": "string",
+  "to": "string",
+  "assertedBy": "string",
+  "createdAt": "string",
+  "scopeId": "string",
+  "basis": "string | null",
+  "disclosure": "string",
+  "validFrom": "string | null",
+  "validUntil": "string | null"
+}
+```
+
+### Receipt Hashed Body
+```json
+{
+  "receiptType": "string",
+  "issuedAt": "string",
+  "issuer": "string",
+  "subject": "string",
+  "inputs": "object",
+  "outputs": "object",
+  "authorityRef": "string | null",
+  "policyRefs": "array",
+  "previousReceiptRefs": "array"
+}
+```
+
+### Request Hashed Body
+```json
+{
+  "requester": "string",
+  "actor": "string",
+  "purpose": "string",
+  "destinationScopeId": "string",
+  "status": "string"
+}
+```
+
+## 5. Domain Separators
+
+| Semantic Type | Prefix String (UTF-8) |
 |---|---|
 | Node | `Project0-Node-v1|` |
 | Edge | `Project0-Edge-v1|` |
 | Receipt | `Project0-Receipt-v1|` |
 | Request | `Project0-Request-v1|` |
-| Artifact | `Project0-Artifact-v1|` |
 
-### Hashing Algorithm
-The hashing algorithm is **SHA-256**.
+## 6. Textual Encoding (base58btc)
 
-The exact payload hashed is:
-`HashInput = UTF8_Encode(DomainPrefix) + JCS_Serialize(Object)`
+The output `SemanticAddress` uses raw `base58btc` encoding. It is **not** multibase-prefixed (do not arbitrarily prepend `z` or assume `Qm...` semantics unless explicitly wrapping a multihash).
 
-### Textual ID Format
-The resulting hash is encoded using `base58btc`. The final textual identifier prepends the type domain in lowercase:
+The raw base58 alphabet is: `123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz`.
 
-- Node: `node-<base58btc>`
-- Edge: `edge-<base58btc>`
-- Receipt: `rect-<base58btc>`
-- Request: `reqt-<base58btc>`
+The final textual address prepends the exact type prefix:
+- Node: `node-<raw_base58btc_hash>`
+- Edge: `edge-<raw_base58btc_hash>`
+- Receipt: `rect-<raw_base58btc_hash>`
+- Request: `reqt-<raw_base58btc_hash>`
 
-*Example: `node-QmV8RkH...`*
-
-## 3. Exclusion of Self-Reference and Signatures
-
-Cryptographic IDs require hashing the object. To prevent recursive paradoxes, the object's own identifier and any cryptographic signatures covering the object must be removed from the object *before* canonical serialization.
-
-Prior to computing the hash, an implementation MUST structurally remove:
-1. The `id` or `receiptId` field.
-2. The `canonicalHash` field.
-3. Any `signature` or `signatures` array present at the root of the object.
-
-## 4. Versioning and Migration
-
-The prefixes end in `-v1|`. If the underlying canonicalization or hashing schema must change (e.g., migrating from SHA-256 to SHA-3), the prefix will be bumped (e.g., `Project0-Node-v2|`). This guarantees that older hashes never silently collide with newer schema hashes. Migration adapters must preserve the original `-v1` hash string as an immutable alias if the object is upgraded.
-
-## 5. Compatibility Consequences
-
-- **TranchNode**: TranchNode v0.1 does not enforce JCS or domain separation. Adapters MUST perform JCS canonicalization and SHA-256 hashing client-side before communicating with TranchNode, storing the Project 0 textual ID (`node-Qm...`) in TranchNode's string ID fields.
-- **Project 0 Executable Contract**: Floor 1.1 implementation of the reference kernel relies completely on this addressing scheme for verifiable graph integrity.
+Implementations MUST rigorously enforce format, length, exact alphabet, and prefix matching. Malformed addresses must be explicitly rejected.

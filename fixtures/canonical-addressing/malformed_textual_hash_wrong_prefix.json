@@ -1,0 +1,7 @@
+{
+  "name": "malformed_textual_hash_wrong_prefix",
+  "type": "Node",
+  "malformedTextualAddress": true,
+  "input_address": "invalid-QmV8RkH",
+  "expectedStatus": "rejected"
+}
