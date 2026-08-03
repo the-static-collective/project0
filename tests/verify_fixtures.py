@@ -3,7 +3,7 @@ import os
 import hashlib
 import math
 import base58
-import jcs
+import rfc8785
 
 FIXTURE_DIR = 'fixtures/canonical-addressing'
 
@@ -95,9 +95,31 @@ def construct_body(type_name, obj):
     else:
         raise ValueError("Unknown type")
 
+PREFIXES = {
+    'Node': 'node-',
+    'Edge': 'edge-',
+    'Receipt': 'rect-',
+    'Request': 'reqt-'
+}
+
+def parse_semantic_address(type_name, textual_address):
+    prefix = PREFIXES[type_name]
+    if not textual_address.startswith(prefix):
+        raise ValueError('Invalid address prefix')
+    encoded_digest = textual_address[len(prefix):]
+    if not encoded_digest:
+        raise ValueError('Missing address digest')
+    digest = base58.b58decode(encoded_digest)
+    if len(digest) != 32:
+        raise ValueError('Invalid address digest length')
+    return digest
+
 def check_fixture(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+        # RFC 8785's number model is ECMAScript IEEE-754, not Python's
+        # arbitrary-precision integer model.  Parsing integer literals as
+        # floats keeps this independent verifier in that shared domain.
+        data = json.load(f, parse_int=float)
 
     print(f"Verifying {data['name']}...")
 
@@ -115,27 +137,17 @@ def check_fixture(file_path):
 
     try:
         if data.get('malformedTextualAddress'):
-            # The test should explicitly test address decoding
             try:
-                # We expect this to fail
-                parts = data['input_address'].split('-')
-                if len(parts) != 2: raise ValueError("Malformed prefix")
-                b58_bytes = base58.b58decode(parts[1])
-                if len(b58_bytes) != 32: raise ValueError("Invalid hash length")
-                if data.get('expectedStatus') == 'rejected':
-                    pass # We successfully rejected it
-                else:
-                    raise Exception(f"Failed to reject malformed address {data['name']}")
-            except Exception as e:
-                if data.get('expectedStatus') != 'rejected':
-                    raise Exception(f"Address rejected incorrectly {data['name']}: {e}")
-            print(f"PASS: {data['name']}")
-            return
+                parse_semantic_address(data['type'], data['input_address'])
+            except ValueError:
+                print(f"PASS: {data['name']}")
+                return
+            raise Exception(f"Malformed address was accepted for {data['name']}")
 
         # Regular path
         body = construct_body(data['type'], data['input'])
         validate_for_canonicalization(body)
-        canonical_bytes = jcs.canonicalize(body)
+        canonical_bytes = rfc8785.dumps(body)
 
         domain_prefix = bytes.fromhex(data['domainPrefixHex'])
         preimage = domain_prefix + canonical_bytes
@@ -150,15 +162,8 @@ def check_fixture(file_path):
         if digest_hex != data['digestHex']:
             raise Exception(f"Digest mismatch for {data['name']}")
 
-        prefix_map = {
-            'Node': 'node-',
-            'Edge': 'edge-',
-            'Receipt': 'rect-',
-            'Request': 'reqt-'
-        }
-
         b58 = base58.b58encode(digest).decode('ascii')
-        expected_address = prefix_map[data['type']] + b58
+        expected_address = PREFIXES[data['type']] + b58
 
         if expected_address != data['textualAddress']:
             raise Exception(f"Textual address mismatch for {data['name']}")

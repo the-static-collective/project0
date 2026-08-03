@@ -5,10 +5,14 @@
   },
   "devDependencies": {
     "@types/node": "^26.1.2",
-    "ts-node": "^10.9.2",
     "typescript": "^7.0.2"
   },
   "scripts": {
-    "test": "jest"
+    "build": "tsc --outDir .build",
+    "check": "tsc --noEmit",
+    "test": "npm run build && node --test .build/tests/canonical-addressing.test.js",
+    "verify:fixtures": "python3 tests/verify_fixtures.py",
+    "verify": "npm run check && npm test",
+    "verify:all": "npm run verify && npm run verify:fixtures"
   }
 }
