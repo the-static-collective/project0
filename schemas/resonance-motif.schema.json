@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project0.static-collective.org/schemas/resonance-motif.schema.json",
+  "title": "Resonance Motif Artifact Payload",
+  "description": "An inspectable typed relational recurrence under tension. This payload is carried by an ordinary ArtifactEnvelope and does not introduce a new canonical Project 0 node kind.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "state",
+    "positions",
+    "relations",
+    "attractors",
+    "anchorTransitions",
+    "predecessorMotifs"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "0.1" },
+    "state": {
+      "enum": [
+        "open",
+        "provisionally_closed",
+        "recognized_closed",
+        "rejected_closed",
+        "abandoned"
+      ]
+    },
+    "positions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": { "$ref": "#/$defs/artifactRefs" },
+        "transformation": { "$ref": "#/$defs/artifactRefs" },
+        "tension": { "$ref": "#/$defs/artifactRefs" },
+        "response": { "$ref": "#/$defs/artifactRefs" },
+        "anchor_state": { "$ref": "#/$defs/artifactRefs" },
+        "recognition": { "$ref": "#/$defs/artifactRefs" }
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyId" },
+      "uniqueItems": true
+    },
+    "ruptureIntent": {
+      "enum": [
+        "intentional_cut",
+        "experimental_cut",
+        "accidental_loss",
+        "unknown"
+      ]
+    },
+    "attractors": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyId" },
+      "uniqueItems": true
+    },
+    "anchorTransitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["anchor", "outcome", "evidence"],
+        "properties": {
+          "anchor": { "$ref": "#/$defs/nonEmptyId" },
+          "outcome": {
+            "enum": ["preserved", "broken", "transfigured"]
+          },
+          "successorAnchor": { "$ref": "#/$defs/nonEmptyId" },
+          "evidence": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/nonEmptyId" },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": { "outcome": { "const": "transfigured" } },
+              "required": ["outcome"]
+            },
+            "then": { "required": ["successorAnchor"] },
+            "else": {
+              "not": { "required": ["successorAnchor"] }
+            }
+          }
+        ]
+      }
+    },
+    "recognition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["disposition", "receipt", "statedReasons"],
+      "properties": {
+        "disposition": {
+          "enum": [
+            "belongs",
+            "does_not_belong",
+            "uncertain",
+            "novel_but_continuous"
+          ]
+        },
+        "receipt": { "$ref": "#/$defs/nonEmptyId" },
+        "statedReasons": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyId" },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "predecessorMotifs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyId" },
+      "uniqueItems": true
+    },
+    "successorSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact", "derivedFromSource", "informedByRecognition"],
+      "properties": {
+        "artifact": { "$ref": "#/$defs/nonEmptyId" },
+        "derivedFromSource": { "$ref": "#/$defs/nonEmptyId" },
+        "informedByRecognition": { "$ref": "#/$defs/nonEmptyId" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": ["recognized_closed", "rejected_closed"]
+          }
+        },
+        "required": ["state"]
+      },
+      "then": {
+        "required": ["recognition", "successorSource"],
+        "properties": {
+          "positions": {
+            "required": [
+              "source",
+              "transformation",
+              "tension",
+              "response",
+              "anchor_state",
+              "recognition"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "state": { "const": "recognized_closed" } },
+        "required": ["state"]
+      },
+      "then": {
+        "properties": {
+          "recognition": {
+            "properties": {
+              "disposition": {
+                "enum": ["belongs", "novel_but_continuous"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "state": { "const": "rejected_closed" } },
+        "required": ["state"]
+      },
+      "then": {
+        "properties": {
+          "recognition": {
+            "properties": {
+              "disposition": { "const": "does_not_belong" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nonEmptyId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifactRefs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyId" },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  }
+}
