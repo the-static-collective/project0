@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "0.1",
+  "state": "recognized_closed",
+  "positions": {
+    "source": ["artifact:source-particular-001"],
+    "transformation": ["artifact:rupture-001"],
+    "tension": ["artifact:attractor-return-to-particular-001"],
+    "response": ["artifact:response-practical-comic-return-001"],
+    "anchor_state": ["artifact:anchor-transition-001"],
+    "recognition": ["artifact:recognition-receipt-001"]
+  },
+  "relations": [
+    "edge:source-to-rupture",
+    "edge:rupture-to-tension",
+    "edge:tension-to-response",
+    "edge:response-to-anchor-state",
+    "edge:anchor-state-to-recognition",
+    "edge:recognition-to-successor-source"
+  ],
+  "ruptureIntent": "experimental_cut",
+  "attractors": ["artifact:attractor-return-to-particular-001"],
+  "anchorTransitions": [
+    {
+      "anchor": "artifact:anchor-mundane-object-001",
+      "outcome": "transfigured",
+      "successorAnchor": "artifact:anchor-mundane-object-practical-return-001",
+      "evidence": ["artifact:anchor-transition-001"]
+    }
+  ],
+  "recognition": {
+    "disposition": "novel_but_continuous",
+    "receipt": "artifact:recognition-receipt-001",
+    "statedReasons": ["artifact:reason-verb-fidelity-001"]
+  },
+  "predecessorMotifs": [],
+  "successorSource": {
+    "artifact": "artifact:source-particular-002",
+    "derivedFromSource": "artifact:source-particular-001",
+    "informedByRecognition": "artifact:recognition-receipt-001"
+  }
+}
