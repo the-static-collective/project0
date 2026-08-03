@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "0.1",
+  "state": "open",
+  "positions": {
+    "source": ["artifact:source-particular-010"],
+    "transformation": ["artifact:rupture-010"],
+    "tension": ["artifact:attractor-belonging-under-change-010"]
+  },
+  "relations": [
+    "edge:source-to-rupture-010",
+    "edge:rupture-to-tension-010"
+  ],
+  "ruptureIntent": "accidental_loss",
+  "attractors": ["artifact:attractor-belonging-under-change-010"],
+  "anchorTransitions": [],
+  "predecessorMotifs": []
+}
