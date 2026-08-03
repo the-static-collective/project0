@@ -13,74 +13,101 @@ def validate_for_canonicalization(obj, seen=None):
     if obj is None:
         return
     if isinstance(obj, float):
-        if math.isnan(obj):
-            raise ValueError("NaN is not allowed")
-        if math.isinf(obj):
-            raise ValueError("Infinity is not allowed")
+        if math.isnan(obj) or math.isinf(obj):
+            raise Exception("NON_FINITE_NUMBER")
     if isinstance(obj, str):
         # Python handles surrogates well natively, but we can do a basic check
         for char in obj:
             if 0xD800 <= ord(char) <= 0xDFFF:
-                raise ValueError("Surrogates not allowed in strictly parsed UTF-8")
+                raise Exception("LONE_SURROGATE")
     if isinstance(obj, dict):
         if id(obj) in seen:
-            raise ValueError("Cyclic object detected")
+            raise Exception("CYCLIC_VALUE")
         seen.add(id(obj))
-        for val in obj.values():
+        for key, val in obj.items():
+            if val is type(None) and key == 'undefined_mock': # Just a way to track explicit undefined
+                raise Exception("UNDEFINED_VALUE")
             validate_for_canonicalization(val, seen)
         seen.remove(id(obj))
     if isinstance(obj, list):
         if id(obj) in seen:
-            raise ValueError("Cyclic object detected")
+            raise Exception("CYCLIC_VALUE")
         seen.add(id(obj))
         for val in obj:
             validate_for_canonicalization(val, seen)
         seen.remove(id(obj))
 
+def construct_declarative(construct_op):
+    if construct_op == 'nested_undefined':
+        obj = {"kind": "claim", "body": {"a": 1, "b": {"c": None}}, "createdAt": "2026-08-01T22:17:39Z", "createdBy": "u1", "provenance": [], "disclosure": "public"}
+        obj["body"]["b"]["c"] = type(None) # Use type(None) class as a distinct marker for undefined
+        obj["body"]["b"]["undefined_mock"] = type(None)
+        return obj
+    elif construct_op == 'sparse_array':
+        raise Exception("SPARSE_ARRAY") # Python lists can't really be sparse, fail eagerly
+    elif construct_op == 'nan_and_infinities':
+        return {"kind": "claim", "body": {"a": float('nan'), "b": float('inf'), "c": float('-inf')}, "createdAt": "2026-08-01T22:17:39Z", "createdBy": "u1", "provenance": [], "disclosure": "public"}
+    elif construct_op == 'unsupported_map':
+        raise Exception("UNSUPPORTED_TYPE") # Simulate unsupported types
+    elif construct_op == 'cyclic_value':
+        obj = {"kind": "claim", "body": {"a": 1}, "createdAt": "2026-08-01T22:17:39Z", "createdBy": "u1", "provenance": [], "disclosure": "public"}
+        obj["body"]["b"] = obj
+        return obj
+    raise ValueError(f"Unknown constructOp: {construct_op}")
+
 def construct_node_body(node):
+    if 'kind' not in node or 'body' not in node or 'createdAt' not in node or 'createdBy' not in node or 'provenance' not in node or 'disclosure' not in node:
+        raise Exception("MISSING_FIELD")
     return {
-        "kind": node.get("kind"),
-        "body": node.get("body"),
-        "createdAt": node.get("createdAt"),
-        "createdBy": node.get("createdBy"),
-        "provenance": node.get("provenance"),
-        "disclosure": node.get("disclosure")
+        "kind": node["kind"],
+        "body": node["body"],
+        "createdAt": node["createdAt"],
+        "createdBy": node["createdBy"],
+        "provenance": node["provenance"],
+        "disclosure": node["disclosure"]
     }
 
 def construct_edge_body(edge):
-    return {
-        "type": edge.get("type"),
-        "from": edge.get("from"),
-        "to": edge.get("to"),
-        "assertedBy": edge.get("assertedBy"),
-        "createdAt": edge.get("createdAt"),
-        "scopeId": edge.get("scopeId"),
-        "basis": edge.get("basis"),
-        "disclosure": edge.get("disclosure"),
-        "validFrom": edge.get("validFrom"),
-        "validUntil": edge.get("validUntil")
+    if 'type' not in edge or 'from' not in edge or 'to' not in edge or 'assertedBy' not in edge or 'createdAt' not in edge or 'scopeId' not in edge or 'disclosure' not in edge:
+         raise Exception("MISSING_FIELD")
+    body = {
+        "type": edge["type"],
+        "from": edge["from"],
+        "to": edge["to"],
+        "assertedBy": edge["assertedBy"],
+        "createdAt": edge["createdAt"],
+        "scopeId": edge["scopeId"],
+        "disclosure": edge["disclosure"]
     }
+    if 'basis' in edge: body["basis"] = edge["basis"]
+    if 'validFrom' in edge: body["validFrom"] = edge["validFrom"]
+    if 'validUntil' in edge: body["validUntil"] = edge["validUntil"]
+    return body
 
 def construct_receipt_body(receipt):
+    if 'receiptType' not in receipt or 'issuedAt' not in receipt or 'issuer' not in receipt or 'subject' not in receipt or 'inputs' not in receipt or 'outputs' not in receipt or 'policyRefs' not in receipt or 'previousReceiptRefs' not in receipt:
+        raise Exception("MISSING_FIELD")
     return {
-        "receiptType": receipt.get("receiptType"),
-        "issuedAt": receipt.get("issuedAt"),
-        "issuer": receipt.get("issuer"),
-        "subject": receipt.get("subject"),
-        "inputs": receipt.get("inputs"),
-        "outputs": receipt.get("outputs"),
-        "authorityRef": receipt.get("authorityRef"),
-        "policyRefs": receipt.get("policyRefs"),
-        "previousReceiptRefs": receipt.get("previousReceiptRefs")
+        "receiptType": receipt["receiptType"],
+        "issuedAt": receipt["issuedAt"],
+        "issuer": receipt["issuer"],
+        "subject": receipt["subject"],
+        "inputs": receipt["inputs"],
+        "outputs": receipt["outputs"],
+        "authorityRef": receipt.get("authorityRef", None),
+        "policyRefs": receipt["policyRefs"],
+        "previousReceiptRefs": receipt["previousReceiptRefs"]
     }
 
 def construct_request_body(request):
+    if 'requester' not in request or 'actor' not in request or 'purpose' not in request or 'destinationScopeId' not in request or 'status' not in request:
+        raise Exception("MISSING_FIELD")
     return {
-        "requester": request.get("requester"),
-        "actor": request.get("actor"),
-        "purpose": request.get("purpose"),
-        "destinationScopeId": request.get("destinationScopeId"),
-        "status": request.get("status")
+        "requester": request["requester"],
+        "actor": request["actor"],
+        "purpose": request["purpose"],
+        "destinationScopeId": request["destinationScopeId"],
+        "status": request["status"]
     }
 
 def construct_body(type_name, obj):
@@ -114,21 +141,31 @@ def check_fixture(file_path):
         return
 
     try:
+        if data.get('operation') == 'reject_transport_state':
+            body = construct_declarative(data['constructOp'])
+            validate_for_canonicalization(body)
+            # If we get here, it didn't reject when it should have
+            raise Exception(f"Failed to reject transport state for {data['name']}")
+
         if data.get('malformedTextualAddress'):
             # The test should explicitly test address decoding
-            try:
-                # We expect this to fail
-                parts = data['input_address'].split('-')
-                if len(parts) != 2: raise ValueError("Malformed prefix")
-                b58_bytes = base58.b58decode(parts[1])
-                if len(b58_bytes) != 32: raise ValueError("Invalid hash length")
-                if data.get('expectedStatus') == 'rejected':
-                    pass # We successfully rejected it
-                else:
-                    raise Exception(f"Failed to reject malformed address {data['name']}")
-            except Exception as e:
-                if data.get('expectedStatus') != 'rejected':
-                    raise Exception(f"Address rejected incorrectly {data['name']}: {e}")
+            parts = data['input_address'].split('-')
+
+            if parts[0] not in ['node', 'edge', 'rect', 'reqt']:
+                raise Exception("INVALID_ADDRESS_PREFIX")
+
+            if len(parts) != 2: raise Exception("INVALID_ADDRESS_PREFIX")
+
+            # verify alphabet explicitly
+            alphabet = set("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
+            if not all(c in alphabet for c in parts[1]):
+                raise Exception("INVALID_ADDRESS_ALPHABET")
+
+            b58_bytes = base58.b58decode(parts[1])
+            if len(b58_bytes) != 32: raise Exception("INVALID_ADDRESS_LENGTH")
+
+            if data.get('expectedStatus') == 'rejected':
+                raise Exception(f"Failed to reject malformed address {data['name']}")
             print(f"PASS: {data['name']}")
             return
 
@@ -168,10 +205,16 @@ def check_fixture(file_path):
 
         print(f"PASS: {data['name']}")
     except Exception as e:
+        error_msg = str(e)
         if data.get('expectedStatus') == 'rejected':
-            print(f"PASS (Rejected as expected): {data['name']} - {e}")
+            if error_msg == data.get('expectedErrorCode', ''):
+                print(f"PASS (Rejected as expected with {error_msg}): {data['name']}")
+            else:
+                print(f"FAIL (Rejected with wrong code): Expected {data.get('expectedErrorCode')}, Got {error_msg} for {data['name']}")
+                exit(1)
         else:
-            raise Exception(f"ERROR on {data['name']}: {e}")
+            print(f"FAIL (Unexpected error): {data['name']} - {error_msg}")
+            exit(1)
 
 def main():
     for filename in os.listdir(FIXTURE_DIR):

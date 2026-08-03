@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { computeSemanticAddress, computeArtifactAddress, DOMAIN_PREFIXES } from '../../src/canonical-addressing/index';
+import { computeSemanticAddress, computeArtifactAddress, DOMAIN_PREFIXES, validateForCanonicalization } from '../../src/canonical-addressing/index';
 import bs58 from 'bs58';
 
-const fixtures = [
+const fixtures: any[] = [
   {
     name: 'valid_node',
     type: 'Node',
@@ -29,26 +29,53 @@ const fixtures = [
     type: 'Node',
     input: { kind: 'claim', body: { a: 1, b: null }, createdAt: '2026-08-01T22:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' }
   },
+  // Declarative native-state rejection fixtures
   {
     name: 'recursive_undefined',
     type: 'Node',
-    input: { kind: 'claim', body: { a: 1, b: { c: undefined } }, createdAt: '2026-08-01T22:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' },
-    expectReject: true,
-    rejectionReason: 'undefined is not allowed'
+    declarative: true,
+    operation: 'reject_transport_state',
+    constructOp: 'nested_undefined',
+    expectedErrorCode: 'UNDEFINED_VALUE'
   },
   {
     name: 'sparse_array',
     type: 'Node',
-    input: { kind: 'claim', body: { arr: [1, , 3] }, createdAt: '2026-08-01T22:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' },
-    expectReject: true,
-    rejectionReason: 'Sparse arrays are not allowed'
+    declarative: true,
+    operation: 'reject_transport_state',
+    constructOp: 'sparse_array',
+    expectedErrorCode: 'SPARSE_ARRAY'
   },
   {
     name: 'nan_and_infinities',
     type: 'Node',
-    input: { kind: 'claim', body: { a: NaN, b: Infinity, c: -Infinity }, createdAt: '2026-08-01T22:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' },
+    declarative: true,
+    operation: 'reject_transport_state',
+    constructOp: 'nan_and_infinities',
+    expectedErrorCode: 'NON_FINITE_NUMBER'
+  },
+  {
+    name: 'unsupported_map',
+    type: 'Node',
+    declarative: true,
+    operation: 'reject_transport_state',
+    constructOp: 'unsupported_map',
+    expectedErrorCode: 'UNSUPPORTED_TYPE'
+  },
+  {
+    name: 'cyclic_value',
+    type: 'Node',
+    declarative: true,
+    operation: 'reject_transport_state',
+    constructOp: 'cyclic_value',
+    expectedErrorCode: 'CYCLIC_VALUE'
+  },
+  {
+    name: 'lone_surrogate',
+    type: 'Node',
+    input: { kind: 'claim', body: '\uD800', createdAt: '2026-08-01T22:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' },
     expectReject: true,
-    rejectionReason: 'NaN is not allowed'
+    expectedErrorCode: 'LONE_SURROGATE'
   },
   {
     name: 'unicode_composed',
@@ -64,13 +91,6 @@ const fixtures = [
     name: 'unicode_non_bmp',
     type: 'Node',
     input: { kind: 'claim', body: '𐐷', createdAt: '2026-08-01T22:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' }
-  },
-  {
-    name: 'lone_surrogate',
-    type: 'Node',
-    input: { kind: 'claim', body: '\uD800', createdAt: '2026-08-01T22:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' },
-    expectReject: true,
-    rejectionReason: 'Lone high surrogate'
   },
   {
     name: 'key_order_a',
@@ -122,21 +142,24 @@ const fixtures = [
     type: 'Node',
     malformedTextualAddress: true,
     input_address: 'invalid-QmV8RkH',
-    expectReject: true
+    expectReject: true,
+    expectedErrorCode: 'INVALID_ADDRESS_PREFIX'
   },
   {
     name: 'malformed_textual_hash_bad_b58',
     type: 'Node',
     malformedTextualAddress: true,
     input_address: 'node-0OIl',
-    expectReject: true
+    expectReject: true,
+    expectedErrorCode: 'INVALID_ADDRESS_ALPHABET'
   },
   {
     name: 'malformed_textual_hash_bad_length',
     type: 'Node',
     malformedTextualAddress: true,
     input_address: 'node-' + bs58.encode(Buffer.from([1, 2, 3])),
-    expectReject: true
+    expectReject: true,
+    expectedErrorCode: 'INVALID_ADDRESS_LENGTH'
   }
 ];
 
@@ -146,9 +169,15 @@ fixtures.forEach(fixture => {
     type: fixture.type
   };
 
-  if (fixture.malformedTextualAddress) {
+  if (fixture.declarative) {
+    output.operation = fixture.operation;
+    output.constructOp = fixture.constructOp;
+    output.expectedErrorCode = fixture.expectedErrorCode;
+    output.expectedStatus = 'rejected';
+  } else if (fixture.malformedTextualAddress) {
     output.malformedTextualAddress = true;
     output.input_address = fixture.input_address;
+    output.expectedErrorCode = fixture.expectedErrorCode;
     output.expectedStatus = 'rejected';
   } else if (fixture.type === 'Artifact') {
     output.rawInputHex = (fixture.input as Buffer).toString('hex');
@@ -175,7 +204,7 @@ fixtures.forEach(fixture => {
     } catch (e: any) {
       if (fixture.expectReject) {
         output.expectedStatus = 'rejected';
-        output.rejectionReason = e.message;
+        output.expectedErrorCode = fixture.expectedErrorCode;
       } else {
         console.error(`ERROR: ${fixture.name} was expected to accept but rejected: ${e.message}`);
         throw e;

@@ -1,0 +1,8 @@
+{
+  "name": "unsupported_map",
+  "type": "Node",
+  "operation": "reject_transport_state",
+  "constructOp": "unsupported_map",
+  "expectedErrorCode": "UNSUPPORTED_TYPE",
+  "expectedStatus": "rejected"
+}

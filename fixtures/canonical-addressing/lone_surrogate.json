@@ -10,5 +10,5 @@
     "disclosure": "public"
   },
   "expectedStatus": "rejected",
-  "rejectionReason": "Lone high surrogate"
+  "expectedErrorCode": "LONE_SURROGATE"
 }

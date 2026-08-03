@@ -1,17 +1,8 @@
 {
   "name": "recursive_undefined",
   "type": "Node",
-  "input": {
-    "kind": "claim",
-    "body": {
-      "a": 1,
-      "b": {}
-    },
-    "createdAt": "2026-08-01T22:17:39Z",
-    "createdBy": "u1",
-    "provenance": [],
-    "disclosure": "public"
-  },
-  "expectedStatus": "rejected",
-  "rejectionReason": "undefined property values are not allowed"
+  "operation": "reject_transport_state",
+  "constructOp": "nested_undefined",
+  "expectedErrorCode": "UNDEFINED_VALUE",
+  "expectedStatus": "rejected"
 }
