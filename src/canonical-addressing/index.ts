@@ -57,7 +57,6 @@ export function validateForCanonicalization(obj: any, seen = new WeakSet()): voi
     for (const key of keys) {
       const desc = descriptors[key];
       if (desc.get || desc.set) throw new Error("ACCESSOR_PROPERTY");
-      // Arrays have a non-enumerable 'length' property, so we skip checking 'length' for enumerability on Arrays
       if (!desc.enumerable && !(Array.isArray(obj) && key === 'length')) {
         throw new Error("NON_ENUMERABLE_PROPERTY");
       }

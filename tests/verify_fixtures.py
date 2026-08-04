@@ -36,17 +36,15 @@ def validate_for_canonicalization(obj, seen=None):
                 raise Exception("LONE_SURROGATE")
         return
 
-    if type(obj) is type: # We mock undefined with type(None) in python dicts for testing
-        if obj is type(None):
-            raise Exception("UNDEFINED_VALUE")
+    # We explicitly test the Python undefined marker here to evaluate dictionary iteration safety
+    if type(obj) is type and obj is type(None):
+        raise Exception("UNDEFINED_VALUE")
 
     if type(obj) is dict:
         if id(obj) in seen:
             raise Exception("CYCLIC_VALUE")
         seen.add(id(obj))
         for key, val in obj.items():
-            if val is type(None): # Just a way to track explicit undefined internally
-                raise Exception("UNDEFINED_VALUE")
             validate_for_canonicalization(val, seen)
         seen.remove(id(obj))
         return
@@ -62,23 +60,6 @@ def validate_for_canonicalization(obj, seen=None):
 
     # If it's not one of the explicit JSON primitives/composites, reject it
     raise Exception("CUSTOM_PROTOTYPE")
-
-def construct_declarative(construct_op):
-    if construct_op == 'nested_undefined':
-        obj = {"kind": "claim", "body": {"a": 1, "b": {"c": None}}, "createdAt": "2026-08-01T22:17:39Z", "createdBy": "u1", "provenance": [], "disclosure": "public"}
-        obj["body"]["b"]["c"] = type(None) # Use type(None) class as a distinct marker for undefined
-        return obj
-    elif construct_op == 'sparse_array':
-        raise Exception("SPARSE_ARRAY") # Python lists can't really be sparse, fail eagerly
-    elif construct_op == 'nan_and_infinities':
-        return {"kind": "claim", "body": {"a": float('nan'), "b": float('inf'), "c": float('-inf')}, "createdAt": "2026-08-01T22:17:39Z", "createdBy": "u1", "provenance": [], "disclosure": "public"}
-    elif construct_op == 'unsupported_map':
-        raise Exception("CUSTOM_PROTOTYPE") # Simulate unsupported types
-    elif construct_op == 'cyclic_value':
-        obj = {"kind": "claim", "body": {"a": 1}, "createdAt": "2026-08-01T22:17:39Z", "createdBy": "u1", "provenance": [], "disclosure": "public"}
-        obj["body"]["b"] = obj
-        return obj
-    raise ValueError(f"Unknown constructOp: {construct_op}")
 
 def construct_node_body(node):
     for field in ['kind', 'body', 'createdAt', 'createdBy', 'provenance', 'disclosure']:
@@ -160,6 +141,9 @@ def check_fixture(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
+    if data.get('operation') == 'reject_transport_state':
+        return # Handled separately in test_python_transport_rejection()
+
     print(f"Verifying {data['name']}...")
 
     if data['type'] == 'Artifact':
@@ -177,12 +161,6 @@ def check_fixture(file_path):
     expected_status = data.get('expectedStatus', 'accepted')
 
     try:
-        if data.get('operation') == 'reject_transport_state':
-            body = construct_declarative(data['constructOp'])
-            validate_for_canonicalization(body)
-            # If we get here, it didn't reject when it should have
-            raise Exception(f"Failed to reject transport state for {data['name']}")
-
         if data.get('malformedTextualAddress'):
             # The test should explicitly test address decoding
             parts = data['input_address'].split('-')
@@ -287,6 +265,18 @@ def test_python_transport_rejection():
         raise Exception("Failed to reject cyclic object")
     except Exception as e:
          if str(e) != "CYCLIC_VALUE": raise Exception(f"Wrong code for cyclic object: {e}")
+
+    # 4. Undefined
+    # Python dicts do not have "undefined". We mock it with type(None) class just to prove the recursive walker correctly errors out if it finds it.
+    try:
+        validate_for_canonicalization({"a": type(None)})
+        raise Exception("Failed to reject undefined")
+    except Exception as e:
+         if str(e) != "UNDEFINED_VALUE": raise Exception(f"Wrong code for undefined: {e}")
+
+    # 5. Sparse arrays
+    # Python lists cannot be sparse. This state is strictly unrepresentable in native Python.
+    print("Note: Sparse arrays have no native Python equivalent. Skipped.")
 
     print("PASS: Python Native Prohibited States")
 
