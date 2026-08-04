@@ -86,12 +86,69 @@ test("rejects cycles and accessor properties without evaluating them", () => {
   cycle.self = cycle;
   assert.throws(() => computeSemanticAddress("Node", { ...validNode, body: cycle }), /Cyclic/);
 
+  let executed = false;
   const accessor = {} as { value?: string };
   Object.defineProperty(accessor, "value", {
     enumerable: true,
     get() {
+      executed = true;
       throw new Error("must not execute");
     },
   });
-  assert.throws(() => computeSemanticAddress("Node", { ...validNode, body: accessor }), /Accessor/);
+  assert.throws(() => computeSemanticAddress("Node", { ...validNode, body: accessor }), /Accessor properties are not allowed/);
+  assert.equal(executed, false, "Getter was executed");
+});
+
+test("Own data properties are distinguished from inherited and prototype properties", () => {
+  const proto = { inherited: true };
+  const body = Object.create(proto);
+  body.own = true;
+  assert.throws(() => computeSemanticAddress("Node", { ...validNode, body }), /Only plain objects are allowed/);
+});
+
+test("Deeply nested objects are handled predictably", () => {
+  let deep: any = "val";
+  for (let i = 0; i < 150; i++) {
+    deep = { a: deep };
+  }
+  assert.throws(() => computeSemanticAddress("Node", { ...validNode, body: deep }), /Maximum depth exceeded/);
+});
+
+test("Oversized objects and arrays expose any currently unbounded behavior", () => {
+  const largeArray = new Array(1000).fill(1);
+  computeSemanticAddress("Node", { ...validNode, body: largeArray });
+});
+
+test("Unsafe integers", () => {
+  const body = { unsafe: Number.MAX_SAFE_INTEGER + 10 };
+  computeSemanticAddress("Node", { ...validNode, body });
+});
+
+test("Domain-separated preimages", () => {
+  const body = {
+    kind: "claim",
+    type: "supersedes",
+    from: "node-...",
+    to: "node-...",
+    createdAt: "2026-08-03T00:00:00.000Z",
+    createdBy: "tester",
+    assertedBy: "tester",
+    scopeId: "scope-1",
+    basis: null,
+    disclosure: "public",
+    provenance: [],
+    body: { value: 1 },
+  };
+  const nodeAddr = computeSemanticAddress("Node", body);
+  const edgeAddr = computeSemanticAddress("Edge", body);
+  assert.notEqual(nodeAddr.canonicalBytes.toString("hex"), edgeAddr.canonicalBytes.toString("hex"));
+  assert.notEqual(nodeAddr.digestHex, edgeAddr.digestHex);
+});
+
+test("Invalid timestamp timezone, precision, type, and impossible calendar values are rejected.", () => {
+  assert.throws(() => computeSemanticAddress("Node", { ...validNode, createdAt: 12345 }), /Timestamp must be a string/);
+  assert.throws(() => computeSemanticAddress("Node", { ...validNode, createdAt: "2026-08-03" }), /Invalid timestamp format/);
+  assert.throws(() => computeSemanticAddress("Node", { ...validNode, createdAt: "2026-08-03T00:00:00.000+05:00" }), /Invalid timestamp format/);
+  assert.throws(() => computeSemanticAddress("Node", { ...validNode, createdAt: "invalid" }), /Invalid timestamp format/);
+  assert.throws(() => computeSemanticAddress("Node", { ...validNode, createdAt: "2026-02-30T00:00:00.000Z" }), /Invalid timestamp value/);
 });

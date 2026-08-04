@@ -27,7 +27,34 @@ function validateString(value: string): void {
   }
 }
 
-export function validateForCanonicalization(obj: unknown, seen = new WeakSet<object>()): void {
+export function validateTimestamp(val: unknown): void {
+  if (typeof val !== 'string') throw new Error("Timestamp must be a string");
+
+  // Enforce strict ISO 8601 UTC format. Must end with Z and have valid components.
+  // Example: 2026-08-03T00:00:00.000Z or 2026-08-01T22:17:39Z
+  const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,9})?Z$/;
+  if (!regex.test(val)) throw new Error("Invalid timestamp format");
+
+  const timestamp = Date.parse(val);
+  if (Number.isNaN(timestamp)) throw new Error("Invalid timestamp value");
+
+  const d = new Date(timestamp);
+  const isoString = d.toISOString();
+  // If the original has no milliseconds, compare without milliseconds
+  if (val.endsWith('Z') && !val.includes('.')) {
+    if (isoString.replace('.000', '') !== val) throw new Error("Invalid timestamp value");
+  } else if (isoString !== val) {
+    const [year, month, day] = val.split('T')[0].split('-');
+    if (d.getUTCFullYear() !== parseInt(year) ||
+        d.getUTCMonth() + 1 !== parseInt(month) ||
+        d.getUTCDate() !== parseInt(day)) {
+        throw new Error("Invalid timestamp value");
+    }
+  }
+}
+
+export function validateForCanonicalization(obj: unknown, seen = new WeakSet<object>(), depth = 0): void {
+  if (depth > 100) throw new Error("Maximum depth exceeded");
   if (obj === undefined) throw new Error("undefined is not allowed");
   if (typeof obj === 'number') {
     if (Number.isNaN(obj)) throw new Error("NaN is not allowed");
@@ -47,7 +74,7 @@ export function validateForCanonicalization(obj: unknown, seen = new WeakSet<obj
       // Check for array holes
       if (Object.keys(obj).length !== obj.length) throw new Error("Sparse arrays are not allowed");
       for (let i = 0; i < obj.length; i++) {
-        validateForCanonicalization(obj[i], seen);
+        validateForCanonicalization(obj[i], seen, depth + 1);
       }
     } else {
       if (Object.getPrototypeOf(obj) !== Object.prototype) {
@@ -60,7 +87,7 @@ export function validateForCanonicalization(obj: unknown, seen = new WeakSet<obj
           throw new Error("Accessor properties are not allowed");
         }
         if (descriptor.value === undefined) throw new Error("undefined property values are not allowed");
-        validateForCanonicalization(descriptor.value, seen);
+        validateForCanonicalization(descriptor.value, seen, depth + 1);
       }
     }
     seen.delete(obj);
@@ -69,6 +96,7 @@ export function validateForCanonicalization(obj: unknown, seen = new WeakSet<obj
 
 // Explicit constructor for Node Hashed Body
 export function constructNodeBody(node: any): any {
+  if (node.createdAt !== undefined) validateTimestamp(node.createdAt);
   return {
     kind: node.kind,
     body: node.body,
@@ -81,6 +109,9 @@ export function constructNodeBody(node: any): any {
 
 // Explicit constructor for Edge Hashed Body
 export function constructEdgeBody(edge: any): any {
+  if (edge.createdAt !== undefined) validateTimestamp(edge.createdAt);
+  if (edge.validFrom !== undefined && edge.validFrom !== null) validateTimestamp(edge.validFrom);
+  if (edge.validUntil !== undefined && edge.validUntil !== null) validateTimestamp(edge.validUntil);
   return {
     type: edge.type,
     from: edge.from,
@@ -97,6 +128,7 @@ export function constructEdgeBody(edge: any): any {
 
 // Explicit constructor for Receipt Hashed Body
 export function constructReceiptBody(receipt: any): any {
+  if (receipt.issuedAt !== undefined) validateTimestamp(receipt.issuedAt);
   return {
     receiptType: receipt.receiptType,
     issuedAt: receipt.issuedAt,
