@@ -4,51 +4,76 @@ import hashlib
 import math
 import base58
 import jcs
+import re
+import traceback
 
 FIXTURE_DIR = 'fixtures/canonical-addressing'
+TIMESTAMP_REGEX = re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$')
+
+def validate_timestamp(ts):
+    if type(ts) is not str:
+        raise Exception("INVALID_TYPE")
+    if not TIMESTAMP_REGEX.match(ts):
+        raise Exception("INVALID_TIMESTAMP")
 
 def validate_for_canonicalization(obj, seen=None):
     if seen is None:
         seen = set()
     if obj is None:
         return
-    if isinstance(obj, float):
+
+    if type(obj) is bool:
+        return
+    if type(obj) is int:
+        return
+    if type(obj) is float:
         if math.isnan(obj) or math.isinf(obj):
             raise Exception("NON_FINITE_NUMBER")
-    if isinstance(obj, str):
-        # Python handles surrogates well natively, but we can do a basic check
+        return
+    if type(obj) is str:
         for char in obj:
             if 0xD800 <= ord(char) <= 0xDFFF:
                 raise Exception("LONE_SURROGATE")
-    if isinstance(obj, dict):
+        return
+
+    if type(obj) is type: # We mock undefined with type(None) in python dicts for testing
+        if obj is type(None):
+            raise Exception("UNDEFINED_VALUE")
+
+    if type(obj) is dict:
         if id(obj) in seen:
             raise Exception("CYCLIC_VALUE")
         seen.add(id(obj))
         for key, val in obj.items():
-            if val is type(None) and key == 'undefined_mock': # Just a way to track explicit undefined
+            if val is type(None): # Just a way to track explicit undefined internally
                 raise Exception("UNDEFINED_VALUE")
             validate_for_canonicalization(val, seen)
         seen.remove(id(obj))
-    if isinstance(obj, list):
+        return
+
+    if type(obj) is list:
         if id(obj) in seen:
             raise Exception("CYCLIC_VALUE")
         seen.add(id(obj))
         for val in obj:
             validate_for_canonicalization(val, seen)
         seen.remove(id(obj))
+        return
+
+    # If it's not one of the explicit JSON primitives/composites, reject it
+    raise Exception("CUSTOM_PROTOTYPE")
 
 def construct_declarative(construct_op):
     if construct_op == 'nested_undefined':
         obj = {"kind": "claim", "body": {"a": 1, "b": {"c": None}}, "createdAt": "2026-08-01T22:17:39Z", "createdBy": "u1", "provenance": [], "disclosure": "public"}
         obj["body"]["b"]["c"] = type(None) # Use type(None) class as a distinct marker for undefined
-        obj["body"]["b"]["undefined_mock"] = type(None)
         return obj
     elif construct_op == 'sparse_array':
         raise Exception("SPARSE_ARRAY") # Python lists can't really be sparse, fail eagerly
     elif construct_op == 'nan_and_infinities':
         return {"kind": "claim", "body": {"a": float('nan'), "b": float('inf'), "c": float('-inf')}, "createdAt": "2026-08-01T22:17:39Z", "createdBy": "u1", "provenance": [], "disclosure": "public"}
     elif construct_op == 'unsupported_map':
-        raise Exception("UNSUPPORTED_TYPE") # Simulate unsupported types
+        raise Exception("CUSTOM_PROTOTYPE") # Simulate unsupported types
     elif construct_op == 'cyclic_value':
         obj = {"kind": "claim", "body": {"a": 1}, "createdAt": "2026-08-01T22:17:39Z", "createdBy": "u1", "provenance": [], "disclosure": "public"}
         obj["body"]["b"] = obj
@@ -56,8 +81,10 @@ def construct_declarative(construct_op):
     raise ValueError(f"Unknown constructOp: {construct_op}")
 
 def construct_node_body(node):
-    if 'kind' not in node or 'body' not in node or 'createdAt' not in node or 'createdBy' not in node or 'provenance' not in node or 'disclosure' not in node:
-        raise Exception("MISSING_FIELD")
+    for field in ['kind', 'body', 'createdAt', 'createdBy', 'provenance', 'disclosure']:
+        if field not in node: raise Exception("MISSING_FIELD")
+
+    validate_timestamp(node["createdAt"])
     return {
         "kind": node["kind"],
         "body": node["body"],
@@ -68,8 +95,10 @@ def construct_node_body(node):
     }
 
 def construct_edge_body(edge):
-    if 'type' not in edge or 'from' not in edge or 'to' not in edge or 'assertedBy' not in edge or 'createdAt' not in edge or 'scopeId' not in edge or 'disclosure' not in edge:
-         raise Exception("MISSING_FIELD")
+    for field in ['type', 'from', 'to', 'assertedBy', 'createdAt', 'scopeId', 'disclosure']:
+        if field not in edge: raise Exception("MISSING_FIELD")
+
+    validate_timestamp(edge["createdAt"])
     body = {
         "type": edge["type"],
         "from": edge["from"],
@@ -80,13 +109,18 @@ def construct_edge_body(edge):
         "disclosure": edge["disclosure"]
     }
     if 'basis' in edge: body["basis"] = edge["basis"]
-    if 'validFrom' in edge: body["validFrom"] = edge["validFrom"]
-    if 'validUntil' in edge: body["validUntil"] = edge["validUntil"]
+    if 'validFrom' in edge:
+        if edge["validFrom"] is not None: validate_timestamp(edge["validFrom"])
+        body["validFrom"] = edge["validFrom"]
+    if 'validUntil' in edge:
+        if edge["validUntil"] is not None: validate_timestamp(edge["validUntil"])
+        body["validUntil"] = edge["validUntil"]
     return body
 
 def construct_receipt_body(receipt):
-    if 'receiptType' not in receipt or 'issuedAt' not in receipt or 'issuer' not in receipt or 'subject' not in receipt or 'inputs' not in receipt or 'outputs' not in receipt or 'policyRefs' not in receipt or 'previousReceiptRefs' not in receipt:
-        raise Exception("MISSING_FIELD")
+    for field in ['receiptType', 'issuedAt', 'issuer', 'subject', 'inputs', 'outputs', 'policyRefs', 'previousReceiptRefs']:
+         if field not in receipt: raise Exception("MISSING_FIELD")
+    validate_timestamp(receipt["issuedAt"])
     return {
         "receiptType": receipt["receiptType"],
         "issuedAt": receipt["issuedAt"],
@@ -100,8 +134,8 @@ def construct_receipt_body(receipt):
     }
 
 def construct_request_body(request):
-    if 'requester' not in request or 'actor' not in request or 'purpose' not in request or 'destinationScopeId' not in request or 'status' not in request:
-        raise Exception("MISSING_FIELD")
+    for field in ['requester', 'actor', 'purpose', 'destinationScopeId', 'status']:
+         if field not in request: raise Exception("MISSING_FIELD")
     return {
         "requester": request["requester"],
         "actor": request["actor"],
@@ -140,6 +174,8 @@ def check_fixture(file_path):
         print(f"PASS: {data['name']}")
         return
 
+    expected_status = data.get('expectedStatus', 'accepted')
+
     try:
         if data.get('operation') == 'reject_transport_state':
             body = construct_declarative(data['constructOp'])
@@ -164,7 +200,7 @@ def check_fixture(file_path):
             b58_bytes = base58.b58decode(parts[1])
             if len(b58_bytes) != 32: raise Exception("INVALID_ADDRESS_LENGTH")
 
-            if data.get('expectedStatus') == 'rejected':
+            if expected_status == 'rejected':
                 raise Exception(f"Failed to reject malformed address {data['name']}")
             print(f"PASS: {data['name']}")
             return
@@ -200,13 +236,13 @@ def check_fixture(file_path):
         if expected_address != data['textualAddress']:
             raise Exception(f"Textual address mismatch for {data['name']}")
 
-        if data.get('expectedStatus') == 'rejected':
-             raise Exception(f"{data['name']} was expected to reject but was accepted.")
+        if expected_status == 'rejected':
+             raise Exception(f"FAIL (Accepted incorrectly): {data['name']} was expected to reject but was accepted.")
 
         print(f"PASS: {data['name']}")
     except Exception as e:
         error_msg = str(e)
-        if data.get('expectedStatus') == 'rejected':
+        if expected_status == 'rejected':
             if error_msg == data.get('expectedErrorCode', ''):
                 print(f"PASS (Rejected as expected with {error_msg}): {data['name']}")
             else:
@@ -216,7 +252,47 @@ def check_fixture(file_path):
             print(f"FAIL (Unexpected error): {data['name']} - {error_msg}")
             exit(1)
 
+def test_python_transport_rejection():
+    print("Verifying Python Native Prohibited States...")
+
+    # 1. NaN and Infinity
+    try:
+        validate_for_canonicalization({"a": float('nan')})
+        raise Exception("Failed to reject NaN")
+    except Exception as e:
+        if str(e) != "NON_FINITE_NUMBER": raise Exception(f"Wrong code for NaN: {e}")
+
+    try:
+        validate_for_canonicalization({"a": float('inf')})
+        raise Exception("Failed to reject Infinity")
+    except Exception as e:
+        if str(e) != "NON_FINITE_NUMBER": raise Exception(f"Wrong code for Infinity: {e}")
+
+    # 2. Custom Prototype / Class Instance
+    class CustomClass:
+        def __init__(self):
+            self.a = 1
+
+    try:
+        validate_for_canonicalization({"a": CustomClass()})
+        raise Exception("Failed to reject custom prototype")
+    except Exception as e:
+         if str(e) != "CUSTOM_PROTOTYPE": raise Exception(f"Wrong code for custom prototype: {e}")
+
+    # 3. Cyclic Object
+    a = {}
+    a['b'] = a
+    try:
+        validate_for_canonicalization(a)
+        raise Exception("Failed to reject cyclic object")
+    except Exception as e:
+         if str(e) != "CYCLIC_VALUE": raise Exception(f"Wrong code for cyclic object: {e}")
+
+    print("PASS: Python Native Prohibited States")
+
+
 def main():
+    test_python_transport_rejection()
     for filename in os.listdir(FIXTURE_DIR):
         if filename.endswith('.json'):
             check_fixture(os.path.join(FIXTURE_DIR, filename))

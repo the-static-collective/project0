@@ -3,6 +3,6 @@
   "type": "Node",
   "operation": "reject_transport_state",
   "constructOp": "unsupported_map",
-  "expectedErrorCode": "UNSUPPORTED_TYPE",
+  "expectedErrorCode": "CUSTOM_PROTOTYPE",
   "expectedStatus": "rejected"
 }

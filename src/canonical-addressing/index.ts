@@ -9,19 +9,24 @@ export const DOMAIN_PREFIXES = {
   Request: 'Project0-Request-v1|',
 };
 
+// Strict timestamp validation
+const TIMESTAMP_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
+export function validateTimestamp(ts: any): void {
+  if (typeof ts !== 'string') throw new Error("INVALID_TYPE");
+  if (!TIMESTAMP_REGEX.test(ts)) throw new Error("INVALID_TIMESTAMP");
+}
+
 // Strict pre-canonicalization validation
 export function validateForCanonicalization(obj: any, seen = new WeakSet()): void {
   if (obj === undefined) throw new Error("UNDEFINED_VALUE");
   if (typeof obj === 'number') {
-    if (Number.isNaN(obj)) throw new Error("NON_FINITE_NUMBER");
-    if (!Number.isFinite(obj)) throw new Error("NON_FINITE_NUMBER");
+    if (Number.isNaN(obj) || !Number.isFinite(obj)) throw new Error("NON_FINITE_NUMBER");
   }
-  if (typeof obj === 'bigint') throw new Error("UNSUPPORTED_TYPE");
-  if (typeof obj === 'symbol') throw new Error("UNSUPPORTED_TYPE");
-  if (typeof obj === 'function') throw new Error("UNSUPPORTED_TYPE");
+  if (typeof obj === 'bigint' || typeof obj === 'symbol' || typeof obj === 'function') {
+    throw new Error("UNSUPPORTED_TYPE");
+  }
 
   if (typeof obj === 'string') {
-    // Check for lone surrogates
     for (let i = 0; i < obj.length; i++) {
       const code = obj.charCodeAt(i);
       if (code >= 0xD800 && code <= 0xDFFF) {
@@ -38,17 +43,33 @@ export function validateForCanonicalization(obj: any, seen = new WeakSet()): voi
   }
 
   if (typeof obj === 'object' && obj !== null) {
-    if (Object.prototype.toString.call(obj) !== '[object Object]' && !Array.isArray(obj)) {
-       throw new Error("UNSUPPORTED_TYPE"); // Rejects Date, Map, Set, ArrayBuffer, RegExp
+    const proto = Object.getPrototypeOf(obj);
+    if (proto !== Object.prototype && proto !== Array.prototype && proto !== null) {
+      throw new Error("CUSTOM_PROTOTYPE");
+    }
+
+    if (Object.getOwnPropertySymbols(obj).length > 0) {
+      throw new Error("SYMBOL_KEYED_PROPERTY");
+    }
+
+    const descriptors = Object.getOwnPropertyDescriptors(obj);
+    const keys = Object.keys(descriptors);
+    for (const key of keys) {
+      const desc = descriptors[key];
+      if (desc.get || desc.set) throw new Error("ACCESSOR_PROPERTY");
+      // Arrays have a non-enumerable 'length' property, so we skip checking 'length' for enumerability on Arrays
+      if (!desc.enumerable && !(Array.isArray(obj) && key === 'length')) {
+        throw new Error("NON_ENUMERABLE_PROPERTY");
+      }
     }
 
     if (seen.has(obj)) throw new Error("CYCLIC_VALUE");
     seen.add(obj);
 
     if (Array.isArray(obj)) {
-      // Check for array holes
       if (Object.keys(obj).length !== obj.length) throw new Error("SPARSE_ARRAY");
       for (let i = 0; i < obj.length; i++) {
+        if (!Object.prototype.hasOwnProperty.call(obj, i)) throw new Error("SPARSE_ARRAY");
         validateForCanonicalization(obj[i], seen);
       }
     } else {
@@ -61,77 +82,87 @@ export function validateForCanonicalization(obj: any, seen = new WeakSet()): voi
   }
 }
 
-function assertField(obj: any, field: string) {
-  if (!(field in obj) || obj[field] === undefined) {
+function assertField(obj: any, field: string, typeType?: string) {
+  if (!Object.prototype.hasOwnProperty.call(obj, field) || obj[field] === undefined) {
     throw new Error(`Missing required field: ${field}`);
   }
+  if (typeType === 'array' && !Array.isArray(obj[field])) throw new Error("INVALID_TYPE");
+  if (typeType === 'object' && (typeof obj[field] !== 'object' || obj[field] === null || Array.isArray(obj[field]))) throw new Error("INVALID_TYPE");
+  if (typeType === 'string' && typeof obj[field] !== 'string') throw new Error("INVALID_TYPE");
   return obj[field];
 }
 
-// Explicit constructor for Node Hashed Body
+// Explicit constructors
 export function constructNodeBody(node: any): any {
+  validateTimestamp(assertField(node, 'createdAt', 'string'));
   return {
-    kind: assertField(node, 'kind'),
+    kind: assertField(node, 'kind', 'string'),
     body: assertField(node, 'body'),
-    createdAt: assertField(node, 'createdAt'),
-    createdBy: assertField(node, 'createdBy'),
-    provenance: assertField(node, 'provenance'),
-    disclosure: assertField(node, 'disclosure')
+    createdAt: node.createdAt,
+    createdBy: assertField(node, 'createdBy', 'string'),
+    provenance: assertField(node, 'provenance', 'array'),
+    disclosure: assertField(node, 'disclosure', 'string')
   };
 }
 
-// Explicit constructor for Edge Hashed Body
 export function constructEdgeBody(edge: any): any {
+  validateTimestamp(assertField(edge, 'createdAt', 'string'));
   const body: any = {
-    type: assertField(edge, 'type'),
-    from: assertField(edge, 'from'),
-    to: assertField(edge, 'to'),
-    assertedBy: assertField(edge, 'assertedBy'),
-    createdAt: assertField(edge, 'createdAt'),
-    scopeId: assertField(edge, 'scopeId'),
-    disclosure: assertField(edge, 'disclosure')
+    type: assertField(edge, 'type', 'string'),
+    from: assertField(edge, 'from', 'string'),
+    to: assertField(edge, 'to', 'string'),
+    assertedBy: assertField(edge, 'assertedBy', 'string'),
+    createdAt: edge.createdAt,
+    scopeId: assertField(edge, 'scopeId', 'string'),
+    disclosure: assertField(edge, 'disclosure', 'string')
   };
 
-  if ('basis' in edge) body.basis = edge.basis;
-  if ('validFrom' in edge) body.validFrom = edge.validFrom;
-  if ('validUntil' in edge) body.validUntil = edge.validUntil;
+  if (Object.prototype.hasOwnProperty.call(edge, 'basis')) body.basis = edge.basis;
+  if (Object.prototype.hasOwnProperty.call(edge, 'validFrom')) {
+    if (edge.validFrom !== null) validateTimestamp(edge.validFrom);
+    body.validFrom = edge.validFrom;
+  }
+  if (Object.prototype.hasOwnProperty.call(edge, 'validUntil')) {
+    if (edge.validUntil !== null) validateTimestamp(edge.validUntil);
+    body.validUntil = edge.validUntil;
+  }
   return body;
 }
 
-// Explicit constructor for Receipt Hashed Body
 export function constructReceiptBody(receipt: any): any {
+  validateTimestamp(assertField(receipt, 'issuedAt', 'string'));
   return {
-    receiptType: assertField(receipt, 'receiptType'),
-    issuedAt: assertField(receipt, 'issuedAt'),
-    issuer: assertField(receipt, 'issuer'),
-    subject: assertField(receipt, 'subject'),
-    inputs: assertField(receipt, 'inputs'),
-    outputs: assertField(receipt, 'outputs'),
-    authorityRef: receipt.authorityRef !== undefined ? receipt.authorityRef : null,
-    policyRefs: assertField(receipt, 'policyRefs'),
-    previousReceiptRefs: assertField(receipt, 'previousReceiptRefs')
+    receiptType: assertField(receipt, 'receiptType', 'string'),
+    issuedAt: receipt.issuedAt,
+    issuer: assertField(receipt, 'issuer', 'string'),
+    subject: assertField(receipt, 'subject', 'string'),
+    inputs: assertField(receipt, 'inputs', 'object'),
+    outputs: assertField(receipt, 'outputs', 'object'),
+    authorityRef: Object.prototype.hasOwnProperty.call(receipt, 'authorityRef') ? receipt.authorityRef : null,
+    policyRefs: assertField(receipt, 'policyRefs', 'array'),
+    previousReceiptRefs: assertField(receipt, 'previousReceiptRefs', 'array')
   };
 }
 
-// Explicit constructor for Request Hashed Body
 export function constructRequestBody(request: any): any {
   return {
-    requester: assertField(request, 'requester'),
-    actor: assertField(request, 'actor'),
-    purpose: assertField(request, 'purpose'),
-    destinationScopeId: assertField(request, 'destinationScopeId'),
-    status: assertField(request, 'status')
+    requester: assertField(request, 'requester', 'string'),
+    actor: assertField(request, 'actor', 'string'),
+    purpose: assertField(request, 'purpose', 'string'),
+    destinationScopeId: assertField(request, 'destinationScopeId', 'string'),
+    status: assertField(request, 'status', 'string')
   };
 }
 
 export function computeSemanticAddress(type: 'Node' | 'Edge' | 'Receipt' | 'Request', body: any): { canonicalBytes: Buffer, textualId: string, digestHex: string } {
+  validateForCanonicalization(body);
+
   let hashedBody;
   if (type === 'Node') hashedBody = constructNodeBody(body);
   else if (type === 'Edge') hashedBody = constructEdgeBody(body);
   else if (type === 'Receipt') hashedBody = constructReceiptBody(body);
   else if (type === 'Request') hashedBody = constructRequestBody(body);
 
-  validateForCanonicalization(hashedBody);
   const jcsString = canonicalize(hashedBody);
   if (jcsString === undefined) throw new Error("Canonicalization failed");
 
@@ -175,7 +206,6 @@ export function parseSemanticAddress(address: string, expectedType?: 'Node' | 'E
   if (!prefixMap[parts[0]]) throw new Error('INVALID_ADDRESS_PREFIX');
   if (expectedType && prefixMap[parts[0]] !== expectedType) throw new Error('INVALID_ADDRESS_PREFIX');
 
-  // Verify Base58 alphabet exactly
   if (!/^[1-9A-HJ-NP-Za-km-z]+$/.test(parts[1])) throw new Error('INVALID_ADDRESS_ALPHABET');
 
   let digest: Buffer;

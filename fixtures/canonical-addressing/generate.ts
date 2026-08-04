@@ -29,7 +29,6 @@ const fixtures: any[] = [
     type: 'Node',
     input: { kind: 'claim', body: { a: 1, b: null }, createdAt: '2026-08-01T22:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' }
   },
-  // Declarative native-state rejection fixtures
   {
     name: 'recursive_undefined',
     type: 'Node',
@@ -60,7 +59,7 @@ const fixtures: any[] = [
     declarative: true,
     operation: 'reject_transport_state',
     constructOp: 'unsupported_map',
-    expectedErrorCode: 'UNSUPPORTED_TYPE'
+    expectedErrorCode: 'CUSTOM_PROTOTYPE'
   },
   {
     name: 'cyclic_value',
@@ -160,6 +159,32 @@ const fixtures: any[] = [
     input_address: 'node-' + bs58.encode(Buffer.from([1, 2, 3])),
     expectReject: true,
     expectedErrorCode: 'INVALID_ADDRESS_LENGTH'
+  },
+  {
+    name: 'valid_timestamp',
+    type: 'Node',
+    input: { kind: 'claim', body: 'Hello', createdAt: '2026-08-01T22:17:39.123Z', createdBy: 'u1', provenance: [], disclosure: 'public' }
+  },
+  {
+    name: 'invalid_timestamp_tz',
+    type: 'Node',
+    input: { kind: 'claim', body: 'Hello', createdAt: '2026-08-01T22:17:39+00:00', createdBy: 'u1', provenance: [], disclosure: 'public' },
+    expectReject: true,
+    expectedErrorCode: 'INVALID_TIMESTAMP'
+  },
+  {
+    name: 'invalid_timestamp_precision',
+    type: 'Node',
+    input: { kind: 'claim', body: 'Hello', createdAt: '2026-08-01T22:17:39.12Z', createdBy: 'u1', provenance: [], disclosure: 'public' },
+    expectReject: true,
+    expectedErrorCode: 'INVALID_TIMESTAMP'
+  },
+  {
+    name: 'invalid_timestamp_type',
+    type: 'Node',
+    input: { kind: 'claim', body: 'Hello', createdAt: 1234567890, createdBy: 'u1', provenance: [], disclosure: 'public' },
+    expectReject: true,
+    expectedErrorCode: 'INVALID_TYPE'
   }
 ];
 
