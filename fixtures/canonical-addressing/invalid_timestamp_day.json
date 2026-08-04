@@ -1,0 +1,14 @@
+{
+  "name": "invalid_timestamp_day",
+  "type": "Node",
+  "input": {
+    "kind": "claim",
+    "body": "Hello",
+    "createdAt": "2026-04-31T22:17:39Z",
+    "createdBy": "u1",
+    "provenance": [],
+    "disclosure": "public"
+  },
+  "expectedStatus": "rejected",
+  "expectedErrorCode": "INVALID_TIMESTAMP"
+}

@@ -14,6 +14,16 @@ const TIMESTAMP_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 export function validateTimestamp(ts: any): void {
   if (typeof ts !== 'string') throw new Error("INVALID_TYPE");
   if (!TIMESTAMP_REGEX.test(ts)) throw new Error("INVALID_TIMESTAMP");
+
+  const d = new Date(ts);
+  if (Number.isNaN(d.getTime())) throw new Error("INVALID_TIMESTAMP");
+
+  // JS Date.toISOString() always outputs milliseconds.
+  // We need to compare to make sure leap days/months didn't wrap silently.
+  const isoStr = d.toISOString();
+  // If the input was e.g. "2026-08-01T22:17:39Z", JS outputs "2026-08-01T22:17:39.000Z"
+  const expectedIso = ts.includes('.') ? ts : ts.replace('Z', '.000Z');
+  if (isoStr !== expectedIso) throw new Error("INVALID_TIMESTAMP");
 }
 
 // Strict pre-canonicalization validation

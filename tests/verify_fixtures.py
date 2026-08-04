@@ -6,6 +6,7 @@ import base58
 import jcs
 import re
 import traceback
+from datetime import datetime, timezone
 
 FIXTURE_DIR = 'fixtures/canonical-addressing'
 TIMESTAMP_REGEX = re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$')
@@ -14,6 +15,15 @@ def validate_timestamp(ts):
     if type(ts) is not str:
         raise Exception("INVALID_TYPE")
     if not TIMESTAMP_REGEX.match(ts):
+        raise Exception("INVALID_TIMESTAMP")
+
+    # Ensure calendar logic is valid (e.g. no Feb 29 in non-leap year, no Month 13)
+    try:
+        # Python fromisoformat expects +00:00 instead of Z in <= 3.10, but natively handles Z in 3.11+.
+        # We replace Z with +00:00 just to be safe.
+        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        # We also want to verify it didn't silently wrap/clamp, though python fromisoformat is strict.
+    except Exception:
         raise Exception("INVALID_TIMESTAMP")
 
 def validate_for_canonicalization(obj, seen=None):

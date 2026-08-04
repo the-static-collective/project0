@@ -185,6 +185,41 @@ const fixtures: any[] = [
     input: { kind: 'claim', body: 'Hello', createdAt: 1234567890, createdBy: 'u1', provenance: [], disclosure: 'public' },
     expectReject: true,
     expectedErrorCode: 'INVALID_TYPE'
+  },
+  {
+    name: 'invalid_timestamp_leap_year',
+    type: 'Node',
+    input: { kind: 'claim', body: 'Hello', createdAt: '2026-02-29T22:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' },
+    expectReject: true,
+    expectedErrorCode: 'INVALID_TIMESTAMP'
+  },
+  {
+    name: 'invalid_timestamp_month',
+    type: 'Node',
+    input: { kind: 'claim', body: 'Hello', createdAt: '2026-13-01T22:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' },
+    expectReject: true,
+    expectedErrorCode: 'INVALID_TIMESTAMP'
+  },
+  {
+    name: 'invalid_timestamp_day',
+    type: 'Node',
+    input: { kind: 'claim', body: 'Hello', createdAt: '2026-04-31T22:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' },
+    expectReject: true,
+    expectedErrorCode: 'INVALID_TIMESTAMP'
+  },
+  {
+    name: 'invalid_timestamp_hour',
+    type: 'Node',
+    input: { kind: 'claim', body: 'Hello', createdAt: '2026-08-01T25:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' },
+    expectReject: true,
+    expectedErrorCode: 'INVALID_TIMESTAMP'
+  },
+  {
+    name: 'invalid_timestamp_minute',
+    type: 'Node',
+    input: { kind: 'claim', body: 'Hello', createdAt: '2026-08-01T22:61:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' },
+    expectReject: true,
+    expectedErrorCode: 'INVALID_TIMESTAMP'
   }
 ];
 
