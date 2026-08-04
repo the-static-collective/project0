@@ -64,14 +64,16 @@ const validNode = {
 };
 
 for (const [name, body, message] of [
-  ["undefined", { nested: undefined }, "undefined"],
-  ["NaN", { value: Number.NaN }, "NaN"],
-  ["infinity", { value: Infinity }, "Infinity"],
-  ["sparse array", { values: [1, , 3] }, "Sparse arrays"],
-  ["bigint", { value: BigInt(1) }, "bigint"],
-  ["function", { value: () => undefined }, "function"],
-  ["symbol", { value: Symbol("x") }, "symbol"],
-  ["custom prototype", Object.create({ inherited: true }), "plain objects"],
+  ["undefined", { nested: undefined }, "UNDEFINED_VALUE"],
+  ["NaN", { value: Number.NaN }, "NON_FINITE_NUMBER"],
+  ["infinity", { value: Infinity }, "NON_FINITE_NUMBER"],
+  ["sparse array", { values: [1, , 3] }, "SPARSE_ARRAY"],
+  ["bigint", { value: BigInt(1) }, "UNSUPPORTED_TYPE"],
+  ["function", { value: () => undefined }, "UNSUPPORTED_TYPE"],
+  ["symbol", { value: Symbol("x") }, "UNSUPPORTED_TYPE"],
+  ["custom prototype", Object.create({ inherited: true }), "CUSTOM_PROTOTYPE"],
+  ["unsafe integer positive", { value: 9007199254740992 }, "UNSAFE_INTEGER"],
+  ["unsafe integer negative", { value: -9007199254740992 }, "UNSAFE_INTEGER"],
 ] as const) {
   test(`rejects runtime-only ${name}`, () => {
     assert.throws(
@@ -84,7 +86,7 @@ for (const [name, body, message] of [
 test("rejects cycles and accessor properties without evaluating them", () => {
   const cycle: { self?: unknown } = {};
   cycle.self = cycle;
-  assert.throws(() => computeSemanticAddress("Node", { ...validNode, body: cycle }), /Cyclic/);
+  assert.throws(() => computeSemanticAddress("Node", { ...validNode, body: cycle }), /CYCLIC_VALUE/);
 
   const accessor = {} as { value?: string };
   Object.defineProperty(accessor, "value", {
@@ -93,5 +95,5 @@ test("rejects cycles and accessor properties without evaluating them", () => {
       throw new Error("must not execute");
     },
   });
-  assert.throws(() => computeSemanticAddress("Node", { ...validNode, body: accessor }), /Accessor/);
+  assert.throws(() => computeSemanticAddress("Node", { ...validNode, body: accessor }), /ACCESSOR_PROPERTY/);
 });
