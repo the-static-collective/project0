@@ -10,6 +10,46 @@ const fixtures: any[] = [
     input: { kind: 'claim', body: 'Hello', createdAt: '2026-08-01T22:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' }
   },
   {
+    name: 'depth_exactly_at_limit',
+    type: 'Node',
+    input: {
+      kind: 'claim',
+      body: (() => {
+        let nested: any = "leaf";
+        // To hit depth 100, we need exactly 99 levels of nesting inside the `body` field because `body` is at depth 1.
+        // Wait, body is at depth 1. `nested` will be depth 2..100
+        for (let i = 0; i < 99; i++) {
+          nested = { a: nested };
+        }
+        return nested;
+      })(),
+      createdAt: '2026-08-01T22:17:39Z',
+      createdBy: 'u1',
+      provenance: [],
+      disclosure: 'public'
+    }
+  },
+  {
+    name: 'depth_one_past_limit',
+    type: 'Node',
+    input: {
+      kind: 'claim',
+      body: (() => {
+        let nested: any = "leaf";
+        for (let i = 0; i < 100; i++) {
+          nested = { a: nested };
+        }
+        return nested;
+      })(),
+      createdAt: '2026-08-01T22:17:39Z',
+      createdBy: 'u1',
+      provenance: [],
+      disclosure: 'public'
+    },
+    expectReject: true,
+    expectedErrorCode: 'MAX_DEPTH_EXCEEDED'
+  },
+  {
     name: 'negative_zero',
     type: 'Node',
     input: { kind: 'claim', body: { num: -0 }, createdAt: '2026-08-01T22:17:39Z', createdBy: 'u1', provenance: [], disclosure: 'public' }

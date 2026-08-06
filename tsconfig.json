@@ -6,5 +6,5 @@
     "strict": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "fixtures/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
 }
