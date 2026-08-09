@@ -9,6 +9,7 @@ import traceback
 
 FIXTURE_DIR = 'fixtures/canonical-addressing'
 TIMESTAMP_REGEX = re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$')
+MAX_CANONICALIZATION_DEPTH = 100
 
 def validate_timestamp(ts):
     if type(ts) is not str:
@@ -16,9 +17,9 @@ def validate_timestamp(ts):
     if not TIMESTAMP_REGEX.match(ts):
         raise Exception("INVALID_TIMESTAMP")
 
-def validate_for_canonicalization(obj, seen=None):
-    if seen is None:
-        seen = set()
+def _validate_for_canonicalization(obj, seen, depth):
+    if depth > MAX_CANONICALIZATION_DEPTH:
+        raise Exception("DEPTH_LIMIT_EXCEEDED")
     if obj is None:
         return
 
@@ -41,7 +42,7 @@ def validate_for_canonicalization(obj, seen=None):
                 raise Exception("LONE_SURROGATE")
         return
 
-    if type(obj) is type: # We mock undefined with type(None) in python dicts for testing
+    if type(obj) is type:
         if obj is type(None):
             raise Exception("UNDEFINED_VALUE")
 
@@ -50,9 +51,9 @@ def validate_for_canonicalization(obj, seen=None):
             raise Exception("CYCLIC_VALUE")
         seen.add(id(obj))
         for key, val in obj.items():
-            if val is type(None): # Just a way to track explicit undefined internally
+            if val is type(None):
                 raise Exception("UNDEFINED_VALUE")
-            validate_for_canonicalization(val, seen)
+            _validate_for_canonicalization(val, seen, depth + 1)
         seen.remove(id(obj))
         return
 
@@ -61,24 +62,40 @@ def validate_for_canonicalization(obj, seen=None):
             raise Exception("CYCLIC_VALUE")
         seen.add(id(obj))
         for val in obj:
-            validate_for_canonicalization(val, seen)
+            _validate_for_canonicalization(val, seen, depth + 1)
         seen.remove(id(obj))
         return
 
-    # If it's not one of the explicit JSON primitives/composites, reject it
     raise Exception("CUSTOM_PROTOTYPE")
+
+def validate_for_canonicalization(obj):
+    # Root is depth 0; each object property value or array element adds one.
+    _validate_for_canonicalization(obj, set(), 0)
+
+def construct_depth_node(wrapper_count):
+    body = "leaf"
+    for _ in range(wrapper_count):
+        body = {"next": body}
+    return {
+        "kind": "claim",
+        "body": body,
+        "createdAt": "2026-08-01T22:17:39Z",
+        "createdBy": "u1",
+        "provenance": [],
+        "disclosure": "public"
+    }
 
 def construct_declarative(construct_op):
     if construct_op == 'nested_undefined':
         obj = {"kind": "claim", "body": {"a": 1, "b": {"c": None}}, "createdAt": "2026-08-01T22:17:39Z", "createdBy": "u1", "provenance": [], "disclosure": "public"}
-        obj["body"]["b"]["c"] = type(None) # Use type(None) class as a distinct marker for undefined
+        obj["body"]["b"]["c"] = type(None)
         return obj
     elif construct_op == 'sparse_array':
-        raise Exception("SPARSE_ARRAY") # Python lists can't really be sparse, fail eagerly
+        raise Exception("SPARSE_ARRAY")
     elif construct_op == 'nan_and_infinities':
         return {"kind": "claim", "body": {"a": float('nan'), "b": float('inf'), "c": float('-inf')}, "createdAt": "2026-08-01T22:17:39Z", "createdBy": "u1", "provenance": [], "disclosure": "public"}
     elif construct_op == 'unsupported_map':
-        raise Exception("CUSTOM_PROTOTYPE") # Simulate unsupported types
+        raise Exception("CUSTOM_PROTOTYPE")
     elif construct_op == 'cyclic_value':
         obj = {"kind": "claim", "body": {"a": 1}, "createdAt": "2026-08-01T22:17:39Z", "createdBy": "u1", "provenance": [], "disclosure": "public"}
         obj["body"]["b"] = obj
@@ -185,11 +202,9 @@ def check_fixture(file_path):
         if data.get('operation') == 'reject_transport_state':
             body = construct_declarative(data['constructOp'])
             validate_for_canonicalization(body)
-            # If we get here, it didn't reject when it should have
             raise Exception(f"Failed to reject transport state for {data['name']}")
 
         if data.get('malformedTextualAddress'):
-            # The test should explicitly test address decoding
             parts = data['input_address'].split('-')
 
             if parts[0] not in ['node', 'edge', 'rect', 'reqt']:
@@ -197,7 +212,6 @@ def check_fixture(file_path):
 
             if len(parts) != 2: raise Exception("INVALID_ADDRESS_PREFIX")
 
-            # verify alphabet explicitly
             alphabet = set("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
             if not all(c in alphabet for c in parts[1]):
                 raise Exception("INVALID_ADDRESS_ALPHABET")
@@ -210,9 +224,17 @@ def check_fixture(file_path):
             print(f"PASS: {data['name']}")
             return
 
-        # Regular path
-        body = construct_body(data['type'], data['input'])
+        raw_input = construct_depth_node(data['depth']) if data.get('constructOp') == 'depth_chain' else data['input']
+        body = construct_body(data['type'], raw_input)
         validate_for_canonicalization(body)
+
+        if data.get('constructOp') == 'depth_chain':
+            if expected_status == 'rejected':
+                raise Exception(f"FAIL (Accepted incorrectly): {data['name']} was expected to reject but was accepted.")
+            jcs.canonicalize(body)
+            print(f"PASS: {data['name']}")
+            return
+
         canonical_bytes = jcs.canonicalize(body)
 
         domain_prefix = bytes.fromhex(data['domainPrefixHex'])
@@ -260,7 +282,6 @@ def check_fixture(file_path):
 def test_python_transport_rejection():
     print("Verifying Python Native Prohibited States...")
 
-    # 1. NaN and Infinity
     try:
         validate_for_canonicalization({"a": float('nan')})
         raise Exception("Failed to reject NaN")
@@ -273,7 +294,6 @@ def test_python_transport_rejection():
     except Exception as e:
         if str(e) != "NON_FINITE_NUMBER": raise Exception(f"Wrong code for Infinity: {e}")
 
-    # 2. Custom Prototype / Class Instance
     class CustomClass:
         def __init__(self):
             self.a = 1
@@ -284,7 +304,6 @@ def test_python_transport_rejection():
     except Exception as e:
          if str(e) != "CUSTOM_PROTOTYPE": raise Exception(f"Wrong code for custom prototype: {e}")
 
-    # 3. Cyclic Object
     a = {}
     a['b'] = a
     try:

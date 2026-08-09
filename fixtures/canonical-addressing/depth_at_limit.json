@@ -1,0 +1,7 @@
+{
+  "name": "depth_at_limit",
+  "type": "Node",
+  "constructOp": "depth_chain",
+  "depth": 99,
+  "expectedStatus": "accepted"
+}

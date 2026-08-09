@@ -15,14 +15,30 @@ type Fixture = {
   name: string;
   type: "Node" | "Edge" | "Receipt" | "Request" | "Artifact";
   expectedStatus: "accepted" | "rejected";
+  expectedErrorCode?: string;
   malformedTextualAddress?: boolean;
   input_address?: string;
   input?: unknown;
+  constructOp?: "depth_chain";
+  depth?: number;
   rawInputHex?: string;
   preimageHex?: string;
   digestHex?: string;
   textualAddress?: string;
 };
+
+function constructDepthNode(wrapperCount: number): unknown {
+  let body: unknown = "leaf";
+  for (let i = 0; i < wrapperCount; i++) body = { next: body };
+  return {
+    kind: "claim",
+    body,
+    createdAt: "2026-08-01T22:17:39Z",
+    createdBy: "u1",
+    provenance: [],
+    disclosure: "public",
+  };
+}
 
 for (const filename of readdirSync(fixtureDirectory).filter((name) => name.endsWith(".json"))) {
   const fixture = JSON.parse(readFileSync(join(fixtureDirectory, filename), "utf8")) as Fixture;
@@ -33,9 +49,21 @@ for (const filename of readdirSync(fixtureDirectory).filter((name) => name.endsW
       return;
     }
 
+    const input = fixture.constructOp === "depth_chain"
+      ? constructDepthNode(fixture.depth!)
+      : fixture.input;
+
     if (fixture.expectedStatus === "rejected") {
-      // JSON fixtures can only exercise transport-representable rejection cases.
-      assert.throws(() => computeSemanticAddress(fixture.type as Exclude<Fixture["type"], "Artifact">, fixture.input));
+      const action = () => computeSemanticAddress(
+        fixture.type as Exclude<Fixture["type"], "Artifact">,
+        input,
+      );
+      const canAssertStableCode = fixture.input !== undefined || fixture.constructOp === "depth_chain";
+      if (fixture.expectedErrorCode && canAssertStableCode) {
+        assert.throws(action, new RegExp(fixture.expectedErrorCode));
+      } else {
+        assert.throws(action);
+      }
       return;
     }
 
@@ -46,11 +74,11 @@ for (const filename of readdirSync(fixtureDirectory).filter((name) => name.endsW
       return;
     }
 
-    const result = computeSemanticAddress(fixture.type, fixture.input);
-    assert.equal(result.canonicalBytes.toString("hex"), fixture.preimageHex);
-    assert.equal(result.digestHex, fixture.digestHex);
-    assert.equal(result.textualId, fixture.textualAddress);
-    assert.equal(parseSemanticAddress(fixture.type, result.textualId).toString("hex"), fixture.digestHex);
+    const result = computeSemanticAddress(fixture.type, input);
+    if (fixture.preimageHex !== undefined) assert.equal(result.canonicalBytes.toString("hex"), fixture.preimageHex);
+    if (fixture.digestHex !== undefined) assert.equal(result.digestHex, fixture.digestHex);
+    if (fixture.textualAddress !== undefined) assert.equal(result.textualId, fixture.textualAddress);
+    assert.equal(parseSemanticAddress(fixture.type, result.textualId).toString("hex"), result.digestHex);
   });
 }
 

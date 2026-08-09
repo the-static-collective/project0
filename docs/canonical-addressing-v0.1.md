@@ -30,6 +30,11 @@ Before `RFC8785` serialization occurs, the object MUST pass a recursive validati
 - `bigint`, `symbol`, `function`, and unsupported object types
 - lone Unicode surrogates
 - cyclic objects
+- values beyond the canonicalization traversal-depth limit
+
+Canonicalization traversal uses one shared convention across implementations: the root semantic payload is depth `0`, and each object-property value or array element increases depth by `1`. The maximum accepted depth is `100`; any value encountered at depth `101` or greater MUST reject with the stable error code `DEPTH_LIMIT_EXCEEDED`.
+
+This limit is pre-canonicalization validation only. It does not alter RFC 8785 bytes, domain prefixes, textual address syntax, or the identity of any payload that was already accepted within the bound.
 
 Rejection must happen explicitly before calling the `json-canonicalize` library.
 
