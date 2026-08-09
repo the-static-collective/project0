@@ -35,11 +35,15 @@ for (const filename of readdirSync(fixtureDirectory).filter((name) => name.endsW
     }
 
     if (fixture.expectedStatus === "rejected") {
-      const expected = fixture.expectedErrorCode ? new RegExp(fixture.expectedErrorCode) : undefined;
-      assert.throws(
-        () => computeSemanticAddress(fixture.type as Exclude<Fixture["type"], "Artifact">, fixture.input),
-        expected,
+      const action = () => computeSemanticAddress(
+        fixture.type as Exclude<Fixture["type"], "Artifact">,
+        fixture.input,
       );
+      if (fixture.expectedErrorCode) {
+        assert.throws(action, new RegExp(fixture.expectedErrorCode));
+      } else {
+        assert.throws(action);
+      }
       return;
     }
 
