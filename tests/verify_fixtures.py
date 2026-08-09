@@ -72,6 +72,19 @@ def validate_for_canonicalization(obj):
     # Root is depth 0; each object property value or array element adds one.
     _validate_for_canonicalization(obj, set(), 0)
 
+def construct_depth_node(wrapper_count):
+    body = "leaf"
+    for _ in range(wrapper_count):
+        body = {"next": body}
+    return {
+        "kind": "claim",
+        "body": body,
+        "createdAt": "2026-08-01T22:17:39Z",
+        "createdBy": "u1",
+        "provenance": [],
+        "disclosure": "public"
+    }
+
 def construct_declarative(construct_op):
     if construct_op == 'nested_undefined':
         obj = {"kind": "claim", "body": {"a": 1, "b": {"c": None}}, "createdAt": "2026-08-01T22:17:39Z", "createdBy": "u1", "provenance": [], "disclosure": "public"}
@@ -211,8 +224,17 @@ def check_fixture(file_path):
             print(f"PASS: {data['name']}")
             return
 
-        body = construct_body(data['type'], data['input'])
+        raw_input = construct_depth_node(data['depth']) if data.get('constructOp') == 'depth_chain' else data['input']
+        body = construct_body(data['type'], raw_input)
         validate_for_canonicalization(body)
+
+        if data.get('constructOp') == 'depth_chain':
+            if expected_status == 'rejected':
+                raise Exception(f"FAIL (Accepted incorrectly): {data['name']} was expected to reject but was accepted.")
+            jcs.canonicalize(body)
+            print(f"PASS: {data['name']}")
+            return
+
         canonical_bytes = jcs.canonicalize(body)
 
         domain_prefix = bytes.fromhex(data['domainPrefixHex'])
