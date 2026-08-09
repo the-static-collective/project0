@@ -9,6 +9,8 @@ export const DOMAIN_PREFIXES = {
   Request: 'Project0-Request-v1|',
 };
 
+export const MAX_CANONICALIZATION_DEPTH = 100;
+
 // Strict pre-canonicalization validation
 export type SemanticAddressKind = keyof typeof DOMAIN_PREFIXES;
 
@@ -19,8 +21,8 @@ export function validateTimestamp(ts: any): void {
   if (!TIMESTAMP_REGEX.test(ts)) throw new Error("INVALID_TIMESTAMP");
 }
 
-// Strict pre-canonicalization validation
-export function validateForCanonicalization(obj: any, seen = new WeakSet()): void {
+function validateForCanonicalizationAtDepth(obj: any, seen: WeakSet<object>, depth: number): void {
+  if (depth > MAX_CANONICALIZATION_DEPTH) throw new Error("DEPTH_LIMIT_EXCEEDED");
   if (obj === undefined) throw new Error("UNDEFINED_VALUE");
   if (typeof obj === 'number') {
     if (Number.isNaN(obj) || !Number.isFinite(obj)) throw new Error("NON_FINITE_NUMBER");
@@ -38,12 +40,12 @@ export function validateForCanonicalization(obj: any, seen = new WeakSet()): voi
     for (let i = 0; i < obj.length; i++) {
       const code = obj.charCodeAt(i);
       if (code >= 0xD800 && code <= 0xDFFF) {
-        if (code <= 0xDBFF) { // High surrogate
+        if (code <= 0xDBFF) {
           if (i === obj.length - 1) throw new Error("LONE_SURROGATE");
           const next = obj.charCodeAt(i + 1);
           if (next < 0xDC00 || next > 0xDFFF) throw new Error("LONE_SURROGATE");
-          i++; // Skip low surrogate
-        } else { // Low surrogate without preceding high
+          i++;
+        } else {
           throw new Error("LONE_SURROGATE");
         }
       }
@@ -65,7 +67,6 @@ export function validateForCanonicalization(obj: any, seen = new WeakSet()): voi
     for (const key of keys) {
       const desc = descriptors[key];
       if (desc.get || desc.set) throw new Error("ACCESSOR_PROPERTY");
-      // Arrays have a non-enumerable 'length' property, so we skip checking 'length' for enumerability on Arrays
       if (!desc.enumerable && !(Array.isArray(obj) && key === 'length')) {
         throw new Error("NON_ENUMERABLE_PROPERTY");
       }
@@ -78,16 +79,21 @@ export function validateForCanonicalization(obj: any, seen = new WeakSet()): voi
       if (Object.keys(obj).length !== obj.length) throw new Error("SPARSE_ARRAY");
       for (let i = 0; i < obj.length; i++) {
         if (!Object.prototype.hasOwnProperty.call(obj, i)) throw new Error("SPARSE_ARRAY");
-        validateForCanonicalization(obj[i], seen);
+        validateForCanonicalizationAtDepth(obj[i], seen, depth + 1);
       }
     } else {
       for (const key of Object.keys(obj)) {
         if (obj[key] === undefined) throw new Error("UNDEFINED_VALUE");
-        validateForCanonicalization(obj[key], seen);
+        validateForCanonicalizationAtDepth(obj[key], seen, depth + 1);
       }
     }
     seen.delete(obj);
   }
+}
+
+// The root value is depth 0; each array element or object property value adds one.
+export function validateForCanonicalization(obj: any): void {
+  validateForCanonicalizationAtDepth(obj, new WeakSet<object>(), 0);
 }
 
 function assertField(obj: any, field: string, typeType?: string) {
@@ -100,7 +106,6 @@ function assertField(obj: any, field: string, typeType?: string) {
   return obj[field];
 }
 
-// Explicit constructors
 export function constructNodeBody(node: any): any {
   validateTimestamp(assertField(node, 'createdAt', 'string'));
   return {
