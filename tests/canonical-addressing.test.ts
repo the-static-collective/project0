@@ -15,6 +15,7 @@ type Fixture = {
   name: string;
   type: "Node" | "Edge" | "Receipt" | "Request" | "Artifact";
   expectedStatus: "accepted" | "rejected";
+  expectedErrorCode?: string;
   malformedTextualAddress?: boolean;
   input_address?: string;
   input?: unknown;
@@ -34,8 +35,11 @@ for (const filename of readdirSync(fixtureDirectory).filter((name) => name.endsW
     }
 
     if (fixture.expectedStatus === "rejected") {
-      // JSON fixtures can only exercise transport-representable rejection cases.
-      assert.throws(() => computeSemanticAddress(fixture.type as Exclude<Fixture["type"], "Artifact">, fixture.input));
+      const expected = fixture.expectedErrorCode ? new RegExp(fixture.expectedErrorCode) : undefined;
+      assert.throws(
+        () => computeSemanticAddress(fixture.type as Exclude<Fixture["type"], "Artifact">, fixture.input),
+        expected,
+      );
       return;
     }
 
