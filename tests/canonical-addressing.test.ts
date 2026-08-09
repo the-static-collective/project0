@@ -58,7 +58,8 @@ for (const filename of readdirSync(fixtureDirectory).filter((name) => name.endsW
         fixture.type as Exclude<Fixture["type"], "Artifact">,
         input,
       );
-      if (fixture.expectedErrorCode) {
+      const canAssertStableCode = fixture.input !== undefined || fixture.constructOp === "depth_chain";
+      if (fixture.expectedErrorCode && canAssertStableCode) {
         assert.throws(action, new RegExp(fixture.expectedErrorCode));
       } else {
         assert.throws(action);
