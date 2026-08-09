@@ -1,1 +1,8 @@
-{"name":"depth_beyond_limit","type":"Node","input":{"kind":"claim","body":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":{"next":"leaf"}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}},"createdAt":"2026-08-01T22:17:39Z","createdBy":"u1","provenance":[],"disclosure":"public"},"expectedStatus":"rejected","expectedErrorCode":"DEPTH_LIMIT_EXCEEDED"}
+{
+  "name": "depth_beyond_limit",
+  "type": "Node",
+  "constructOp": "depth_chain",
+  "depth": 100,
+  "expectedStatus": "rejected",
+  "expectedErrorCode": "DEPTH_LIMIT_EXCEEDED"
+}
