@@ -96,6 +96,18 @@ export function validateForCanonicalization(obj: any): void {
   validateForCanonicalizationAtDepth(obj, new WeakSet<object>(), 0);
 }
 
+/** Canonicalize a validated structured value for a domain-specific address. */
+export function canonicalizeDomainValue(domainPrefix: string, value: unknown): { canonicalBytes: Buffer; digestHex: string } {
+  validateForCanonicalization(value);
+  const jcsString = canonicalize(value);
+  if (jcsString === undefined) throw new Error("Canonicalization failed");
+  const canonicalBytes = Buffer.concat([Buffer.from(domainPrefix, "utf8"), Buffer.from(jcsString, "utf8")]);
+  return {
+    canonicalBytes,
+    digestHex: crypto.createHash("sha256").update(canonicalBytes).digest("hex"),
+  };
+}
+
 function assertField(obj: any, field: string, typeType?: string) {
   if (!Object.prototype.hasOwnProperty.call(obj, field) || obj[field] === undefined) {
     throw new Error(`Missing required field: ${field}`);
