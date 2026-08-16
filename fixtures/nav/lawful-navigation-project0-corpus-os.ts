@@ -32,7 +32,7 @@ export const lawfulNavigationSourceEvidence = Object.freeze({
 
 export const lawfulNavigationBefore: FrameSnapshot = {
   frameRef: `field:project0@${lawfulNavigationSourceEvidence.project0Commit}`,
-  constitutionRef: project0Ref,
+  constitutionRef: null,
   authorityRefs: [],
   decoderRef: "decoder:read-only-cross-repo-specimen-v0.1",
   evidenceRefs: [thresholdLawRef, authorityKitRelationRef],
@@ -52,7 +52,7 @@ export const lawfulNavigationCrossing: CrossingDeclaration = {
 
 export const lawfulNavigationAfter: FrameSnapshot = {
   frameRef: `field:corpus-os@${lawfulNavigationSourceEvidence.corpusOsCommit}`,
-  constitutionRef: corpusOsRef,
+  constitutionRef: null,
   authorityRefs: [],
   decoderRef: "decoder:read-only-cross-repo-specimen-v0.1",
   evidenceRefs: [thresholdLawRef, authorityKitRelationRef, latentReachabilityRef],
