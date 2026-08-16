@@ -54,7 +54,7 @@ test("P0-I1/P0-I3/P0-I5/P0-I14: plurality, repair scar, and build-beside are exe
   const required: Record<string, number> = {
     "sealed-plurality-round-trip": 5,
     "repair-scar-round-trip": 2,
-    "monument-build-beside": 3,
+    "monument-build-beside": 4,
   };
 
   for (const [fixtureId, minimumEvidence] of Object.entries(required)) {
