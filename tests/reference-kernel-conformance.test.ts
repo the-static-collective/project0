@@ -49,17 +49,21 @@ test("P0-I4/P0-I7/P0-I14: passing fixtures are backed by executable kernel evide
   );
 });
 
-test("P0-I20: unfinished fixture families remain explicitly unsupported", () => {
+test("P0-I1/P0-I3/P0-I5/P0-I14: plurality, repair scar, and build-beside are executable", () => {
   const results = run();
-  for (const fixtureId of [
-    "sealed-plurality-round-trip",
-    "repair-scar-round-trip",
-    "monument-build-beside",
-  ]) {
+  const required: Record<string, number> = {
+    "sealed-plurality-round-trip": 5,
+    "repair-scar-round-trip": 2,
+    "monument-build-beside": 3,
+  };
+
+  for (const [fixtureId, minimumEvidence] of Object.entries(required)) {
     const result = results.find((item) => item.fixtureId === fixtureId);
     assert.ok(result, `missing ${fixtureId}`);
-    assert.equal(result.status, "unsupported");
-    assert.deepEqual(result.reasonCodes, ["UNSUPPORTED_CHECK"]);
+    assert.equal(result.status, "pass", `${fixtureId} must be executable`);
+    assert.deepEqual(result.reasonCodes, []);
+    assert.ok(result.evidenceRefs.length >= minimumEvidence, `${fixtureId} must cite canonical evidence`);
+    assert.equal(new Set(result.evidenceRefs).size, result.evidenceRefs.length, `${fixtureId} evidence refs must be distinct`);
   }
 });
 
@@ -68,12 +72,13 @@ test("P0-I18: rendered report exposes status, invariant, fixture, and reason evi
   const rendered = kernel.renderConformance(run());
   assert.match(rendered, /PASS\s+P0-I4/);
   assert.match(rendered, /stable-node-identity/);
-  assert.match(rendered, /UNSUPPORTED\s+P0-I5/);
-  assert.match(rendered, /repair-scar-round-trip/);
+  assert.match(rendered, /PASS\s+P0-I5,P0-I14\s+repair-scar-round-trip/);
+  assert.match(rendered, /PASS\s+P0-I1,P0-I3\s+monument-build-beside/);
+  assert.doesNotMatch(rendered, /UNSUPPORTED/);
   assert.match(rendered, /AUTHORITY_SCOPE_MISMATCH/);
 });
 
-test("P0-I20: unsupported is visible but only actual conformance failure makes the CLI fail", () => {
+test("P0-I20: only actual conformance failure makes the CLI fail", () => {
   assert.equal(typeof kernel.conformanceExitCode, "function", "conformanceExitCode must be exported");
   const results = run();
   assert.equal(kernel.conformanceExitCode(results), 0);
