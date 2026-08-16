@@ -94,7 +94,11 @@ const CROSSING_STATUSES = new Set([
 
 function validateDifferenceObservation(value: unknown): asserts value is DifferenceObservation {
   assertObject(value);
-  if (typeof value.dimension !== "string" || !DISPOSITIONS.has(String(value.disposition))) {
+  if (
+    typeof value.dimension !== "string" ||
+    typeof value.disposition !== "string" ||
+    !DISPOSITIONS.has(value.disposition)
+  ) {
     throw new NavValidationError(NAV_VALIDATION_CODES.INVALID_OBSERVATION);
   }
   assertStringArray(value.beforeRefs);
