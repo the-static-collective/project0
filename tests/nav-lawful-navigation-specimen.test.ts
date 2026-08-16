@@ -38,7 +38,9 @@ test("witnesses Project0 to Corpus OS as changed field without manufacturing aut
 
   assert.equal(result.receipt.body.crossingStatus, "materially_changed");
   assert.equal(byDimension.get("frame")?.disposition, "changed");
-  assert.equal(byDimension.get("constitution")?.disposition, "changed");
+  assert.equal(byDimension.get("constitution")?.disposition, "indeterminate");
+  assert.deepEqual(byDimension.get("constitution")?.beforeRefs, []);
+  assert.deepEqual(byDimension.get("constitution")?.afterRefs, []);
   assert.equal(byDimension.get("authority")?.disposition, "preserved");
   assert.deepEqual(byDimension.get("authority")?.beforeRefs, []);
   assert.deepEqual(byDimension.get("authority")?.afterRefs, []);
