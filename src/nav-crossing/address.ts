@@ -8,6 +8,8 @@ import type {
   NavRecordType,
 } from "./types";
 import {
+  NAV_VALIDATION_CODES,
+  NavValidationError,
   validateCrossingDeclaration,
   validateFrameSnapshot,
   validateNavCrossingReceipt,
@@ -27,6 +29,12 @@ function sortedUnique(values: readonly string[]): string[] {
   return [...new Set(values)].sort();
 }
 
+function compareCodeUnits(left: string, right: string): number {
+  if (left < right) return -1;
+  if (left > right) return 1;
+  return 0;
+}
+
 function normalizeFrameSnapshot(frame: FrameSnapshot): FrameSnapshot {
   return {
     frameRef: frame.frameRef,
@@ -36,7 +44,7 @@ function normalizeFrameSnapshot(frame: FrameSnapshot): FrameSnapshot {
     evidenceRefs: sortedUnique(frame.evidenceRefs),
     participantRef: frame.participantRef,
     particularityAnchors: Object.fromEntries(
-      Object.entries(frame.particularityAnchors).sort(([left], [right]) => left.localeCompare(right)),
+      Object.entries(frame.particularityAnchors).sort(([left], [right]) => compareCodeUnits(left, right)),
     ),
   };
 }
@@ -51,6 +59,14 @@ function normalizeCrossingDeclaration(crossing: CrossingDeclaration): CrossingDe
 }
 
 function normalizeNavBody<T>(recordType: NavRecordType, body: T): T {
+  if (
+    recordType !== "frame_snapshot" &&
+    recordType !== "crossing_declaration" &&
+    recordType !== "crossing_receipt"
+  ) {
+    throw new NavValidationError(NAV_VALIDATION_CODES.INVALID_RECORD_TYPE);
+  }
+
   if (recordType === "frame_snapshot") {
     validateFrameSnapshot(body);
     return normalizeFrameSnapshot(body) as T;
