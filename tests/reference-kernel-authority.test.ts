@@ -117,6 +117,29 @@ test("P0-I7/P0-I14: non-root authority lineage must resolve", () => {
   assert.deepEqual(result.reasonCodes, ["AUTHORITY_LINEAGE_INVALID"]);
 });
 
+test("P0-I7/P0-I14: non-root authority lineage must resolve to an authority-bearing grant", () => {
+  const graph = new kernel.ReceiptGraph();
+  const witness = {
+    receiptType: "WitnessReceipt",
+    issuedAt: "2026-08-16T10:30:00Z",
+    issuer: "human:witness",
+    subject: "event:one",
+    inputs: {},
+    outputs: { observed: true },
+    authorityRef: null,
+    policyRefs: ["policy:public"],
+    previousReceiptRefs: [],
+  };
+  const witnessRef = kernel.addressReceipt(witness).address;
+  assert.equal(graph.append(witness).status, "appended");
+  const delegated = grant({ authorityRef: witnessRef });
+  const delegatedRef = kernel.addressReceipt(delegated).address;
+  assert.equal(graph.append(delegated).status, "appended");
+  const result = evaluation(graph, delegatedRef);
+  assert.equal(result.status, "refused");
+  assert.deepEqual(result.reasonCodes, ["AUTHORITY_LINEAGE_INVALID"]);
+});
+
 test("P0-I7/P0-I14: successful use appends consumption without mutating the grant", () => {
   const { graph, grantRef } = seededGrant();
   const original = graph.get(grantRef);
@@ -126,6 +149,17 @@ test("P0-I7/P0-I14: successful use appends consumption without mutating the gran
   assert.match(result.receiptRef, /^rect-/);
   assert.equal(graph.countConsumptions(grantRef), 1);
   assert.deepEqual(graph.get(grantRef), original);
+  assert.equal(evaluation(graph, grantRef).remainingInvocations, 1);
+});
+
+test("P0-I7/P0-I14: replaying the identical consumption is idempotent, not a fresh consumption", () => {
+  const { graph, grantRef } = seededGrant();
+  const first = kernel.recordLeaseConsumption(graph, grantRef, policy(), request(), "act:one", "human:lu");
+  assert.equal(first.status, "consumed");
+  const replay = kernel.recordLeaseConsumption(graph, grantRef, policy(), request(), "act:one", "human:lu");
+  assert.equal(replay.status, "idempotent");
+  assert.equal(replay.receiptRef, first.receiptRef);
+  assert.equal(graph.countConsumptions(grantRef), 1);
   assert.equal(evaluation(graph, grantRef).remainingInvocations, 1);
 });
 
