@@ -24,7 +24,7 @@
 
 Exit condition: deterministic fixtures pass without a model, database, network, or UI.
 
-The initial executable floor is implemented by the model-independent reference kernel. Broader relationship-preserving, addressed-graph, sealed-plurality, repair-scar, redaction, and monument/build-beside coverage remains attributable follow-on conformance work in issues #3, #6, and #10 rather than hidden as completed coverage.
+The initial executable floor is implemented by the model-independent reference kernel. Sealed plurality, repair-scar, and monument/build-beside now have bounded executable conformance specimens. Broader relationship-preserving, addressed-graph, graft-seam, and redaction coverage remains attributable follow-on work in issues #3, #6, and #10 rather than hidden as completed coverage.
 
 ## Floor 1.2 — Adapter boundary
 
