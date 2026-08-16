@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  NAV_DOMAIN_PREFIX,
+  addressNavRecord,
   compareFrameDeclarations,
+  createNavCrossingReceipt,
   validateCrossingDeclaration,
   validateFrameSnapshot,
 } from "../src/nav-crossing/index";
@@ -174,4 +177,60 @@ test("comparison is deterministic and does not mutate inputs", () => {
       "particularity:z",
     ],
   );
+});
+
+test("addresses NAV records under an experimental domain without canonical receipt identity", () => {
+  const addressed = addressNavRecord("frame_snapshot", frame);
+
+  assert.equal(NAV_DOMAIN_PREFIX, "Project0-NAV-v0.1|");
+  assert.match(addressed.ref, /^nav-[0-9a-f]{64}$/);
+  assert.equal(addressed.ref.startsWith("rect-"), false);
+  assert.equal(addressed.digestHex.length, 64);
+});
+
+test("reordered set declarations produce the same NAV frame address", () => {
+  const left = addressNavRecord("frame_snapshot", {
+    ...structuredClone(frame),
+    authorityRefs: ["lease-2", "lease-1", "lease-1"],
+    evidenceRefs: ["witness-2", "witness-1"],
+  });
+  const right = addressNavRecord("frame_snapshot", {
+    ...structuredClone(frame),
+    authorityRefs: ["lease-1", "lease-2"],
+    evidenceRefs: ["witness-1", "witness-2", "witness-2"],
+  });
+
+  assert.equal(left.ref, right.ref);
+  assert.equal(left.digestHex, right.digestHex);
+  assert.deepEqual(left.canonicalBytes, right.canonicalBytes);
+});
+
+test("crossing receipt binds exact addressed input declarations", () => {
+  const result = createNavCrossingReceipt(frame, crossing, {
+    ...structuredClone(frame),
+    decoderRef: "decoder-2",
+  });
+
+  assert.equal(result.receipt.body.beforeSnapshotRef, result.before.ref);
+  assert.equal(result.receipt.body.crossingDeclarationRef, result.crossing.ref);
+  assert.equal(result.receipt.body.afterSnapshotRef, result.after.ref);
+  assert.equal(result.receipt.body.crossingStatus, "materially_changed");
+  assert.match(result.receipt.ref, /^nav-[0-9a-f]{64}$/);
+});
+
+test("same normalized input declarations create the same crossing receipt digest", () => {
+  const beforeA = {
+    ...structuredClone(frame),
+    authorityRefs: ["lease-2", "lease-1"],
+  };
+  const beforeB = {
+    ...structuredClone(frame),
+    authorityRefs: ["lease-1", "lease-2"],
+  };
+
+  const first = createNavCrossingReceipt(beforeA, crossing, frame);
+  const second = createNavCrossingReceipt(beforeB, crossing, frame);
+
+  assert.equal(first.before.ref, second.before.ref);
+  assert.equal(first.receipt.ref, second.receipt.ref);
 });
