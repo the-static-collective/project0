@@ -21,6 +21,8 @@ It does not prove route optimality, traversal authority, execution permission, g
 - Corpus OS destination: commit `f54c808c3c91a599f47189a1e873c8adcaff7143`; `runtime/latent-reachability.ts` blob `e31f97d27a16c15a79ea3062dfdad2214413cc81`.
 - Pollen Scout / Founder Node PR #2 is corroborating design lineage only. It remains draft and is not a fixture dependency.
 
+These sources establish route relevance, repository/frame identity, and a newly visible destination particularity. They do **not** establish a governing constitution/cut reference for either bounded frame. That absence remains explicit rather than being filled with repository commit identity.
+
 ## Fixture architecture
 
 Add one fixture-only TypeScript module under `fixtures/nav/`. It exports:
@@ -37,15 +39,17 @@ No runtime module imports external repositories. All external evidence is repres
 The before field is Project0 at the NAV-v0.1 merge line.
 
 - `frameRef`: Project0 field identity for commit `0961e44f7fabc5807acea2b267009230f1e846c3`;
-- `constitutionRef`: pinned Project0 commit ref;
+- `constitutionRef`: `null`, because the pinned evidence does not establish a governing constitution/cut reference for this frame;
 - `authorityRefs`: empty;
 - stable fixture-local decoder and participant refs;
 - `evidenceRefs`: Front Room threshold-law ref + pinned Authority Kit relation ref;
 - particularity anchors:
-  - `current-project` → pinned Project0 ref;
-  - `nearby-door` → pinned Corpus OS ref.
+  - `current-project` → pinned Project0 repository/commit ref;
+  - `nearby-door` → pinned Corpus OS repository/commit ref.
 
 The presence of `nearby-door` means only that the destination has been identified at the boundary. It does not mean destination content has been loaded.
+
+The Project0 commit is used as frame/evidence/particularity identity. It is **not** relabeled as constitutional authority.
 
 ## Crossing declaration
 
@@ -59,7 +63,8 @@ Crossing evidence stays evidence. It never enters `authorityRefs`.
 
 The after field is Corpus OS at commit `f54c808...`.
 
-- frame/constitution change to Corpus OS;
+- frame changes to Corpus OS;
+- `constitutionRef` remains `null`, because the pinned evidence still does not establish a governing constitution/cut reference;
 - `authorityRefs` remains empty;
 - decoder and participant remain unchanged;
 - evidence retains the threshold/relationship refs and adds the pinned Latent Reachability source ref;
@@ -68,12 +73,14 @@ The after field is Corpus OS at commit `f54c808...`.
   - `nearby-door` remains Corpus OS, because the selected destination is still the same particular;
   - `prospective-reachability` appears only after crossing and points at the pinned Latent Reachability source.
 
+The Corpus OS commit likewise remains frame/evidence/particularity identity rather than being promoted into `constitutionRef`.
+
 ## Required observations
 
 Existing NAV v0.1 must produce:
 
 - `frame`: changed;
-- `constitution`: changed;
+- `constitution`: indeterminate, with no before/after constitution refs;
 - `authority`: preserved, with empty before/after refs;
 - `decoder`: preserved;
 - `evidence`: changed;
@@ -83,19 +90,29 @@ Existing NAV v0.1 must produce:
 - `particularity:prospective-reachability`: new_after;
 - crossing status: `materially_changed`.
 
+The constitution observation remains indeterminate even though the overall crossing is materially changed, because other declared dimensions establish the change while constitutional evidence remains absent.
+
 The addressed crossing receipt must remain in the experimental `nav-...` domain and be byte/digest deterministic for repeated construction from the same declarations.
 
 ## TDD strategy
 
-RED first: add a test importing the not-yet-existing fixture module and asserting the exact observations above. Repository `npm run verify:all` must fail before the fixture exists.
+Initial RED: add a test importing the not-yet-existing fixture module and asserting the bounded observations. Repository `npm run verify:all` fails before the fixture exists.
 
-GREEN: add only the fixture module. No `src/nav-crossing/*`, canonical-addressing, ontology, reference-kernel, or receipt-contract file may change. Full `npm run verify:all` must pass.
+Initial GREEN: add only the fixture module. No `src/nav-crossing/*`, canonical-addressing, ontology, reference-kernel, or receipt-contract file changes. Full `npm run verify:all` passes.
+
+Riqor-style owner review then challenges the declaration itself. It finds that repository commits had been placed in `constitutionRef` even though NAV defines that field as a governing constitution/cut reference and the pinned evidence establishes no such reference.
+
+Owner-review RED: change the acceptance test first to require `constitution: indeterminate` with empty before/after refs. The existing fixture fails.
+
+Owner-review GREEN: set both `constitutionRef` declarations to `null`, retain repository commits only in frame/evidence/particularity roles, and require the full repository gate to pass again.
 
 ## Compatibility / authority boundary
 
 This is fixture coverage only. It does not add a NAV comparison dimension, canonical ontology kind, relationship kind, receipt kind, routing algorithm, authority grant, external network dependency, or cross-repository runtime import.
 
 `CONFORMS_TO` explains why the door is relevant; it does not authorize crossing. Latent Reachability is what becomes newly visible after crossing; it does not authorize navigation or future execution.
+
+Unknown constitution stays unknown. Repository identity, relevance, evidence, or successful traversal cannot manufacture a constitutional reference.
 
 ## Follow-on
 
