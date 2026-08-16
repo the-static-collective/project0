@@ -152,15 +152,26 @@ test("P0-I7/P0-I14: successful use appends consumption without mutating the gran
   assert.equal(evaluation(graph, grantRef).remainingInvocations, 1);
 });
 
-test("P0-I7/P0-I14: replaying the identical consumption is idempotent, not a fresh consumption", () => {
-  const { graph, grantRef } = seededGrant();
+test("P0-I7/P0-I14: replaying the identical consumption is idempotent even after authority is exhausted", () => {
+  const { graph, grantRef } = seededGrant({
+    outputs: {
+      recipient: "human:lu",
+      capability: "publish",
+      scopeId: "scope:public",
+      purpose: "publish-test",
+      invocationLimit: 1,
+      validFrom: "2026-08-16T11:00:00Z",
+      validUntil: "2026-08-17T11:00:00Z",
+    },
+  });
   const first = kernel.recordLeaseConsumption(graph, grantRef, policy(), request(), "act:one", "human:lu");
   assert.equal(first.status, "consumed");
+  assert.equal(evaluation(graph, grantRef).status, "refused");
+  assert.deepEqual(evaluation(graph, grantRef).reasonCodes, ["AUTHORITY_EXHAUSTED"]);
   const replay = kernel.recordLeaseConsumption(graph, grantRef, policy(), request(), "act:one", "human:lu");
   assert.equal(replay.status, "idempotent");
   assert.equal(replay.receiptRef, first.receiptRef);
   assert.equal(graph.countConsumptions(grantRef), 1);
-  assert.equal(evaluation(graph, grantRef).remainingInvocations, 1);
 });
 
 test("P0-I7/P0-I14: two-use grant exhausts from history and refuses a third use", () => {
