@@ -2,6 +2,7 @@ import { validateTimestamp } from "../canonical-addressing/index.js";
 import { REASON_CODES, type ReasonCode } from "./reason-codes.js";
 import { ReceiptGraph } from "./receipt-graph.js";
 import type { AuthorityRequest, CanonicalReceipt, DisclosurePolicy, LeaseGrantOutputs } from "./types.js";
+import { addressReceipt } from "./validate.js";
 
 export type AuthorityEvaluation =
   | { status: "permitted"; reasonCodes: []; grantRef: string; remainingInvocations: number }
@@ -104,23 +105,14 @@ export function evaluateAuthority(
   return { status: "permitted", reasonCodes: [], grantRef, remainingInvocations };
 }
 
-export function recordLeaseConsumption(
-  graph: ReceiptGraph,
+function consumptionReceipt(
   grantRef: string,
   policy: DisclosurePolicy,
   request: AuthorityRequest,
   subjectRef: string,
   issuer: string,
-): LeaseConsumptionResult {
-  const evaluation = evaluateAuthority(graph, grantRef, policy, request);
-  if (evaluation.status !== "permitted") {
-    return { status: evaluation.status, reasonCodes: evaluation.reasonCodes };
-  }
-  if (issuer !== request.actor) {
-    return { status: "refused", reasonCodes: [REASON_CODES.AUTHORITY_ISSUER_MISMATCH] };
-  }
-
-  const consumption: CanonicalReceipt = {
+): CanonicalReceipt {
+  return {
     receiptType: "LeaseConsumption",
     issuedAt: request.evaluatedAt,
     issuer,
@@ -141,6 +133,28 @@ export function recordLeaseConsumption(
     policyRefs: [policy.policyRef],
     previousReceiptRefs: [grantRef],
   };
+}
+
+export function recordLeaseConsumption(
+  graph: ReceiptGraph,
+  grantRef: string,
+  policy: DisclosurePolicy,
+  request: AuthorityRequest,
+  subjectRef: string,
+  issuer: string,
+): LeaseConsumptionResult {
+  if (issuer !== request.actor) {
+    return { status: "refused", reasonCodes: [REASON_CODES.AUTHORITY_ISSUER_MISMATCH] };
+  }
+
+  const consumption = consumptionReceipt(grantRef, policy, request, subjectRef, issuer);
+  const receiptRef = addressReceipt(consumption).address;
+  if (graph.has(receiptRef)) return { status: "idempotent", receiptRef };
+
+  const evaluation = evaluateAuthority(graph, grantRef, policy, request);
+  if (evaluation.status !== "permitted") {
+    return { status: evaluation.status, reasonCodes: evaluation.reasonCodes };
+  }
 
   const appended = graph.append(consumption);
   if (appended.status === "refused") return { status: "refused", reasonCodes: appended.reasonCodes };
