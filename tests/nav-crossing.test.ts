@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  compareFrameDeclarations,
   validateCrossingDeclaration,
   validateFrameSnapshot,
 } from "../src/nav-crossing/index";
@@ -18,7 +19,7 @@ const frame = {
 
 const crossing = {
   crossingRef: "crossing-1",
-  kind: "room_crossing",
+  kind: "room_crossing" as const,
   declaredPurpose: "compare declared frame change",
   evidenceRefs: ["witness-crossing-1"],
 };
@@ -57,5 +58,120 @@ test("null is legal only for nullable scalar frame dimensions", () => {
   assert.throws(
     () => validateFrameSnapshot({ ...frame, frameRef: null }),
     /NAV_INVALID_STRING/,
+  );
+});
+
+test("same visible evidence does not hide changed authority and decoder", () => {
+  const before = structuredClone(frame);
+  const after = {
+    ...structuredClone(frame),
+    authorityRefs: ["lease-2"],
+    decoderRef: "decoder-2",
+  };
+
+  const result = compareFrameDeclarations(before, crossing, after);
+  const byDimension = new Map(result.observations.map((item) => [item.dimension, item]));
+
+  assert.equal(byDimension.get("evidence")?.disposition, "preserved");
+  assert.equal(byDimension.get("authority")?.disposition, "changed");
+  assert.equal(byDimension.get("decoder")?.disposition, "changed");
+  assert.equal(result.crossingStatus, "materially_changed");
+  assert.equal("same_world" in result, false);
+});
+
+test("stable label cannot override changed particularity", () => {
+  const after = {
+    ...structuredClone(frame),
+    particularityAnchors: { "goal:G": "artifact-B" },
+  };
+
+  const result = compareFrameDeclarations(frame, crossing, after);
+  const particularity = result.observations.find((item) => item.dimension === "particularity:goal:G");
+
+  assert.equal(particularity?.disposition, "changed");
+  assert.equal(result.crossingStatus, "materially_changed");
+});
+
+test("null scalar comparison is indeterminate, not preserved", () => {
+  const before = { ...structuredClone(frame), decoderRef: null };
+  const after = { ...structuredClone(frame), decoderRef: null };
+  const result = compareFrameDeclarations(before, crossing, after);
+  const decoder = result.observations.find((item) => item.dimension === "decoder");
+
+  assert.equal(decoder?.disposition, "indeterminate");
+  assert.equal(result.crossingStatus, "indeterminate");
+});
+
+test("normalizes authority and evidence as sets", () => {
+  const before = {
+    ...structuredClone(frame),
+    authorityRefs: ["lease-2", "lease-1", "lease-1"],
+    evidenceRefs: ["witness-2", "witness-1"],
+  };
+  const after = {
+    ...structuredClone(frame),
+    authorityRefs: ["lease-1", "lease-2"],
+    evidenceRefs: ["witness-1", "witness-2", "witness-2"],
+  };
+
+  const result = compareFrameDeclarations(before, crossing, after);
+  const byDimension = new Map(result.observations.map((item) => [item.dimension, item]));
+
+  assert.equal(byDimension.get("authority")?.disposition, "preserved");
+  assert.equal(byDimension.get("evidence")?.disposition, "preserved");
+});
+
+test("distinguishes absent_after and new_after", () => {
+  const removed = compareFrameDeclarations(
+    { ...structuredClone(frame), authorityRefs: ["lease-1"] },
+    crossing,
+    { ...structuredClone(frame), authorityRefs: [] },
+  );
+  assert.equal(
+    removed.observations.find((item) => item.dimension === "authority")?.disposition,
+    "absent_after",
+  );
+
+  const introduced = compareFrameDeclarations(
+    { ...structuredClone(frame), authorityRefs: [] },
+    crossing,
+    { ...structuredClone(frame), authorityRefs: ["lease-1"] },
+  );
+  assert.equal(
+    introduced.observations.find((item) => item.dimension === "authority")?.disposition,
+    "new_after",
+  );
+});
+
+test("comparison is deterministic and does not mutate inputs", () => {
+  const before = {
+    ...structuredClone(frame),
+    authorityRefs: ["lease-2", "lease-1"],
+    particularityAnchors: { z: "z-ref", a: "a-ref" },
+  };
+  const after = structuredClone(before);
+  after.authorityRefs = ["lease-1", "lease-2"];
+  after.particularityAnchors = { a: "a-ref", z: "z-ref" };
+
+  const beforeCopy = structuredClone(before);
+  const afterCopy = structuredClone(after);
+  const first = compareFrameDeclarations(before, crossing, after);
+  const second = compareFrameDeclarations(before, crossing, after);
+
+  assert.deepEqual(first, second);
+  assert.deepEqual(before, beforeCopy);
+  assert.deepEqual(after, afterCopy);
+  assert.deepEqual(
+    first.observations.map((item) => item.dimension),
+    [
+      "frame",
+      "constitution",
+      "authority",
+      "decoder",
+      "evidence",
+      "participant",
+      "particularity:a",
+      "particularity:z",
+    ],
   );
 });
