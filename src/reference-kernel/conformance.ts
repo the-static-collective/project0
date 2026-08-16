@@ -2,8 +2,14 @@ import { evaluateMaterial } from "./admission.js";
 import { evaluateAuthority, recordLeaseConsumption } from "./authority.js";
 import { REASON_CODES } from "./reason-codes.js";
 import { ReceiptGraph } from "./receipt-graph.js";
-import type { AuthorityRequest, CanonicalNode, CanonicalReceipt, DisclosurePolicy } from "./types.js";
-import { addressNode, addressReceipt } from "./validate.js";
+import type {
+  AuthorityRequest,
+  CanonicalNode,
+  CanonicalReceipt,
+  CanonicalRelationship,
+  DisclosurePolicy,
+} from "./types.js";
+import { addressNode, addressReceipt, addressRelationship } from "./validate.js";
 
 export type ConformanceResult = {
   fixtureId: string;
@@ -174,13 +180,187 @@ function admissionOrthogonality(): ConformanceResult {
     : failure(fixtureId, invariantIds, ["ADMISSION_DISPOSITION_COUPLED"], [grantRef]);
 }
 
-const unsupported = (fixtureId: string, invariantIds: string[]): ConformanceResult => ({
-  fixtureId,
-  invariantIds,
-  status: "unsupported",
-  reasonCodes: [REASON_CODES.UNSUPPORTED_CHECK],
-  evidenceRefs: [],
-});
+function sealedPluralityRoundTrip(): ConformanceResult {
+  const fixtureId = "sealed-plurality-round-trip";
+  const invariantIds = ["P0-I3", "P0-I5"];
+  try {
+    const left: CanonicalNode = {
+      kind: "observation",
+      body: { subject: "field:plurality", reading: "left" },
+      createdAt: "2026-08-16T12:10:00Z",
+      createdBy: "human:left",
+      provenance: [],
+      disclosure: "public",
+      relationships: [],
+    };
+    const right: CanonicalNode = {
+      kind: "observation",
+      body: { subject: "field:plurality", reading: "right" },
+      createdAt: "2026-08-16T12:11:00Z",
+      createdBy: "human:right",
+      provenance: [],
+      disclosure: "public",
+      relationships: [],
+    };
+    const leftRef = addressNode(left).address;
+    const rightRef = addressNode(right).address;
+    const harvest: CanonicalNode = {
+      kind: "harvest",
+      body: { mode: "sealed-plurality", consensusRequired: false },
+      createdAt: "2026-08-16T12:12:00Z",
+      createdBy: "human:lu",
+      provenance: [leftRef, rightRef],
+      disclosure: "public",
+      relationships: [],
+    };
+    const harvestRef = addressNode(harvest).address;
+    const leftEdge: CanonicalRelationship = {
+      type: "compresses",
+      from: harvestRef,
+      to: leftRef,
+      assertedBy: "human:lu",
+      createdAt: "2026-08-16T12:12:01Z",
+      scopeId: "scope:public",
+      basis: null,
+      disclosure: "public",
+    };
+    const rightEdge: CanonicalRelationship = {
+      ...leftEdge,
+      to: rightRef,
+      createdAt: "2026-08-16T12:12:02Z",
+    };
+    const leftEdgeRef = addressRelationship(leftEdge).address;
+    const rightEdgeRef = addressRelationship(rightEdge).address;
+
+    const passed =
+      leftRef !== rightRef &&
+      addressNode(structuredClone(left)).address === leftRef &&
+      addressNode(structuredClone(right)).address === rightRef &&
+      harvest.provenance.length === 2 &&
+      harvest.provenance.includes(leftRef) &&
+      harvest.provenance.includes(rightRef) &&
+      leftEdge.from === harvestRef &&
+      leftEdge.to === leftRef &&
+      rightEdge.from === harvestRef &&
+      rightEdge.to === rightRef &&
+      leftEdgeRef !== rightEdgeRef;
+
+    const evidenceRefs = [leftRef, rightRef, harvestRef, leftEdgeRef, rightEdgeRef];
+    return passed
+      ? { fixtureId, invariantIds, status: "pass", reasonCodes: [], evidenceRefs }
+      : failure(fixtureId, invariantIds, ["SEALED_PLURALITY_NOT_PRESERVED"], evidenceRefs);
+  } catch (error) {
+    return failure(fixtureId, invariantIds, [error instanceof Error ? error.message : "SEALED_PLURALITY_CHECK_FAILED"]);
+  }
+}
+
+function repairScarRoundTrip(): ConformanceResult {
+  const fixtureId = "repair-scar-round-trip";
+  const invariantIds = ["P0-I5", "P0-I14"];
+  try {
+    const graph = new ReceiptGraph();
+    const original: CanonicalReceipt = {
+      receiptType: "WitnessReceipt",
+      issuedAt: "2026-08-16T12:20:00Z",
+      issuer: "human:original",
+      subject: "node:observed",
+      inputs: { observation: "first-account" },
+      outputs: { disposition: "recorded" },
+      authorityRef: null,
+      policyRefs: ["policy:public"],
+      previousReceiptRefs: [],
+    };
+    const originalRef = addressReceipt(original).address;
+    const originalAppend = graph.append(original);
+
+    const repair: CanonicalReceipt = {
+      receiptType: "DispositionReceipt",
+      issuedAt: "2026-08-16T12:21:00Z",
+      issuer: "human:repairer",
+      subject: originalRef,
+      inputs: { disputedReceiptRef: originalRef },
+      outputs: { disposition: "repair", scarPreserved: true },
+      authorityRef: null,
+      policyRefs: ["policy:public"],
+      previousReceiptRefs: [originalRef],
+    };
+    const repairRef = addressReceipt(repair).address;
+    const repairAppend = graph.append(repair);
+    const recoveredOriginal = graph.get(originalRef);
+    const children = graph.childrenOf(originalRef);
+
+    const passed =
+      originalAppend.status === "appended" &&
+      repairAppend.status === "appended" &&
+      recoveredOriginal !== undefined &&
+      addressReceipt(recoveredOriginal).address === originalRef &&
+      JSON.stringify(recoveredOriginal) === JSON.stringify(original) &&
+      repairRef !== originalRef &&
+      children.length === 1 &&
+      children[0]?.receiptRef === repairRef &&
+      children[0]?.receipt.previousReceiptRefs.includes(originalRef) === true;
+
+    const evidenceRefs = [originalRef, repairRef];
+    return passed
+      ? { fixtureId, invariantIds, status: "pass", reasonCodes: [], evidenceRefs }
+      : failure(fixtureId, invariantIds, ["REPAIR_SCAR_NOT_PRESERVED"], evidenceRefs);
+  } catch (error) {
+    return failure(fixtureId, invariantIds, [error instanceof Error ? error.message : "REPAIR_SCAR_CHECK_FAILED"]);
+  }
+}
+
+function monumentBuildBeside(): ConformanceResult {
+  const fixtureId = "monument-build-beside";
+  const invariantIds = ["P0-I1", "P0-I3"];
+  try {
+    const monument: CanonicalNode = {
+      kind: "source",
+      body: { fixtureStatus: "monument", closed: true, text: "closed form" },
+      createdAt: "2026-08-16T12:30:00Z",
+      createdBy: "human:maker",
+      provenance: [],
+      disclosure: "public",
+      relationships: [],
+    };
+    const monumentRef = addressNode(monument).address;
+    const branch: CanonicalNode = {
+      kind: "proposal",
+      body: { mode: "build-beside", replacesParent: false },
+      createdAt: "2026-08-16T12:31:00Z",
+      createdBy: "human:builder",
+      provenance: [monumentRef],
+      disclosure: "public",
+      relationships: [],
+    };
+    const branchRef = addressNode(branch).address;
+    const relation: CanonicalRelationship = {
+      type: "continues",
+      from: branchRef,
+      to: monumentRef,
+      assertedBy: "human:builder",
+      createdAt: "2026-08-16T12:31:01Z",
+      scopeId: "scope:public",
+      basis: null,
+      disclosure: "public",
+    };
+    const relationRef = addressRelationship(relation).address;
+
+    const passed =
+      addressNode(structuredClone(monument)).address === monumentRef &&
+      branchRef !== monumentRef &&
+      branch.provenance.length === 1 &&
+      branch.provenance[0] === monumentRef &&
+      relation.from === branchRef &&
+      relation.to === monumentRef;
+
+    const evidenceRefs = [monumentRef, branchRef, relationRef];
+    return passed
+      ? { fixtureId, invariantIds, status: "pass", reasonCodes: [], evidenceRefs }
+      : failure(fixtureId, invariantIds, ["MONUMENT_BUILD_BESIDE_NOT_PRESERVED"], evidenceRefs);
+  } catch (error) {
+    return failure(fixtureId, invariantIds, [error instanceof Error ? error.message : "MONUMENT_BUILD_BESIDE_CHECK_FAILED"]);
+  }
+}
 
 export function runConformance(): ConformanceResult[] {
   return [
@@ -190,9 +370,9 @@ export function runConformance(): ConformanceResult[] {
     authorityScopeRefusal(),
     authorityExhaustion(),
     admissionOrthogonality(),
-    unsupported("sealed-plurality-round-trip", ["P0-I3", "P0-I5"]),
-    unsupported("repair-scar-round-trip", ["P0-I5", "P0-I14"]),
-    unsupported("monument-build-beside", ["P0-I1", "P0-I3"]),
+    sealedPluralityRoundTrip(),
+    repairScarRoundTrip(),
+    monumentBuildBeside(),
   ];
 }
 
