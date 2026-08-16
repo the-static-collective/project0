@@ -11,8 +11,9 @@
     "build": "tsc --outDir .build",
     "check": "tsc --noEmit",
     "test": "npm run build && node --test .build/tests/*.test.js",
+    "conformance": "npm run build && node .build/scripts/conformance.js",
     "verify:fixtures": "python3 tests/verify_fixtures.py",
     "verify": "npm run check && npm test",
-    "verify:all": "npm run verify && npm run verify:fixtures"
+    "verify:all": "npm run verify && npm run verify:fixtures && npm run conformance"
   }
 }

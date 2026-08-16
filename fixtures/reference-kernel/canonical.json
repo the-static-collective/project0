@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "project0.reference-kernel-fixtures.v1",
+  "fixtures": [
+    {
+      "fixtureId": "stable-node-identity",
+      "invariantIds": ["P0-I4", "P0-I18"],
+      "expectation": "canonically equivalent Node bodies retain identity while material disclosure change alters identity"
+    },
+    {
+      "fixtureId": "receipt-round-trip",
+      "invariantIds": ["P0-I14", "P0-I18"],
+      "expectation": "append/get round trip preserves canonical receipt identity and body"
+    },
+    {
+      "fixtureId": "authority-valid-use",
+      "invariantIds": ["P0-I6", "P0-I7", "P0-I18"],
+      "expectation": "complete explicit bounded authority permits the declared act"
+    },
+    {
+      "fixtureId": "admission-orthogonality",
+      "invariantIds": ["P0-I11", "P0-I20"],
+      "expectation": "pipeline admission remains unchanged when only epistemic disposition changes"
+    }
+  ]
+}

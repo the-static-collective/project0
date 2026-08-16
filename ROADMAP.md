@@ -12,17 +12,19 @@
 
 ## Floor 1.1 — Executable contract
 
-- [ ] TypeScript domain types
-- [ ] canonical JSON serialization
-- [ ] one central hasher
-- [ ] schema validation
-- [ ] append-only in-memory receipt graph
-- [ ] authority lease validation and consumption
-- [ ] pipeline admission checks
-- [ ] canonical and adversarial fixtures
-- [ ] conformance CLI
+- [x] TypeScript domain types
+- [x] canonical JSON serialization
+- [x] one central hasher
+- [x] schema/runtime validation
+- [x] append-only in-memory receipt graph
+- [x] authority lease validation and consumption
+- [x] pipeline admission checks
+- [x] canonical and adversarial fixtures
+- [x] conformance CLI
 
 Exit condition: deterministic fixtures pass without a model, database, network, or UI.
+
+The initial executable floor is implemented by the model-independent reference kernel. Broader relationship-preserving, addressed-graph, sealed-plurality, repair-scar, redaction, and monument/build-beside coverage remains attributable follow-on conformance work in issues #3, #6, and #10 rather than hidden as completed coverage.
 
 ## Floor 1.2 — Adapter boundary
 

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "project0.reference-kernel-fixtures.v1",
+  "fixtures": [
+    {
+      "fixtureId": "authority-scope-refusal",
+      "invariantIds": ["P0-I7", "P0-I9"],
+      "expectedReasonCodes": ["AUTHORITY_SCOPE_MISMATCH"]
+    },
+    {
+      "fixtureId": "authority-exhaustion",
+      "invariantIds": ["P0-I7", "P0-I14"],
+      "expectedReasonCodes": ["AUTHORITY_EXHAUSTED"]
+    },
+    {
+      "fixtureId": "sealed-plurality-round-trip",
+      "invariantIds": ["P0-I3", "P0-I5"],
+      "expectedStatus": "unsupported"
+    },
+    {
+      "fixtureId": "repair-scar-round-trip",
+      "invariantIds": ["P0-I5", "P0-I14"],
+      "expectedStatus": "unsupported"
+    },
+    {
+      "fixtureId": "monument-build-beside",
+      "invariantIds": ["P0-I1", "P0-I3"],
+      "expectedStatus": "unsupported"
+    }
+  ]
+}
