@@ -10,6 +10,7 @@ export type AuthorityEvaluation =
 
 export type LeaseConsumptionResult =
   | { status: "consumed"; receiptRef: string }
+  | { status: "idempotent"; receiptRef: string }
   | { status: "refused"; reasonCodes: ReasonCode[] }
   | { status: "indeterminate"; reasonCodes: ReasonCode[] };
 
@@ -80,8 +81,12 @@ export function evaluateAuthority(
   if (validFrom !== undefined && evaluatedAt < validFrom) return refused(grantRef, REASON_CODES.AUTHORITY_NOT_YET_VALID);
   if (validUntil !== undefined && evaluatedAt >= validUntil) return refused(grantRef, REASON_CODES.AUTHORITY_EXPIRED);
 
-  if (grant.authorityRef !== null && !graph.has(grant.authorityRef)) {
-    return refused(grantRef, REASON_CODES.AUTHORITY_LINEAGE_INVALID);
+  if (grant.authorityRef !== null) {
+    const parentGrant = graph.get(grant.authorityRef);
+    const parentOutputs = parentGrant ? grantOutputs(parentGrant) : undefined;
+    if (!parentGrant || !parentOutputs || parentOutputs.recipient !== grant.issuer) {
+      return refused(grantRef, REASON_CODES.AUTHORITY_LINEAGE_INVALID);
+    }
   }
 
   const disclosureAllowed =
@@ -139,5 +144,6 @@ export function recordLeaseConsumption(
 
   const appended = graph.append(consumption);
   if (appended.status === "refused") return { status: "refused", reasonCodes: appended.reasonCodes };
+  if (appended.status === "idempotent") return { status: "idempotent", receiptRef: appended.receiptRef };
   return { status: "consumed", receiptRef: appended.receiptRef };
 }
