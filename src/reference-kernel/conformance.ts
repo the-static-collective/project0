@@ -138,7 +138,12 @@ function authorityExhaustion(): ConformanceResult {
   const invariantIds = ["P0-I7", "P0-I14"];
   const { graph, grantRef } = seedGrant(1);
   const consumed = recordLeaseConsumption(graph, grantRef, policy, request(), "act:one", "human:lu");
-  if (consumed.status !== "consumed") return failure(fixtureId, invariantIds, consumed.reasonCodes, [grantRef]);
+  if (consumed.status === "refused" || consumed.status === "indeterminate") {
+    return failure(fixtureId, invariantIds, consumed.reasonCodes, [grantRef]);
+  }
+  if (consumed.status === "idempotent") {
+    return failure(fixtureId, invariantIds, ["UNEXPECTED_IDEMPOTENT_CONSUMPTION"], [grantRef, consumed.receiptRef]);
+  }
   const exhausted = evaluateAuthority(graph, grantRef, policy, request({ evaluatedAt: "2026-08-16T12:01:00Z" }));
   const passed = exhausted.status === "refused" && exhausted.reasonCodes.length === 1 && exhausted.reasonCodes[0] === REASON_CODES.AUTHORITY_EXHAUSTED;
   return passed
