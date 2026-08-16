@@ -323,6 +323,11 @@ function monumentBuildBeside(): ConformanceResult {
       relationships: [],
     };
     const monumentRef = addressNode(monument).address;
+    const directRewrite: CanonicalNode = {
+      ...monument,
+      body: { fixtureStatus: "monument", closed: true, text: "closed form with direct extension" },
+    };
+    const directRewriteRef = addressNode(directRewrite).address;
     const branch: CanonicalNode = {
       kind: "proposal",
       body: { mode: "build-beside", replacesParent: false },
@@ -347,13 +352,14 @@ function monumentBuildBeside(): ConformanceResult {
 
     const passed =
       addressNode(structuredClone(monument)).address === monumentRef &&
+      directRewriteRef !== monumentRef &&
       branchRef !== monumentRef &&
       branch.provenance.length === 1 &&
       branch.provenance[0] === monumentRef &&
       relation.from === branchRef &&
       relation.to === monumentRef;
 
-    const evidenceRefs = [monumentRef, branchRef, relationRef];
+    const evidenceRefs = [monumentRef, directRewriteRef, branchRef, relationRef];
     return passed
       ? { fixtureId, invariantIds, status: "pass", reasonCodes: [], evidenceRefs }
       : failure(fixtureId, invariantIds, ["MONUMENT_BUILD_BESIDE_NOT_PRESERVED"], evidenceRefs);
