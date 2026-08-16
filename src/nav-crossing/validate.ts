@@ -31,6 +31,24 @@ function assertObject(value: unknown): asserts value is Record<string, unknown> 
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw new NavValidationError(NAV_VALIDATION_CODES.INVALID_OBJECT);
   }
+
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) {
+    throw new NavValidationError(NAV_VALIDATION_CODES.INVALID_OBJECT);
+  }
+  if (Object.getOwnPropertySymbols(value).length > 0) {
+    throw new NavValidationError(NAV_VALIDATION_CODES.INVALID_OBJECT);
+  }
+
+  for (const descriptor of Object.values(Object.getOwnPropertyDescriptors(value))) {
+    if (descriptor.get || descriptor.set || !descriptor.enumerable) {
+      throw new NavValidationError(NAV_VALIDATION_CODES.INVALID_OBJECT);
+    }
+  }
+}
+
+function ownValue(value: Record<string, unknown>, key: string): unknown {
+  return Object.getOwnPropertyDescriptor(value, key)?.value;
 }
 
 function assertString(value: unknown): asserts value is string {
@@ -45,24 +63,49 @@ function assertNullableString(value: unknown): asserts value is string | null {
   }
 }
 
+function assertDataArray(
+  value: unknown,
+  code: NavValidationCode,
+): asserts value is unknown[] {
+  if (!Array.isArray(value) || Object.getOwnPropertySymbols(value).length > 0) {
+    throw new NavValidationError(code);
+  }
+
+  const enumerableKeys = Object.keys(value);
+  if (enumerableKeys.length !== value.length) {
+    throw new NavValidationError(code);
+  }
+
+  for (let index = 0; index < value.length; index += 1) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+    if (!descriptor || descriptor.get || descriptor.set || !descriptor.enumerable) {
+      throw new NavValidationError(code);
+    }
+  }
+}
+
 function assertStringArray(value: unknown): asserts value is string[] {
-  if (!Array.isArray(value) || value.some((entry) => typeof entry !== "string")) {
-    throw new NavValidationError(NAV_VALIDATION_CODES.INVALID_STRING_ARRAY);
+  assertDataArray(value, NAV_VALIDATION_CODES.INVALID_STRING_ARRAY);
+  for (let index = 0; index < value.length; index += 1) {
+    if (typeof Object.getOwnPropertyDescriptor(value, String(index))?.value !== "string") {
+      throw new NavValidationError(NAV_VALIDATION_CODES.INVALID_STRING_ARRAY);
+    }
   }
 }
 
 export function validateFrameSnapshot(value: unknown): asserts value is FrameSnapshot {
   assertObject(value);
-  assertString(value.frameRef);
-  assertNullableString(value.constitutionRef);
-  assertStringArray(value.authorityRefs);
-  assertNullableString(value.decoderRef);
-  assertStringArray(value.evidenceRefs);
-  assertNullableString(value.participantRef);
-  assertObject(value.particularityAnchors);
+  assertString(ownValue(value, "frameRef"));
+  assertNullableString(ownValue(value, "constitutionRef"));
+  assertStringArray(ownValue(value, "authorityRefs"));
+  assertNullableString(ownValue(value, "decoderRef"));
+  assertStringArray(ownValue(value, "evidenceRefs"));
+  assertNullableString(ownValue(value, "participantRef"));
 
-  for (const anchor of Object.values(value.particularityAnchors)) {
-    if (anchor !== null && typeof anchor !== "string") {
+  const particularityAnchors = ownValue(value, "particularityAnchors");
+  assertObject(particularityAnchors);
+  for (const descriptor of Object.values(Object.getOwnPropertyDescriptors(particularityAnchors))) {
+    if (descriptor.value !== null && typeof descriptor.value !== "string") {
       throw new NavValidationError(NAV_VALIDATION_CODES.INVALID_PARTICULARITY_ANCHOR);
     }
   }
@@ -70,12 +113,13 @@ export function validateFrameSnapshot(value: unknown): asserts value is FrameSna
 
 export function validateCrossingDeclaration(value: unknown): asserts value is CrossingDeclaration {
   assertObject(value);
-  assertString(value.crossingRef);
-  if (typeof value.kind !== "string" || !CROSSING_KINDS.includes(value.kind as typeof CROSSING_KINDS[number])) {
+  assertString(ownValue(value, "crossingRef"));
+  const kind = ownValue(value, "kind");
+  if (typeof kind !== "string" || !CROSSING_KINDS.includes(kind as typeof CROSSING_KINDS[number])) {
     throw new NavValidationError(NAV_VALIDATION_CODES.INVALID_CROSSING_KIND);
   }
-  assertString(value.declaredPurpose);
-  assertStringArray(value.evidenceRefs);
+  assertString(ownValue(value, "declaredPurpose"));
+  assertStringArray(ownValue(value, "evidenceRefs"));
 }
 
 const DISPOSITIONS = new Set([
@@ -94,28 +138,34 @@ const CROSSING_STATUSES = new Set([
 
 function validateDifferenceObservation(value: unknown): asserts value is DifferenceObservation {
   assertObject(value);
+  const dimension = ownValue(value, "dimension");
+  const disposition = ownValue(value, "disposition");
   if (
-    typeof value.dimension !== "string" ||
-    typeof value.disposition !== "string" ||
-    !DISPOSITIONS.has(value.disposition)
+    typeof dimension !== "string" ||
+    typeof disposition !== "string" ||
+    !DISPOSITIONS.has(disposition)
   ) {
     throw new NavValidationError(NAV_VALIDATION_CODES.INVALID_OBSERVATION);
   }
-  assertStringArray(value.beforeRefs);
-  assertStringArray(value.afterRefs);
-  assertStringArray(value.evidenceRefs);
+  assertStringArray(ownValue(value, "beforeRefs"));
+  assertStringArray(ownValue(value, "afterRefs"));
+  assertStringArray(ownValue(value, "evidenceRefs"));
 }
 
 export function validateNavCrossingReceipt(value: unknown): asserts value is NavCrossingReceipt {
   assertObject(value);
-  assertString(value.beforeSnapshotRef);
-  assertString(value.crossingDeclarationRef);
-  assertString(value.afterSnapshotRef);
-  if (!Array.isArray(value.observations)) {
-    throw new NavValidationError(NAV_VALIDATION_CODES.INVALID_OBSERVATION);
+  assertString(ownValue(value, "beforeSnapshotRef"));
+  assertString(ownValue(value, "crossingDeclarationRef"));
+  assertString(ownValue(value, "afterSnapshotRef"));
+
+  const observations = ownValue(value, "observations");
+  assertDataArray(observations, NAV_VALIDATION_CODES.INVALID_OBSERVATION);
+  for (let index = 0; index < observations.length; index += 1) {
+    validateDifferenceObservation(Object.getOwnPropertyDescriptor(observations, String(index))?.value);
   }
-  for (const observation of value.observations) validateDifferenceObservation(observation);
-  if (typeof value.crossingStatus !== "string" || !CROSSING_STATUSES.has(value.crossingStatus)) {
+
+  const crossingStatus = ownValue(value, "crossingStatus");
+  if (typeof crossingStatus !== "string" || !CROSSING_STATUSES.has(crossingStatus)) {
     throw new NavValidationError(NAV_VALIDATION_CODES.INVALID_CROSSING_STATUS);
   }
 }
