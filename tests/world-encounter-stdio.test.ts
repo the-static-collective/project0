@@ -66,3 +66,18 @@ test("evaluate operation delegates destination-local disposition", () => {
   assert.equal(result.addressed.body.status, "admitted");
   assert.equal(result.addressed.body.reasonCode, "ENCOUNTER_ADMITTED");
 });
+
+test("process port rejects input larger than one MiB", () => {
+  const child = run({
+    schema: "project0.world-encounter-process/v0.1",
+    operation: "address",
+    recordType: "exchange_envelope",
+    body: project0EncounterEnvelope,
+    padding: "x".repeat(1_048_576),
+  });
+
+  assert.notEqual(child.status, 0);
+  const result = JSON.parse(child.stdout);
+  assert.equal(result.status, "error");
+  assert.equal(result.code, "PROCESS_INPUT_TOO_LARGE");
+});
