@@ -37,9 +37,9 @@ The implementation must reuse, not replace:
 
 No new canonical node kind, relationship kind, or Floor 1.1 receipt kind is required by this design.
 
-## Experimental namespace
+## Experimental namespace and versioning
 
-The first implementation should live in a focused experimental module, for example:
+The first implementation should live in a focused experimental module:
 
 ```text
 src/world-encounter/
@@ -50,7 +50,21 @@ src/world-encounter/
   index.ts
 ```
 
-Its records use an experimental domain/address prefix distinct from canonical `node-`, `edge-`, `rect-`, and existing `nav-` identities. The exact prefix is an implementation detail to settle in the plan, but it must reuse Project0's one canonicalization/hash path.
+World Encounter records use the domain prefix:
+
+```text
+Project0-WorldEncounter-v0.1|
+```
+
+Addressed records use:
+
+```text
+enc-<sha256>
+```
+
+The canonical body includes the experimental record type, exactly as NAV does, and uses Project0's existing `canonicalizeDomainValue(...)` path. There is no second serializer or hasher.
+
+Only `p0.exchange/0.1` is accepted in this specimen. Any other protocol version fails closed as `ENCOUNTER_PROTOCOL_UNSUPPORTED`. Unknown top-level fields are rejected in v0.1 rather than silently tolerated because their semantics and canonical-identity effects are not yet defined. A later compatible or breaking profile must declare its own version and migration/compatibility rules before a real downstream adapter depends on it.
 
 ## Contract
 
@@ -87,6 +101,38 @@ export type SafeSourceRefV01 = {
 
 `objectRef` is an already-established identity. The envelope does not embed arbitrary foreign payload bytes in v0.1. This keeps the first proof about encounter semantics rather than transport size or parsing.
 
+### SourceEpistemicKindV01
+
+The envelope preserves the source's declared epistemic role without inventing a universal cross-project role system.
+
+```ts
+export type SourceEpistemicKindV01 =
+  | "source"
+  | "observation"
+  | "claim"
+  | "proposal"
+  | "tension"
+  | "rejection"
+  | "witness"
+  | "harvest"
+  | "inference"
+  | "foreign";
+```
+
+The first nine values are Project0's frozen node kinds. `foreign` means only that the source did not declare one of those Project0 roles. It is envelope metadata, not a tenth canonical node kind.
+
+### SourceVerificationV01
+
+```ts
+export type SourceVerificationV01 =
+  | "unverified"
+  | "verified"
+  | "disputed"
+  | "unknown";
+```
+
+Verification remains separate from epistemic role and authority.
+
 ### ExchangeEnvelopeV01
 
 ```ts
@@ -99,7 +145,8 @@ export type ExchangeEnvelopeV01 = {
   sourceProvenanceRefs: string[];
   sourceAuthorityRefs: string[];
   sourceAuthorityClass: "none" | "local" | "unknown";
-  sourceDisposition: "evidence" | "proposal" | "uncertainty" | "unknown";
+  sourceEpistemicKind: SourceEpistemicKindV01;
+  sourceVerification: SourceVerificationV01;
   capabilityUsed: string;
   limitations: string[];
 };
@@ -255,7 +302,7 @@ Validation must fail closed for:
 - unsupported protocol versions;
 - sparse arrays, accessors, prototypes, cycles, or unsafe values already forbidden by the canonicalization floor;
 - mutated `objectRef` / source receipt lineage;
-- unknown top-level record kinds;
+- unknown top-level record kinds or fields;
 - source authority values inserted into destination authority by caller convenience;
 - manifest claims used as if they were grants;
 - disclosure rules that require inspecting hidden content to decide whether hidden content may be inspected.
@@ -264,7 +311,7 @@ Hostile coercion/accessor behavior must not execute during validation.
 
 ## Determinism
 
-Canonically equivalent envelopes and encounter dispositions must produce identical experimental addresses. Reordered set-like fields must normalize according to the same deterministic code-unit rules already used by Project0.
+Canonically equivalent envelopes and encounter dispositions must produce identical `enc-...` experimental addresses. Reordered set-like fields must normalize according to the same deterministic code-unit rules already used by Project0.
 
 No timestamps, randomness, machine identity, model output, locale collation, or network state enters the v0.1 identity.
 
@@ -281,10 +328,18 @@ The implementation plan must use explicit RED → GREEN cycles and add focused t
 - admitted/refused/indeterminate separation;
 - source immutability across every destination outcome;
 - tamper refusal;
+- unsupported-version refusal;
+- unknown-field refusal;
 - hostile accessor/coercion refusal;
 - NAV post-encounter composition;
 - no canonical Node/Edge/Receipt/Request identity drift;
 - full offline `npm run verify:all` regression.
+
+## Compatibility and migration effect
+
+This design is additive and experimental. It changes no existing canonical Project0 identity, ontology, relationship, receipt, or NAV record.
+
+Because `p0.exchange/0.1` has no downstream consumer yet, the first implementation may still be revised before any stable Floor 1.2 tag. Once a real downstream adapter adopts the profile, incompatible field or semantic changes require a new protocol version and an explicit migration note rather than silent reinterpretation.
 
 ## Non-goals
 
