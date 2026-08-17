@@ -44,6 +44,14 @@ const context = {
   destinationAuthorityRefs: ["corpus-local-authority"],
 };
 
+const admittedOptions = {
+  offeredClass: "witness",
+  requiredCapability: "receive_public_witness",
+  requiredScope: "public",
+  localDetermination: "admit" as const,
+  evidenceRefs: ["corpus-policy-evidence"],
+};
+
 test("accepts explicit v0.1 envelope and destination context", () => {
   assert.doesNotThrow(() => validateExchangeEnvelope(envelope));
   assert.doesNotThrow(() => validateDestinationEncounterContext(context));
@@ -77,13 +85,7 @@ test("normalizes set-like envelope fields before addressing", () => {
 test("admits testimony only under destination-local authority", () => {
   const sourceBefore = structuredClone(envelope);
   const contextBefore = structuredClone(context);
-  const result = evaluateEncounter(envelope, context, {
-    offeredClass: "witness",
-    requiredCapability: "receive_public_witness",
-    requiredScope: "public",
-    localDetermination: "admit",
-    evidenceRefs: ["corpus-policy-evidence"],
-  });
+  const result = evaluateEncounter(envelope, context, admittedOptions);
 
   assert.equal(result.body.status, "admitted");
   assert.equal(result.body.reasonCode, "ENCOUNTER_ADMITTED");
@@ -95,13 +97,7 @@ test("admits testimony only under destination-local authority", () => {
 });
 
 test("refuses missing disclosure scope before object inspection", () => {
-  const result = evaluateEncounter(envelope, { ...structuredClone(context), grantedScopes: [] }, {
-    offeredClass: "witness",
-    requiredCapability: "receive_public_witness",
-    requiredScope: "public",
-    localDetermination: "admit",
-    evidenceRefs: [],
-  });
+  const result = evaluateEncounter(envelope, { ...structuredClone(context), grantedScopes: [] }, admittedOptions);
 
   assert.equal(result.body.status, "refused");
   assert.equal(result.body.reasonCode, "ENCOUNTER_SCOPE_REQUIRED");
@@ -110,9 +106,7 @@ test("refuses missing disclosure scope before object inspection", () => {
 
 test("manifest capability declaration is not itself a grant", () => {
   const result = evaluateEncounter(envelope, context, {
-    offeredClass: "witness",
-    requiredCapability: "receive_public_witness",
-    requiredScope: "public",
+    ...admittedOptions,
     localDetermination: "indeterminate",
     evidenceRefs: ["authority-not-established"],
   });
@@ -124,16 +118,12 @@ test("manifest capability declaration is not itself a grant", () => {
 
 test("refused and indeterminate remain distinct", () => {
   const refused = evaluateEncounter(envelope, context, {
+    ...admittedOptions,
     offeredClass: "claim",
-    requiredCapability: "receive_public_witness",
-    requiredScope: "public",
-    localDetermination: "admit",
     evidenceRefs: [],
   });
   const indeterminate = evaluateEncounter(envelope, context, {
-    offeredClass: "witness",
-    requiredCapability: "receive_public_witness",
-    requiredScope: "public",
+    ...admittedOptions,
     localDetermination: "indeterminate",
     evidenceRefs: [],
   });
@@ -155,13 +145,14 @@ test("fails closed on unsupported protocol and unknown top-level fields", () => 
   );
 });
 
-test("destination context cannot reuse source authority by convenience", () => {
+test("destination authority cannot overlap source authority by transport", () => {
+  const contaminatedContext = {
+    ...structuredClone(context),
+    destinationAuthorityRefs: ["corpus-local-authority", "project0-local-authority"],
+  };
+
   assert.throws(
-    () => validateDestinationEncounterContext({
-      ...structuredClone(context),
-      destinationAuthorityRefs: ["corpus-local-authority", "project0-local-authority"],
-      forbiddenSourceAuthorityRefs: ["project0-local-authority"],
-    }),
+    () => evaluateEncounter(envelope, contaminatedContext, admittedOptions),
     /ENCOUNTER_SOURCE_AUTHORITY_TRANSFER/,
   );
 });
