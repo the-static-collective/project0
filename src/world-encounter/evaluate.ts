@@ -1,3 +1,4 @@
+import { validateForCanonicalization } from "../canonical-addressing/index";
 import { addressEncounterRecord, type AddressedEncounterRecord } from "./address";
 import type {
   DestinationEncounterContextV01,
@@ -18,6 +19,11 @@ function sortedUnique(values: readonly string[]): string[] {
 }
 
 function assertEvaluationOptions(value: EncounterEvaluationOptionsV01): void {
+  try {
+    validateForCanonicalization(value);
+  } catch {
+    throw new EncounterValidationError("ENCOUNTER_INVALID_REPRESENTATION");
+  }
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw new EncounterValidationError("ENCOUNTER_INVALID_REPRESENTATION");
   }
