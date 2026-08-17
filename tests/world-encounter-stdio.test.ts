@@ -77,6 +77,20 @@ test("stdio adapter addresses an exchange envelope with canonical Project0 norma
   assert.equal("authority" in response, false);
 });
 
+test("stdio adapter replay is stable across set-like input order", async () => {
+  const reordered = structuredClone(envelope);
+  reordered.offered.sourceReceiptRefs = ["receipt-a", "receipt-b"];
+  reordered.sourceProvenanceRefs = [...reordered.sourceProvenanceRefs].reverse();
+  reordered.sourceAuthorityRefs = [...reordered.sourceAuthorityRefs].reverse();
+  reordered.limitations = [...reordered.limitations].reverse();
+
+  const first = await runAdapter(`${JSON.stringify(addressRequest(envelope))}\n`);
+  const second = await runAdapter(`${JSON.stringify(addressRequest(reordered))}\n`);
+  assert.equal(first.code, 0, first.stderr);
+  assert.equal(second.code, 0, second.stderr);
+  assert.equal(JSON.parse(first.stdout).record.ref, JSON.parse(second.stdout).record.ref);
+});
+
 test("stdio adapter verifies the exact canonical encounter ref", async () => {
   const expected = addressEncounterRecord("exchange_envelope", envelope).ref;
   const result = await runAdapter(`${JSON.stringify(verifyRequest(expected))}\n`);
@@ -106,6 +120,15 @@ test("stdio adapter preserves disclosure validation before any destination invoc
   const response = JSON.parse(result.stdout) as any;
   assert.equal(response.ok, false);
   assert.equal(response.error.code, "ENCOUNTER_INVALID_STRING");
+});
+
+test("stdio adapter preserves Project0 protocol-version rejection", async () => {
+  const unsupported = { ...structuredClone(envelope), protocolVersion: "p0.exchange/9.9" };
+  const result = await runAdapter(`${JSON.stringify(addressRequest(unsupported))}\n`);
+  assert.equal(result.code, 1);
+  const response = JSON.parse(result.stdout) as any;
+  assert.equal(response.ok, false);
+  assert.equal(response.error.code, "ENCOUNTER_PROTOCOL_UNSUPPORTED");
 });
 
 test("stdio adapter fails closed on unsupported wrapper schema and unknown wrapper fields", async () => {
