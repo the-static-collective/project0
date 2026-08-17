@@ -14,6 +14,7 @@
     "conformance": "npm run build && node .build/scripts/conformance.js",
     "verify:fixtures": "python3 tests/verify_fixtures.py",
     "verify": "npm run check && npm test",
-    "verify:all": "npm run verify && npm run verify:fixtures && npm run conformance"
+    "verify:all": "npm run verify && npm run verify:fixtures && npm run conformance",
+    "world-encounter:stdio": "npm run build --silent && node .build/scripts/world-encounter-stdio.js"
   }
 }
