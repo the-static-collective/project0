@@ -2,6 +2,7 @@ import {
   EncounterValidationError,
   addressEncounterRecord,
   verifyEncounterRecord,
+  type AddressedEncounterRecord,
   type ExchangeEnvelopeV01,
 } from "../src/world-encounter/index";
 
@@ -77,7 +78,7 @@ async function readStdin(): Promise<string> {
 
 function success(
   operation: Operation,
-  addressed: ReturnType<typeof addressEncounterRecord>,
+  addressed: AddressedEncounterRecord<ExchangeEnvelopeV01>,
 ): void {
   const response: AdapterResponse = {
     schema: RESPONSE_SCHEMA,
@@ -87,7 +88,7 @@ function success(
       ref: addressed.ref,
       digestHex: addressed.digestHex,
       recordType: "exchange_envelope",
-      body: addressed.body as ExchangeEnvelopeV01,
+      body: addressed.body,
     },
   };
   process.stdout.write(`${JSON.stringify(response)}\n`);
