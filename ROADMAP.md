@@ -28,12 +28,14 @@ The initial executable floor is implemented by the model-independent reference k
 
 ## Floor 1.2 — Adapter boundary
 
-- [ ] versioned import/export envelope
+- [x] versioned import/export envelope — bounded offline `World Encounter Envelope v0.1` reference specimen
 - [ ] extension namespaces
 - [ ] compatibility and migration rules
 - [ ] TranchNode adapter
 - [ ] one contrasting product adapter
 - [ ] relationship-preserving round-trip tests
+
+The checked envelope item means only that Project0 can deterministically address and evaluate one fixed offline encounter profile (`p0.exchange/0.1`) while preserving destination-local authority and disclosure. It does not claim a network protocol, remote adapter, transferable authority, universal ontology mapping, or general ecosystem interoperability. Those remain subsequent Floor 1.2 work.
 
 ## Floor 2 — Ecosystem use
 
