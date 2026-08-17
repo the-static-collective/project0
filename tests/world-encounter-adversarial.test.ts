@@ -76,6 +76,18 @@ test("refuses undeclared destination capability even when local determination sa
   assert.equal(result.body.inspectedObject, false);
 });
 
+test("envelope disclosure cannot be weakened by a caller-selected required scope", () => {
+  const privateEnvelope = {
+    ...structuredClone(envelope),
+    offered: { ...structuredClone(envelope.offered), disclosureClass: "private" },
+  };
+  const result = evaluateEncounter(privateEnvelope, context, options);
+
+  assert.equal(result.body.status, "refused");
+  assert.equal(result.body.reasonCode, "ENCOUNTER_SCOPE_REQUIRED");
+  assert.equal(result.body.inspectedObject, false);
+});
+
 test("rejects sparse arrays before canonicalization or evaluation", () => {
   const sparse: any = structuredClone(envelope);
   sparse.limitations = new Array(1);
