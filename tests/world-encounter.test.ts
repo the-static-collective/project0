@@ -45,7 +45,6 @@ const context = {
 };
 
 const admittedOptions = {
-  offeredClass: "witness",
   requiredCapability: "receive_public_witness",
   requiredScope: "public",
   localDetermination: "admit" as const,
@@ -117,11 +116,11 @@ test("manifest capability declaration is not itself a grant", () => {
 });
 
 test("refused and indeterminate remain distinct", () => {
-  const refused = evaluateEncounter(envelope, context, {
-    ...admittedOptions,
-    offeredClass: "claim",
-    evidenceRefs: [],
-  });
+  const refused = evaluateEncounter(
+    { ...structuredClone(envelope), sourceEpistemicKind: "claim" as const },
+    context,
+    { ...admittedOptions, evidenceRefs: [] },
+  );
   const indeterminate = evaluateEncounter(envelope, context, {
     ...admittedOptions,
     localDetermination: "indeterminate",
