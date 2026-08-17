@@ -140,6 +140,21 @@ test("evaluation options reject accessors without executing them", () => {
   assert.equal(touched, false);
 });
 
+test("contradictory disposition cannot receive an encounter address", () => {
+  assert.throws(
+    () => addressEncounterRecord("encounter_disposition", {
+      envelopeRef: "enc-0000000000000000000000000000000000000000000000000000000000000000",
+      destinationFrameRef: "frame-destination",
+      status: "admitted",
+      reasonCode: "ENCOUNTER_SCOPE_REQUIRED" as any,
+      inspectedObject: false,
+      destinationAuthorityRefs: [],
+      evidenceRefs: [],
+    }),
+    /ENCOUNTER_DISPOSITION_INCONSISTENT/,
+  );
+});
+
 test("destination manifest protocol mismatch fails closed", () => {
   assert.throws(
     () => validateDestinationEncounterContext({
