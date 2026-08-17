@@ -117,6 +117,29 @@ test("nested hostile accessors are rejected without executing them", () => {
   assert.equal(touched, false);
 });
 
+test("evaluation options reject accessors without executing them", () => {
+  let touched = false;
+  const hostileOptions = Object.create(null);
+  Object.defineProperty(hostileOptions, "requiredCapability", {
+    enumerable: true,
+    get() {
+      touched = true;
+      return "receive_public_witness";
+    },
+  });
+  Object.assign(hostileOptions, {
+    requiredScope: "public",
+    localDetermination: "admit",
+    evidenceRefs: [],
+  });
+
+  assert.throws(
+    () => evaluateEncounter(envelope, context, hostileOptions as any),
+    /ENCOUNTER_INVALID_REPRESENTATION/,
+  );
+  assert.equal(touched, false);
+});
+
 test("destination manifest protocol mismatch fails closed", () => {
   assert.throws(
     () => validateDestinationEncounterContext({
