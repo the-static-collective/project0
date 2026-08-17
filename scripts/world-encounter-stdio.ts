@@ -142,4 +142,4 @@ async function main(): Promise<void> {
   }
 }
 
-await main();
+void main().catch(() => fail("ADAPTER_INVALID_REQUEST"));
