@@ -100,9 +100,12 @@ export function evaluateEncounter(
     );
   }
 
-  const scopeRequired = contextInput.manifest.requiredScopes.includes(options.requiredScope)
-    || envelope.body.offered.disclosureClass === options.requiredScope;
-  if (scopeRequired && !contextInput.grantedScopes.includes(options.requiredScope)) {
+  const requiredScopes = new Set([
+    ...contextInput.manifest.requiredScopes,
+    envelope.body.offered.disclosureClass,
+    options.requiredScope,
+  ]);
+  if ([...requiredScopes].some((scope) => !contextInput.grantedScopes.includes(scope))) {
     return disposition(
       envelope.ref,
       contextInput,
