@@ -93,3 +93,33 @@ export function addressEncounterRecord(
     body: normalized,
   };
 }
+
+export function verifyEncounterRecord(
+  recordType: "exchange_envelope",
+  expectedRef: string,
+  body: ExchangeEnvelopeV01,
+): AddressedEncounterRecord<ExchangeEnvelopeV01>;
+export function verifyEncounterRecord(
+  recordType: "encounter_disposition",
+  expectedRef: string,
+  body: EncounterDispositionV01,
+): AddressedEncounterRecord<EncounterDispositionV01>;
+export function verifyEncounterRecord(
+  recordType: EncounterRecordType,
+  expectedRef: string,
+  body: ExchangeEnvelopeV01 | EncounterDispositionV01,
+): AddressedEncounterRecord<ExchangeEnvelopeV01 | EncounterDispositionV01> {
+  if (typeof expectedRef !== "string" || !/^enc-[0-9a-f]{64}$/.test(expectedRef)) {
+    throw new EncounterValidationError("ENCOUNTER_ADDRESS_MISMATCH");
+  }
+
+  const addressed = recordType === "exchange_envelope"
+    ? addressEncounterRecord("exchange_envelope", body as ExchangeEnvelopeV01)
+    : addressEncounterRecord("encounter_disposition", body as EncounterDispositionV01);
+
+  if (addressed.ref !== expectedRef) {
+    throw new EncounterValidationError("ENCOUNTER_ADDRESS_MISMATCH");
+  }
+
+  return addressed;
+}
