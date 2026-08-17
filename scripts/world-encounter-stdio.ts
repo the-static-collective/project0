@@ -10,6 +10,8 @@ import {
   type ExchangeEnvelopeV01,
 } from "../src/world-encounter/index";
 
+const MAX_STDIN_BYTES = 1_048_576;
+
 type AddressRequest = {
   schema: "project0.world-encounter-process/v0.1";
   operation: "address";
@@ -93,8 +95,16 @@ function parseRequest(input: string): ProcessRequest {
 
 async function readStdin(): Promise<string> {
   const chunks: Buffer[] = [];
+  let total = 0;
   for await (const chunk of process.stdin) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    total += buffer.byteLength;
+    if (total > MAX_STDIN_BYTES) {
+      throw Object.assign(new Error("stdin exceeds the one MiB process limit"), {
+        code: "PROCESS_INPUT_TOO_LARGE",
+      });
+    }
+    chunks.push(buffer);
   }
   return Buffer.concat(chunks).toString("utf8");
 }
