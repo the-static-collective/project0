@@ -77,7 +77,7 @@ test("refuses undeclared destination capability even when local determination sa
 });
 
 test("rejects sparse arrays before canonicalization or evaluation", () => {
-  const sparse = structuredClone(envelope);
+  const sparse: any = structuredClone(envelope);
   sparse.limitations = new Array(1);
   assert.throws(() => validateExchangeEnvelope(sparse), /ENCOUNTER_INVALID_REPRESENTATION/);
 });
