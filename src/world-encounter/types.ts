@@ -87,7 +87,6 @@ export type EncounterDispositionV01 = {
 export type EncounterRecordType = "exchange_envelope" | "encounter_disposition";
 
 export type EncounterEvaluationOptionsV01 = {
-  offeredClass: string;
   requiredCapability: string;
   requiredScope: string;
   localDetermination: "admit" | "refuse" | "indeterminate";
