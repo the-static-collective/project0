@@ -19,6 +19,7 @@ export const ENCOUNTER_VALIDATION_CODES = {
   PROTOCOL_UNSUPPORTED: "ENCOUNTER_PROTOCOL_UNSUPPORTED",
   SOURCE_INVALID: "ENCOUNTER_SOURCE_INVALID",
   SOURCE_AUTHORITY_TRANSFER: "ENCOUNTER_SOURCE_AUTHORITY_TRANSFER",
+  DISPOSITION_INCONSISTENT: "ENCOUNTER_DISPOSITION_INCONSISTENT",
 } as const;
 
 export class EncounterValidationError extends Error {
@@ -155,6 +156,13 @@ export function validateDestinationEncounterContext(
   assertStringArray(value.destinationAuthorityRefs);
 }
 
+const REFUSAL_DISPOSITION_REASONS = new Set([
+  "ENCOUNTER_TYPE_NOT_ACCEPTED",
+  "ENCOUNTER_CAPABILITY_UNDECLARED",
+  "ENCOUNTER_SCOPE_REQUIRED",
+  "ENCOUNTER_DISCLOSURE_REFUSED",
+]);
+
 export function validateEncounterDisposition(value: unknown): asserts value is EncounterDispositionV01 {
   guardCanonicalRepresentation(value);
   assertRecord(value);
@@ -176,4 +184,17 @@ export function validateEncounterDisposition(value: unknown): asserts value is E
   if (typeof value.inspectedObject !== "boolean") fail(ENCOUNTER_VALIDATION_CODES.INVALID_REPRESENTATION);
   assertStringArray(value.destinationAuthorityRefs);
   assertStringArray(value.evidenceRefs);
+
+  const consistent =
+    (value.status === "admitted"
+      && value.reasonCode === "ENCOUNTER_ADMITTED"
+      && value.inspectedObject === true)
+    || (value.status === "indeterminate"
+      && value.reasonCode === "ENCOUNTER_INDETERMINATE"
+      && value.inspectedObject === false)
+    || (value.status === "refused"
+      && REFUSAL_DISPOSITION_REASONS.has(value.reasonCode)
+      && value.inspectedObject === false);
+
+  if (!consistent) fail(ENCOUNTER_VALIDATION_CODES.DISPOSITION_INCONSISTENT);
 }
