@@ -2,6 +2,10 @@ export {
   CONTINUITY_LANES,
   CONTINUITY_MODES,
 } from "./types";
+export {
+  ContinuityValidationError,
+  validateContinuityClaim,
+} from "./validate";
 
 export type {
   ContinuityClaimV0,
