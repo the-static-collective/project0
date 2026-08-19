@@ -1,7 +1,4 @@
-import type {
-  ContinuityClaimV0,
-  ContinuityLaneKind,
-} from "./types";
+import type { ContinuityClaimV0 } from "./types";
 import { validateContinuityClaim } from "./validate";
 
 export type ContinuityConformanceReason =
@@ -53,8 +50,3 @@ export function checkContinuityClosure({
 
   return reasons.length === 0 ? conforming() : refused(reasons);
 }
-
-// Imported now because the same bounded module will own explicit composition
-// checks in the next TDD task. It is intentionally unused until those tests
-// demand behavior; no automatic composition is provided here.
-void (undefined as unknown as ContinuityLaneKind);
