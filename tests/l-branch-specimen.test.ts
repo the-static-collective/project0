@@ -13,7 +13,10 @@ test("baseline specimen preserves lawful propagation and refusal topology", () =
 
   assert.deepEqual(result.terminal.body.finalOutputRefs, ["A", "B"]);
   assert.deepEqual(result.terminal.body.refusedAttemptRefs, ["C"]);
-  assert.equal(result.steps.at(-1)?.body.refusalReasonCodes.C, "LBRANCH_AUTHORITY_REQUIRED");
+  assert.equal(
+    result.steps[result.steps.length - 1]?.body.refusalReasonCodes.C,
+    "LBRANCH_AUTHORITY_REQUIRED",
+  );
   assert.equal(result.terminal.body.disposition, "damped");
   assert.deepEqual(L_BRANCH_SPECIMEN.baseline, before);
 });
