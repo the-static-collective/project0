@@ -57,3 +57,26 @@ export type ContinuityClaimV0 = {
   parentContinuityRefs: string[];
   occurrenceClaim: "continuation-only";
 };
+
+export type WhyCurrentProjection = {
+  subjectRef: string;
+  purpose: string;
+  ancestorRoots: string[];
+  parentContinuityRefs: string[];
+  environment: ContinuityEnvironment;
+  outputRefs: string[];
+  lanes: ContinuityLaneClaim[];
+};
+
+export type StillAliveProjection = {
+  continuing: ContinuityLaneClaim[];
+  unresolved: ContinuityLaneClaim[];
+  ended: ContinuityLaneClaim[];
+  residualRefs: string[];
+  authority: {
+    declaredMode: ContinuityMode | null;
+    evidenceRefs: string[];
+    portableEffect: "none";
+    externalAdmissionRequired: true;
+  };
+};
