@@ -35,6 +35,32 @@ function dataRecord(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
+function dataArray(value: unknown): unknown[] {
+  if (!Array.isArray(value) || Object.getOwnPropertySymbols(value).length > 0) {
+    throw new LBranchValidationError("LBRANCH_INVALID_REPRESENTATION");
+  }
+
+  const propertyNames = Object.getOwnPropertyNames(value);
+  const expectedNames = new Set<string>(["length"]);
+  const items: unknown[] = [];
+
+  for (let index = 0; index < value.length; index += 1) {
+    const key = String(index);
+    expectedNames.add(key);
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || descriptor.get || descriptor.set || !descriptor.enumerable) {
+      throw new LBranchValidationError("LBRANCH_INVALID_REPRESENTATION");
+    }
+    items.push(descriptor.value);
+  }
+
+  if (propertyNames.some((name) => !expectedNames.has(name))) {
+    throw new LBranchValidationError("LBRANCH_INVALID_REPRESENTATION");
+  }
+
+  return items;
+}
+
 function exactKeys(record: Record<string, unknown>, allowed: readonly string[]): void {
   const allowedSet = new Set(allowed);
   for (const key of Object.keys(record)) {
@@ -56,11 +82,11 @@ function requiredString(record: Record<string, unknown>, key: string): string {
 }
 
 function stringArray(record: Record<string, unknown>, key: string): string[] {
-  const value = record[key];
-  if (!Array.isArray(value) || value.some((item) => typeof item !== "string" || item.length === 0)) {
+  const values = dataArray(record[key]);
+  if (values.some((item) => typeof item !== "string" || item.length === 0)) {
     throw new LBranchValidationError("LBRANCH_INVALID_FIELD");
   }
-  return value as string[];
+  return values as string[];
 }
 
 function positiveSafeInteger(value: unknown): number {
@@ -109,10 +135,7 @@ export function validateLBranchDeclaration(value: unknown): asserts value is LBr
   validatePropagationBudget(record.budget);
 }
 
-export function validateLBranchCandidate(
-  value: unknown,
-  declaration?: LBranchDeclarationV01,
-): asserts value is LBranchCandidateV01 {
+export function validateLBranchCandidate(value: unknown): asserts value is LBranchCandidateV01 {
   const record = dataRecord(value);
   exactKeys(record, [
     "candidateRef",
@@ -124,25 +147,22 @@ export function validateLBranchCandidate(
     "terminal",
   ]);
 
-  const candidateRef = requiredString(record, "candidateRef");
+  requiredString(record, "candidateRef");
   const depth = record.depth;
   if (!Number.isSafeInteger(depth) || (depth as number) <= 0) {
     throw new LBranchValidationError("LBRANCH_INVALID_DEPTH");
   }
   stringArray(record, "requiresInputRefs");
   stringArray(record, "requiresInfluenceRefs");
-  const authorityRefs = stringArray(record, "requiresAuthorityRefs");
+  stringArray(record, "requiresAuthorityRefs");
   requiredString(record, "requiredPolicyRef");
   if (typeof record.terminal !== "boolean") {
     throw new LBranchValidationError("LBRANCH_INVALID_FIELD");
   }
+}
 
-  if (declaration) {
-    if (!declaration.participantRefs.includes(candidateRef)) {
-      throw new LBranchValidationError("LBRANCH_UNDECLARED_PARTICIPANT");
-    }
-    if (authorityRefs.some((ref) => !declaration.authorityRefs.includes(ref))) {
-      throw new LBranchValidationError("LBRANCH_AUTHORITY_OUTSIDE_DECLARATION");
-    }
-  }
+export function validateLBranchCandidateList(value: unknown): LBranchCandidateV01[] {
+  const items = dataArray(value);
+  for (const item of items) validateLBranchCandidate(item);
+  return items as LBranchCandidateV01[];
 }
