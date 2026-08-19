@@ -85,6 +85,16 @@ export function runSnapState(input: SnapStateExecutionInputV01): SnapStateExecut
   const activeCouplings = new Set<string>();
   const causeByCell = new Map<string, string>();
   const cellByRef = new Map(cells.map((cell) => [cell.ref, cell]));
+  const outgoing = new Map<string, AddressedSnapStateRecord<SnapCouplingV01>[]>();
+  for (const coupling of couplings) {
+    const list = outgoing.get(coupling.body.fromCellRef) ?? [];
+    list.push(coupling);
+    outgoing.set(coupling.body.fromCellRef, list);
+  }
+  for (const list of outgoing.values()) {
+    list.sort((left, right) => left.ref.localeCompare(right.ref));
+  }
+
   const events: AddressedSnapStateRecord<SnapEventRecordV01>[] = [];
   let remainingEvents = declaration.body.budget.maxEvents;
   let exhausted = false;
@@ -98,6 +108,78 @@ export function runSnapState(input: SnapStateExecutionInputV01): SnapStateExecut
     events.push(addressed);
     mutate(addressed.ref);
     remainingEvents -= 1;
+    return true;
+  }
+
+  function eligibleCellRefs(): string[] {
+    return cells
+      .filter((cell) => !snapped.has(cell.ref))
+      .filter((cell) => (currentLoads.get(cell.ref) ?? 0) >= cell.body.threshold)
+      .map((cell) => cell.ref)
+      .sort();
+  }
+
+  function processSnap(cellRef: string): boolean {
+    const cell = cellByRef.get(cellRef)!;
+    const snapLoad = currentLoads.get(cellRef)!;
+    const cellOutgoing = outgoing.get(cellRef) ?? [];
+    let snapEventRef: string | null = null;
+
+    if (!admitEvent({
+      declarationRef: declaration.ref,
+      eventIndex: events.length,
+      kind: "snap",
+      cellRef,
+      sourceEventRef: causeByCell.get(cellRef) ?? null,
+      couplingRef: null,
+      loadBefore: snapLoad,
+      loadDelta: 0,
+      loadAfter: snapLoad,
+    }, (eventRef) => {
+      snapEventRef = eventRef;
+      snapped.add(cellRef);
+      for (const coupling of cellOutgoing) activeCouplings.add(coupling.ref);
+    })) return false;
+
+    for (const coupling of cellOutgoing) {
+      const transferBefore = currentLoads.get(coupling.body.toCellRef)!;
+      const transferAfter = transferBefore + coupling.body.transferAmount;
+      if (!Number.isSafeInteger(transferAfter)) {
+        throw new SnapStateValidationError("SNAPSTATE_INVALID_EVENT");
+      }
+      if (!admitEvent({
+        declarationRef: declaration.ref,
+        eventIndex: events.length,
+        kind: "transfer",
+        cellRef: coupling.body.toCellRef,
+        sourceEventRef: snapEventRef,
+        couplingRef: coupling.ref,
+        loadBefore: transferBefore,
+        loadDelta: coupling.body.transferAmount,
+        loadAfter: transferAfter,
+      }, (eventRef) => {
+        currentLoads.set(coupling.body.toCellRef, transferAfter);
+        causeByCell.set(coupling.body.toCellRef, eventRef);
+      })) return false;
+    }
+
+    const recoilBefore = currentLoads.get(cellRef)!;
+    const recoilAfter = Math.max(0, recoilBefore - cell.body.recoilAmount);
+    if (!admitEvent({
+      declarationRef: declaration.ref,
+      eventIndex: events.length,
+      kind: "recoil",
+      cellRef,
+      sourceEventRef: snapEventRef,
+      couplingRef: null,
+      loadBefore: recoilBefore,
+      loadDelta: recoilAfter - recoilBefore,
+      loadAfter: recoilAfter,
+    }, (eventRef) => {
+      currentLoads.set(cellRef, recoilAfter);
+      causeByCell.set(cellRef, eventRef);
+    })) return false;
+
     return true;
   }
 
@@ -121,73 +203,10 @@ export function runSnapState(input: SnapStateExecutionInputV01): SnapStateExecut
     causeByCell.set(targetRef, eventRef);
   });
 
-  const targetCell = cellByRef.get(targetRef)!;
-  if (!exhausted && currentLoads.get(targetRef)! >= targetCell.body.threshold) {
-    const snapLoad = currentLoads.get(targetRef)!;
-    let snapEventRef: string | null = null;
-    const outgoing = couplings
-      .filter((coupling) => coupling.body.fromCellRef === targetRef)
-      .sort((left, right) => left.ref.localeCompare(right.ref));
-
-    const snapAdmitted = admitEvent({
-      declarationRef: declaration.ref,
-      eventIndex: events.length,
-      kind: "snap",
-      cellRef: targetRef,
-      sourceEventRef: causeByCell.get(targetRef) ?? null,
-      couplingRef: null,
-      loadBefore: snapLoad,
-      loadDelta: 0,
-      loadAfter: snapLoad,
-    }, (eventRef) => {
-      snapEventRef = eventRef;
-      snapped.add(targetRef);
-      for (const coupling of outgoing) activeCouplings.add(coupling.ref);
-    });
-
-    if (snapAdmitted && snapEventRef !== null) {
-      for (const coupling of outgoing) {
-        const transferBefore = currentLoads.get(coupling.body.toCellRef)!;
-        const transferAfter = transferBefore + coupling.body.transferAmount;
-        if (!Number.isSafeInteger(transferAfter)) {
-          throw new SnapStateValidationError("SNAPSTATE_INVALID_EVENT");
-        }
-        if (!admitEvent({
-          declarationRef: declaration.ref,
-          eventIndex: events.length,
-          kind: "transfer",
-          cellRef: coupling.body.toCellRef,
-          sourceEventRef: snapEventRef,
-          couplingRef: coupling.ref,
-          loadBefore: transferBefore,
-          loadDelta: coupling.body.transferAmount,
-          loadAfter: transferAfter,
-        }, (eventRef) => {
-          currentLoads.set(coupling.body.toCellRef, transferAfter);
-          causeByCell.set(coupling.body.toCellRef, eventRef);
-        })) break;
-      }
-
-      if (!exhausted) {
-        const recoilBefore = currentLoads.get(targetRef)!;
-        const recoilAfter = Math.max(0, recoilBefore - targetCell.body.recoilAmount);
-        const recoilDelta = recoilAfter - recoilBefore;
-        admitEvent({
-          declarationRef: declaration.ref,
-          eventIndex: events.length,
-          kind: "recoil",
-          cellRef: targetRef,
-          sourceEventRef: snapEventRef,
-          couplingRef: null,
-          loadBefore: recoilBefore,
-          loadDelta: recoilDelta,
-          loadAfter: recoilAfter,
-        }, (eventRef) => {
-          currentLoads.set(targetRef, recoilAfter);
-          causeByCell.set(targetRef, eventRef);
-        });
-      }
-    }
+  while (!exhausted) {
+    const next = eligibleCellRefs()[0];
+    if (!next) break;
+    if (!processSnap(next)) break;
   }
 
   const terminal = addressSnapStateRecord("terminal", {
