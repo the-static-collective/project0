@@ -181,3 +181,39 @@ export const falseTransferredLostProtocolClaim = claim({
   outputRefs: ["output:false-transferred-protocol"],
   parentContinuityRefs: [lostProtocolParentRef],
 });
+
+const custodyWarrantLookingLane = lane(
+  "custody",
+  "transferred",
+  "evidence:custody-transfer",
+  ["identity", "authority"],
+);
+custodyWarrantLookingLane.dimensions[0].note = "authorityRef=external:warrant-looking-string";
+
+export const custodyWithWarrantLookingNote = claim({
+  purpose: "authority laundering stress test",
+  subjectRef: "subject:custody-only",
+  ancestorRoots: ["root:custody"],
+  lanes: [custodyWarrantLookingLane],
+  outputRefs: ["output:custody-only"],
+});
+
+export const mixedContinuityClaim = claim({
+  purpose: "read model classification stress test",
+  subjectRef: "subject:mixed",
+  ancestorRoots: ["root:mixed"],
+  environment: {
+    decoderRef: "decoder:v2",
+    runtimeRef: "runtime:v2",
+    policyRefs: ["policy:b", "policy:a"],
+    contextRefs: ["context:b", "context:a"],
+  },
+  lanes: [
+    lane("custody", "transferred", "evidence:custody", ["identity", "authority"]),
+    lane("protocol", "reconstituted", "evidence:protocol", ["identity", "authority"], ["residual:protocol"]),
+    lane("identity", "unresolved", "evidence:identity-unresolved", [], ["residual:identity"]),
+    lane("representation-story", "broken", "evidence:story-break", ["identity", "authority"], ["residual:story"]),
+    lane("authority", "transferred", "external:warrant-17", ["identity"]),
+  ],
+  outputRefs: ["output:mixed"],
+});
