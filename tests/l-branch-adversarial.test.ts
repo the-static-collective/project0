@@ -55,3 +55,63 @@ test("influence changes susceptibility without changing authority", () => {
     true,
   );
 });
+
+test("larger declared load expands search reach without widening sovereignty", () => {
+  const candidates = [
+    {
+      candidateRef: "A",
+      depth: 1,
+      requiresInputRefs: ["excitation-E"],
+      requiresInfluenceRefs: [],
+      requiresAuthorityRefs: ["lease-A"],
+      requiredPolicyRef: "policy-public",
+      terminal: false,
+    },
+    {
+      candidateRef: "X",
+      depth: 1,
+      requiresInputRefs: ["excitation-E"],
+      requiresInfluenceRefs: [],
+      requiresAuthorityRefs: ["lease-A"],
+      requiredPolicyRef: "policy-public",
+      terminal: false,
+    },
+    {
+      candidateRef: "D",
+      depth: 2,
+      requiresInputRefs: ["A"],
+      requiresInfluenceRefs: [],
+      requiresAuthorityRefs: ["lease-A"],
+      requiredPolicyRef: "policy-public",
+      terminal: false,
+    },
+  ];
+
+  const shared = {
+    protocolVersion: "p0.l-branch/0.1" as const,
+    snapshotRef: "snapshot-load",
+    excitationRef: "excitation-E",
+    purposeRef: "purpose-search",
+    participantRefs: ["A", "D", "X"],
+    influenceRefs: [],
+    authorityRefs: ["lease-A"],
+    evaluatorId: "fixture-evaluator",
+    evaluatorVersion: "0.1.0",
+    policyRef: "policy-public",
+  };
+
+  const low = runLBranch(
+    { ...shared, budget: { maxSteps: 3, maxFrontierWidth: 1, maxDepth: 1 } },
+    structuredClone(candidates),
+  );
+  const high = runLBranch(
+    { ...shared, budget: { maxSteps: 3, maxFrontierWidth: 2, maxDepth: 2 } },
+    structuredClone(candidates),
+  );
+
+  assert.deepEqual(low.declaration.body.authorityRefs, high.declaration.body.authorityRefs);
+  assert.equal(low.terminal.body.finalOutputRefs.includes("D"), false);
+  assert.equal(high.terminal.body.finalOutputRefs.includes("D"), true);
+  assert.equal(low.terminal.body.disposition, "exhausted");
+  assert.equal(high.terminal.body.disposition, "damped");
+});
