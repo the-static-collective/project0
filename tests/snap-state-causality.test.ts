@@ -9,9 +9,16 @@ import {
 
 test("zero-delta transfer does not falsely become a later snap cause", () => {
   const A = { cellId: "cause-A", threshold: 5, initialLoad: 0, recoilAmount: 5 };
-  const B = { cellId: "cause-B", threshold: 5, initialLoad: 5, recoilAmount: 5 };
   const a = addressSnapStateRecord("cell", A);
-  const b = addressSnapStateRecord("cell", B);
+
+  let B = { cellId: "cause-B-0", threshold: 5, initialLoad: 5, recoilAmount: 5 };
+  let b = addressSnapStateRecord("cell", B);
+  for (let index = 1; b.ref <= a.ref && index < 1000; index += 1) {
+    B = { cellId: `cause-B-${index}`, threshold: 5, initialLoad: 5, recoilAmount: 5 };
+    b = addressSnapStateRecord("cell", B);
+  }
+  assert.ok(a.ref < b.ref, "fixture must force A to snap before initially eligible B");
+
   const abBody = {
     couplingId: "cause-AB-zero",
     fromCellRef: a.ref,
@@ -42,9 +49,9 @@ test("zero-delta transfer does not falsely become a later snap cause", () => {
     excitation: excitationBody,
   });
 
-  const bSnap = result.events.find(
-    (event) => event.body.kind === "snap" && event.body.cellRef === b.ref,
-  );
+  const snaps = result.events.filter((event) => event.body.kind === "snap");
+  assert.equal(snaps[0].body.cellRef, a.ref);
+  const bSnap = snaps.find((event) => event.body.cellRef === b.ref);
   assert.ok(bSnap);
   assert.equal(bSnap.body.sourceEventRef, null);
 });
