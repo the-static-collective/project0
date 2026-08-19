@@ -6,6 +6,11 @@ export {
   ContinuityValidationError,
   validateContinuityClaim,
 } from "./validate";
+export {
+  addressContinuityClaim,
+  normalizeContinuityClaim,
+  verifyContinuityClaim,
+} from "./address";
 
 export type {
   ContinuityClaimV0,
