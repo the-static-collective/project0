@@ -103,10 +103,17 @@ export function runLBranch(
       candidate.requiresInputRefs.forEach((ref) => inputRefs.add(ref));
       candidate.requiresInfluenceRefs.forEach((ref) => influenceRefsConsulted.add(ref));
 
-      if (candidate.requiresAuthorityRefs.some((ref) => !branch.authorityRefs.includes(ref))) {
+      let refusalReason: string | null = null;
+      if (!branch.participantRefs.includes(candidate.candidateRef)) {
+        refusalReason = "LBRANCH_UNDECLARED_PARTICIPANT";
+      } else if (candidate.requiresAuthorityRefs.some((ref) => !branch.authorityRefs.includes(ref))) {
+        refusalReason = "LBRANCH_AUTHORITY_REQUIRED";
+      }
+
+      if (refusalReason) {
         refusedOutputRefs.push(candidate.candidateRef);
         refusedRefs.add(candidate.candidateRef);
-        refusalReasonCodes[candidate.candidateRef] = "LBRANCH_AUTHORITY_REQUIRED";
+        refusalReasonCodes[candidate.candidateRef] = refusalReason;
         continue;
       }
 
