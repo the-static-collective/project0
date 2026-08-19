@@ -134,3 +134,91 @@ test("records one snap, declared transfer, and recoil with causal lineage", () =
   assert.equal(result.terminal.body.finalLoads[a.ref], 0);
   assert.equal(result.terminal.body.finalLoads[b.ref], 3);
 });
+
+test("cascades the approved three-cell specimen and returns loads to baseline", () => {
+  const C = { cellId: "C", threshold: 6, initialLoad: 2, recoilAmount: 6 };
+  const a = addressSnapStateRecord("cell", A);
+  const b = addressSnapStateRecord("cell", B);
+  const c = addressSnapStateRecord("cell", C);
+  const abBody = {
+    couplingId: "AB",
+    fromCellRef: a.ref,
+    toCellRef: b.ref,
+    transferAmount: 3,
+    activation: "on-source-snap" as const,
+  };
+  const bcBody = {
+    couplingId: "BC",
+    fromCellRef: b.ref,
+    toCellRef: c.ref,
+    transferAmount: 4,
+    activation: "on-source-snap" as const,
+  };
+  const ab = addressSnapStateRecord("coupling", abBody);
+  const bc = addressSnapStateRecord("coupling", bcBody);
+  const excitationBody = { excitationId: "pulse-baseline", targetCellRef: a.ref, amount: 5 };
+  const excitation = addressSnapStateRecord("excitation", excitationBody);
+  const declaration = {
+    protocolVersion: SNAP_STATE_PROTOCOL_VERSION,
+    snapshotRef: "snapshot-baseline",
+    purposeRef: "purpose-baseline",
+    excitationRef: excitation.ref,
+    cellRefs: [c.ref, a.ref, b.ref],
+    couplingRefs: [bc.ref, ab.ref],
+    evaluatorId: "snap-state-reference",
+    evaluatorVersion: "0.1.0",
+    orderingRule: "cell-ref-lexicographic" as const,
+    budget: { maxEvents: 12 },
+  };
+
+  const result = runSnapState({
+    declaration,
+    cells: [C, A, B],
+    couplings: [bcBody, abBody],
+    excitation: excitationBody,
+  });
+
+  assert.equal(result.terminal.body.disposition, "settled");
+  const snaps = result.events.filter((event) => event.body.kind === "snap");
+  assert.deepEqual(snaps.map((event) => event.body.cellRef).sort(), [a.ref, b.ref, c.ref].sort());
+  assert.equal(snaps.length, 3);
+  assert.deepEqual(result.terminal.body.activeCouplingRefs, [ab.ref, bc.ref].sort());
+  assert.equal(result.terminal.body.finalLoads[a.ref], 0);
+  assert.equal(result.terminal.body.finalLoads[b.ref], 0);
+  assert.equal(result.terminal.body.finalLoads[c.ref], 0);
+});
+
+test("orders simultaneously eligible cells by addressed cell ref", () => {
+  const target = { cellId: "target", threshold: 10, initialLoad: 0, recoilAmount: 10 };
+  const loadedOne = { cellId: "loaded-one", threshold: 5, initialLoad: 5, recoilAmount: 5 };
+  const loadedTwo = { cellId: "loaded-two", threshold: 4, initialLoad: 4, recoilAmount: 4 };
+  const t = addressSnapStateRecord("cell", target);
+  const one = addressSnapStateRecord("cell", loadedOne);
+  const two = addressSnapStateRecord("cell", loadedTwo);
+  const excitationBody = { excitationId: "pulse-tie", targetCellRef: t.ref, amount: 1 };
+  const excitation = addressSnapStateRecord("excitation", excitationBody);
+  const declaration = {
+    protocolVersion: SNAP_STATE_PROTOCOL_VERSION,
+    snapshotRef: "snapshot-tie",
+    purposeRef: "purpose-tie",
+    excitationRef: excitation.ref,
+    cellRefs: [two.ref, t.ref, one.ref],
+    couplingRefs: [],
+    evaluatorId: "snap-state-reference",
+    evaluatorVersion: "0.1.0",
+    orderingRule: "cell-ref-lexicographic" as const,
+    budget: { maxEvents: 8 },
+  };
+
+  const result = runSnapState({
+    declaration,
+    cells: [loadedTwo, target, loadedOne],
+    couplings: [],
+    excitation: excitationBody,
+  });
+
+  const snapRefs = result.events
+    .filter((event) => event.body.kind === "snap")
+    .map((event) => event.body.cellRef);
+  assert.deepEqual(snapRefs, [one.ref, two.ref].sort());
+});
