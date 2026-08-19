@@ -16,6 +16,10 @@ export {
   checkLaneComposition,
   claimEstablishesLane,
 } from "./conformance";
+export {
+  deriveStillAlive,
+  deriveWhyCurrent,
+} from "./inspect";
 
 export type {
   ContinuityClaimV0,
@@ -24,6 +28,8 @@ export type {
   ContinuityLaneClaim,
   ContinuityLaneKind,
   ContinuityMode,
+  StillAliveProjection,
+  WhyCurrentProjection,
 } from "./types";
 export type {
   ContinuityConformanceReason,
