@@ -5,6 +5,9 @@ import {
   CONTINUITY_LANES,
   CONTINUITY_MODES,
   addressContinuityClaim,
+  claimEstablishesLane,
+  deriveStillAlive,
+  deriveWhyCurrent,
   normalizeContinuityClaim,
   verifyContinuityClaim,
 } from "../src/continuity-profile";
@@ -14,7 +17,13 @@ import type {
   ContinuityLaneClaim,
   ContinuityLaneKind,
   ContinuityMode,
+  StillAliveProjection,
+  WhyCurrentProjection,
 } from "../src/continuity-profile";
+import {
+  custodyWithWarrantLookingNote,
+  mixedContinuityClaim,
+} from "../fixtures/continuity-profile/specimens";
 
 const expectedLanes = [
   "identity",
@@ -171,4 +180,76 @@ test("same visible outputs with different ancestry remain distinct continuity cl
   alternate.ancestorRoots = ["root:other-a", "root:other-b"];
   assert.deepEqual(alternate.outputRefs, claim.outputRefs);
   assert.notEqual(addressContinuityClaim(alternate), addressContinuityClaim(claim));
+});
+
+test("Why Current is a frozen transparent projection of exact claim data", () => {
+  const projection: WhyCurrentProjection = deriveWhyCurrent(mixedContinuityClaim);
+  const normalized = normalizeContinuityClaim(mixedContinuityClaim);
+
+  assert.deepEqual(projection, {
+    subjectRef: normalized.subjectRef,
+    purpose: normalized.purpose,
+    ancestorRoots: normalized.ancestorRoots,
+    parentContinuityRefs: normalized.parentContinuityRefs,
+    environment: normalized.environment,
+    outputRefs: normalized.outputRefs,
+    lanes: normalized.lanes,
+  });
+  assert.equal(Object.isFrozen(projection), true);
+  assert.equal(Object.isFrozen(projection.lanes), true);
+  assert.equal(Object.isFrozen(projection.lanes[0]), true);
+});
+
+test("Still Alive classifies lane state without erasing residuals", () => {
+  const projection: StillAliveProjection = deriveStillAlive(mixedContinuityClaim);
+
+  assert.deepEqual(
+    projection.continuing.map((item) => [item.lane, item.mode]),
+    [
+      ["authority", "transferred"],
+      ["custody", "transferred"],
+      ["protocol", "reconstituted"],
+    ],
+  );
+  assert.deepEqual(
+    projection.unresolved.map((item) => [item.lane, item.mode]),
+    [["identity", "unresolved"]],
+  );
+  assert.deepEqual(
+    projection.ended.map((item) => [item.lane, item.mode]),
+    [["representation-story", "broken"]],
+  );
+  assert.deepEqual(projection.residualRefs, [
+    "residual:identity",
+    "residual:protocol",
+    "residual:story",
+  ]);
+  assert.equal(Object.isFrozen(projection), true);
+});
+
+test("authority continuity can be reported but has no portable effect", () => {
+  const projection = deriveStillAlive(mixedContinuityClaim);
+  assert.deepEqual(projection.authority, {
+    declaredMode: "transferred",
+    evidenceRefs: ["external:warrant-17"],
+    portableEffect: "none",
+    externalAdmissionRequired: true,
+  });
+});
+
+test("warrant-looking custody text cannot manufacture authority continuity", () => {
+  assert.equal(claimEstablishesLane(custodyWithWarrantLookingNote, "authority"), false);
+  assert.deepEqual(deriveStillAlive(custodyWithWarrantLookingNote).authority, {
+    declaredMode: null,
+    evidenceRefs: [],
+    portableEffect: "none",
+    externalAdmissionRequired: true,
+  });
+});
+
+test("copying continuity data grants no authority-capable API", () => {
+  const copy = structuredClone(mixedContinuityClaim) as ContinuityClaimV0 & Record<string, unknown>;
+  assert.equal("execute" in copy, false);
+  assert.equal("admitAuthority" in copy, false);
+  assert.equal("grant" in copy, false);
 });
