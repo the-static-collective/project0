@@ -35,9 +35,13 @@ test("later copy can preserve text-schema without impersonating composition occu
     { status: "conforming", reasonCodes: [] },
   );
 
+  const textLane = manuscriptCopyClaim.lanes.find((lane) => lane.lane === "text-schema");
   assert.equal(manuscriptCopyClaim.occurrenceClaim, "continuation-only");
   assert.notEqual(manuscriptCopyClaim.subjectRef, manuscriptCopyParent.subjectRef);
   assert.notDeepEqual(manuscriptCopyClaim.outputRefs, manuscriptCopyParent.outputRefs);
+  assert.deepEqual(manuscriptCopyClaim.parentContinuityRefs, [manuscriptCopyParentRef]);
+  assert.deepEqual(textLane?.uncertainty, ["unknown:intermediate-transmission"]);
+  assert.equal(manuscriptCopyClaim.environment.contextRefs.includes("unknown:intermediate-transmission"), true);
   assert.notEqual(
     addressContinuityClaim(manuscriptCopyClaim),
     addressContinuityClaim(manuscriptCopyParent),
