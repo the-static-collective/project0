@@ -149,3 +149,49 @@ test("candidate outside the admitted participant topology is refused", () => {
   assert.equal(result.steps[0].body.refusalReasonCodes.Z, "LBRANCH_UNDECLARED_PARTICIPANT");
   assert.equal(result.terminal.body.disposition, "refused");
 });
+
+test("policy mismatch refuses safely without leaking undeclared external identifiers", () => {
+  const secretRef = "secret-object-stable-id-must-not-leak";
+  const declaration = {
+    protocolVersion: "p0.l-branch/0.1" as const,
+    snapshotRef: "snapshot-policy",
+    excitationRef: "excitation-E",
+    purposeRef: "purpose-policy",
+    participantRefs: ["P", "Q"],
+    influenceRefs: [],
+    authorityRefs: ["lease-A"],
+    evaluatorId: "fixture-evaluator",
+    evaluatorVersion: "0.1.0",
+    policyRef: "policy-public",
+    budget: { maxSteps: 2, maxFrontierWidth: 2, maxDepth: 1 },
+  };
+  const candidates = [
+    {
+      candidateRef: "P",
+      depth: 1,
+      requiresInputRefs: ["excitation-E"],
+      requiresInfluenceRefs: [],
+      requiresAuthorityRefs: ["lease-A"],
+      requiredPolicyRef: "policy-private",
+      terminal: false,
+    },
+    {
+      candidateRef: "Q",
+      depth: 1,
+      requiresInputRefs: [secretRef],
+      requiresInfluenceRefs: [],
+      requiresAuthorityRefs: ["lease-A"],
+      requiredPolicyRef: "policy-private",
+      terminal: false,
+    },
+  ];
+
+  const result = runLBranch(declaration, candidates);
+  const serialized = JSON.stringify(result);
+
+  assert.deepEqual(result.terminal.body.finalOutputRefs, []);
+  assert.deepEqual(result.terminal.body.refusedAttemptRefs, ["P"]);
+  assert.equal(result.steps[0].body.refusalReasonCodes.P, "LBRANCH_POLICY_REQUIRED");
+  assert.equal(serialized.includes(secretRef), false);
+  assert.equal(result.terminal.body.disposition, "refused");
+});
