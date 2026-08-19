@@ -18,6 +18,7 @@ export class ContinuityValidationError extends Error {
 
 const laneKinds = new Set<string>(CONTINUITY_LANES);
 const modes = new Set<string>(CONTINUITY_MODES);
+const continuityRefPattern = /^cty-[0-9a-f]{64}$/;
 
 function record(value: unknown): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
@@ -57,6 +58,14 @@ function stringArray(value: unknown, options: { nonEmpty?: boolean } = {}): stri
   const result = value.map(nonEmptyString);
   assertUnique(result);
   return result;
+}
+
+function continuityRefArray(value: unknown): string[] {
+  const refs = stringArray(value);
+  if (refs.some((ref) => !continuityRefPattern.test(ref))) {
+    throw new ContinuityValidationError("CONTINUITY_INVALID_FIELD");
+  }
+  return refs;
 }
 
 function assertUnique(values: readonly string[]): void {
@@ -162,7 +171,7 @@ export function validateContinuityClaim(value: unknown): ContinuityClaimV0 {
   assertUnique(lanes.map((lane) => lane.lane));
 
   stringArray(claim.outputRefs);
-  stringArray(claim.parentContinuityRefs);
+  continuityRefArray(claim.parentContinuityRefs);
   if (claim.occurrenceClaim !== "continuation-only") {
     throw new ContinuityValidationError("CONTINUITY_INVALID_FIELD");
   }
