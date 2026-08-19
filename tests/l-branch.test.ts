@@ -102,6 +102,49 @@ test("fails closed on unsupported protocol and hostile accessors", () => {
   assert.equal(touched, false);
 });
 
+test("rejects hostile declaration array entries without executing them", () => {
+  let touched = false;
+  const hostileParticipants: string[] = [];
+  Object.defineProperty(hostileParticipants, "0", {
+    enumerable: true,
+    configurable: true,
+    get() {
+      touched = true;
+      return "A";
+    },
+  });
+
+  const hostileDeclaration = {
+    ...structuredClone(declaration),
+    participantRefs: hostileParticipants,
+  };
+
+  assert.throws(
+    () => validateLBranchDeclaration(hostileDeclaration),
+    /LBRANCH_INVALID_REPRESENTATION/,
+  );
+  assert.equal(touched, false);
+});
+
+test("rejects hostile candidate array entries without executing them", () => {
+  let touched = false;
+  const hostileCandidates: typeof candidates = [];
+  Object.defineProperty(hostileCandidates, "0", {
+    enumerable: true,
+    configurable: true,
+    get() {
+      touched = true;
+      return candidates[0];
+    },
+  });
+
+  assert.throws(
+    () => runLBranch(structuredClone(declaration), hostileCandidates),
+    /LBRANCH_INVALID_REPRESENTATION/,
+  );
+  assert.equal(touched, false);
+});
+
 test("propagates two lawful steps, preserves refusal, and damps", () => {
   const result = runLBranch(declaration, candidates);
 
