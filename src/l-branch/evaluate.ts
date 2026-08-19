@@ -76,6 +76,7 @@ export function runLBranch(
     const pending = normalizedCandidates.filter((candidate) => !handledRefs.has(candidate.candidateRef));
     const ready = pending.filter((candidate) =>
       candidate.requiresInputRefs.every((ref) => availableRefs.has(ref))
+      && candidate.requiresInfluenceRefs.every((ref) => branch.influenceRefs.includes(ref))
     );
 
     if (steps.length >= branch.budget.maxSteps) {
@@ -89,11 +90,13 @@ export function runLBranch(
     const refusedOutputRefs: string[] = [];
     const refusalReasonCodes: Record<string, string> = {};
     const stepAuthorityRefs = new Set<string>();
+    const influenceRefsConsulted = new Set<string>();
     const inputRefs = new Set<string>();
 
     for (const candidate of frontier) {
       handledRefs.add(candidate.candidateRef);
       candidate.requiresInputRefs.forEach((ref) => inputRefs.add(ref));
+      candidate.requiresInfluenceRefs.forEach((ref) => influenceRefsConsulted.add(ref));
 
       if (candidate.requiresAuthorityRefs.some((ref) => !branch.authorityRefs.includes(ref))) {
         refusedOutputRefs.push(candidate.candidateRef);
@@ -123,7 +126,7 @@ export function runLBranch(
       refusedOutputRefs,
       refusalReasonCodes,
       authorityRefsUsed: sortedUnique(stepAuthorityRefs),
-      influenceRefsConsulted: [],
+      influenceRefsConsulted: sortedUnique(influenceRefsConsulted),
       remainingBudget: {
         maxSteps: remainingSteps,
         maxFrontierWidth: branch.budget.maxFrontierWidth,
