@@ -1,10 +1,27 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import * as continuityApi from "../src/continuity-profile";
 import {
+  addressContinuityClaim,
+  checkContinuityClosure,
+  checkLaneComposition,
+  claimEstablishesLane,
   validateContinuityClaim,
   type ContinuityClaimV0,
+  type ContinuityLaneKind,
 } from "../src/continuity-profile";
+import {
+  brokenProtocolParent,
+  brokenProtocolParentRef,
+  manufacturedIdentityClaim,
+  omittedRootClaim,
+  participantsParent,
+  participantsParentRef,
+  reconstitutedProtocolClaim,
+  representationStoryParent,
+  representationStoryParentRef,
+} from "../fixtures/continuity-profile/specimens";
 
 function makeClaim(): ContinuityClaimV0 {
   return {
@@ -38,6 +55,26 @@ function makeClaim(): ContinuityClaimV0 {
 
 function cloneClaim(): ContinuityClaimV0 {
   return structuredClone(makeClaim());
+}
+
+function authorityLookingClaim(lane: Exclude<ContinuityLaneKind, "authority">): ContinuityClaimV0 {
+  return {
+    ...cloneClaim(),
+    subjectRef: `subject:${lane}`,
+    lanes: [{
+      lane,
+      mode: "preserved",
+      dimensions: [{
+        dimension: `${lane}-dimension`,
+        evidenceRefs: ["external:warrant-looking"],
+        note: "looks like authority but is evidence under a non-authority lane",
+      }],
+      transformationRefs: [],
+      residualRefs: [],
+      uncertainty: [],
+      doesNotEstablish: ["authority"],
+    }],
+  };
 }
 
 test("accepts one structurally conforming typed continuity claim", () => {
@@ -137,4 +174,102 @@ test("inherits canonicalization refusals for hostile runtime values", () => {
   const custom = cloneClaim() as unknown as Record<string, unknown>;
   custom.environment = Object.create({ inherited: true });
   assert.throws(() => validateContinuityClaim(custom), /CUSTOM_PROTOTYPE/);
+});
+
+test("broken or reconstituted continuity cannot be rewritten as preserved without evidence change", () => {
+  const falsePreserved = structuredClone(reconstitutedProtocolClaim);
+  falsePreserved.lanes[0].mode = "preserved";
+
+  assert.notEqual(
+    addressContinuityClaim(falsePreserved),
+    addressContinuityClaim(reconstitutedProtocolClaim),
+  );
+  assert.deepEqual(
+    checkLaneComposition({
+      proposedClaim: falsePreserved,
+      lane: "protocol",
+      parents: [{ ref: brokenProtocolParentRef, claim: brokenProtocolParent }],
+    }),
+    { status: "refused", reasonCodes: ["BROKEN_PARENT_LANE"] },
+  );
+});
+
+test("deleting a residual to make a cleaner story changes claim identity", () => {
+  const cleaned = structuredClone(reconstitutedProtocolClaim);
+  cleaned.lanes[0].residualRefs = [];
+  assert.notEqual(
+    addressContinuityClaim(cleaned),
+    addressContinuityClaim(reconstitutedProtocolClaim),
+  );
+});
+
+test("semantic or perceptual similarity notes cannot satisfy a missing material root", () => {
+  const similarityOnly = structuredClone(omittedRootClaim);
+  similarityOnly.lanes[0].dimensions[0].note = "perceptually and semantically identical to root:b";
+
+  assert.deepEqual(
+    checkContinuityClosure({
+      claim: similarityOnly,
+      requiredMaterialRoots: ["root:a", "root:b"],
+      allowedMaterialRoots: ["root:a", "root:b"],
+    }),
+    { status: "refused", reasonCodes: ["MISSING_MATERIAL_ROOT"] },
+  );
+});
+
+test("decoder and runtime drift changes continuity identity", () => {
+  const base = cloneClaim();
+  const drifted = cloneClaim();
+  drifted.environment.decoderRef = "decoder:v2";
+  drifted.environment.runtimeRef = "runtime:v2";
+  assert.notEqual(addressContinuityClaim(base), addressContinuityClaim(drifted));
+});
+
+test("same output refs with different lineage remain distinct", () => {
+  const left = cloneClaim();
+  const right = cloneClaim();
+  right.ancestorRoots = ["root:different"];
+  assert.deepEqual(left.outputRefs, right.outputRefs);
+  assert.notEqual(addressContinuityClaim(left), addressContinuityClaim(right));
+});
+
+test("shared story plus later participants cannot satisfy institutional identity", () => {
+  assert.deepEqual(
+    checkLaneComposition({
+      proposedClaim: manufacturedIdentityClaim,
+      lane: "identity",
+      parents: [
+        { ref: representationStoryParentRef, claim: representationStoryParent },
+        { ref: participantsParentRef, claim: participantsParent },
+      ],
+    }),
+    { status: "refused", reasonCodes: ["LANE_MISMATCH"] },
+  );
+});
+
+test("authority-looking evidence outside the authority lane grants no authority continuity", () => {
+  const nonAuthorityLanes: Array<Exclude<ContinuityLaneKind, "authority">> = [
+    "custody",
+    "protocol",
+    "identity",
+    "purpose-meaning",
+    "representation-story",
+  ];
+
+  for (const lane of nonAuthorityLanes) {
+    const claim = authorityLookingClaim(lane);
+    assert.equal(claimEstablishesLane(claim, "authority"), false, lane);
+  }
+});
+
+test("public continuity API exposes no authority or automatic genealogy capability", () => {
+  for (const forbidden of [
+    "grantAuthority",
+    "executeAuthority",
+    "admitWarrant",
+    "composeClaims",
+    "inferLane",
+  ]) {
+    assert.equal(Object.prototype.hasOwnProperty.call(continuityApi, forbidden), false, forbidden);
+  }
 });
