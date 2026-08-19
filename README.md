@@ -30,7 +30,11 @@ The repository now contains:
 - advanced Floor 1.1 conformance proofs for sealed plurality, repair scars, and monument/build-beside behavior;
 - **NAV v0.1** declaration, comparison, addressing, and crossing-witness machinery, including one fixture-only Project0 → Corpus OS crossing proof;
 - **World Encounter Envelope v0.1**, which preserves bounded encounter testimony without treating transported testimony as source authority;
-- a bounded stdio adapter for World Encounter so another local process can submit supported operations without importing Project 0 internals.
+- a bounded stdio adapter for World Encounter so another local process can submit supported operations without importing Project 0 internals;
+- **L-Branch v0.1**, an experimental deterministic propagation seam where one admitted excitation may ring through a predeclared finite topology without widening authority, disclosure, participant scope, or policy;
+- **Snap-State v0.1**, an experimental thresholded-topology seam where local load may activate only predeclared couplings, recoil current state, and leave append-only addressed event history;
+- **Typed Continuity Braid v0**, an experimental purpose-relative continuity grammar with explicit lanes, breakage/reconstitution, root closure, and non-transitivity by default;
+- manuscript-transmission and reticulate/mixed-descent adversarial fixtures proving that copy, translation, reconstruction, and plural ancestry can remain distinguishable without adding a new genealogy primitive.
 
 Run the full proof surface with:
 
@@ -47,9 +51,9 @@ npm run world-encounter:stdio
 
 ## Status
 
-**Floor 1.2 — executable encounter boundary.**
+**Floor 1.2 — executable encounter boundary + experimental dynamics and continuity profiles.**
 
-The contract is now backed by a reference kernel, conformance fixtures, lawful-navigation witnesses, and a bounded local process seam. This remains an intentionally limited executable proof surface, not a claim of full ecosystem conformance or portable authority.
+The contract is backed by a reference kernel, conformance fixtures, lawful-navigation witnesses, a bounded local process seam, deterministic local propagation/topology experiments, and a typed continuity witness grammar. These newer profiles remain deliberately experimental: they do not expand the frozen ontology, create a new canonical receipt family, or turn continuity/influence into authority.
 
 Machine-readable snapshot: [`PROJECT_STATUS.json`](PROJECT_STATUS.json).
 
