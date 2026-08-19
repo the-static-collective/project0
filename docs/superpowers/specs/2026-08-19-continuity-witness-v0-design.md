@@ -79,7 +79,7 @@ Identity continuity is strong and therefore expensive. Similarity, shared name, 
 
 What power, warrant, capability, office, stewardship right, or execution permission is claimed to continue?
 
-A Continuity Witness never grants this lane. It can only point to separately constituted authority evidence or report the lane as absent/unresolved.
+A Continuity Witness never grants this lane. It can only point to separately constituted authority evidence or report the lane as absent or unresolved.
 
 ### 3. Custody
 
@@ -119,7 +119,7 @@ This is the lane most likely to be mistaken for stronger genealogy. Its existenc
 
 ## Lane-local continuity modes
 
-Each lane claim declares one continuity mode:
+Each lane claim declares exactly one continuity mode:
 
 - `preserved` — materially continuous without a declared constitutive change in that lane;
 - `transformed` — continuous for the declared purpose through an evidenced transformation;
@@ -132,6 +132,8 @@ Each lane claim declares one continuity mode:
 `reconstituted` is not a synonym for `preserved`. It exists specifically so a lawful revival can be described without impersonating an unbroken line.
 
 `broken` differs from `lost`: `lost` says a property or carrier did not survive; `broken` says the continuity relation itself is known to have been interrupted.
+
+When available evidence could support more than one classification, the claim must choose the strongest classification actually justified by its declared evidence. If that choice cannot be made, the mode is `unresolved`; slash-separated or blended modes are non-conforming.
 
 ## Conceptual profile shape
 
@@ -244,16 +246,18 @@ A braid therefore permits multiple adjacent valid claims without manufacturing a
 
 A system must be able to survive interruption without lying about it.
 
-If A disappears, later evidence from A is used to build B, and no lawful bridge supports uninterrupted identity, B may still be a legitimate descendant under one or more lanes:
+If A disappears, later evidence from A is used to build B, and no lawful bridge supports uninterrupted identity, B may still be a legitimate descendant under one or more lanes. For example, if the evidence establishes that a surviving text was copied exactly but the operating practice had to be rebuilt:
 
 ```text
-text-schema: preserved or transformed
+text-schema: preserved
 protocol: reconstituted
 purpose-meaning: reconstituted
-representation-story: revived/reconstituted
-identity: broken or unresolved
-authority: none unless separately constituted
+representation-story: reconstituted
+identity: broken
+authority: unresolved unless separately constituted evidence is supplied
 ```
+
+If the text itself was translated or structurally altered, `text-schema` would instead be `transformed`. If the historical record cannot establish whether identity actually broke, `identity` must be `unresolved`, not `broken`.
 
 This is stronger than either extreme:
 
@@ -446,17 +450,18 @@ A lawful braid may say approximately:
 ```text
 A → H
   custody: transferred
-  identity: not established by custody
-  authority: local to H's separately constituted basis
+  identity: unresolved unless separate evidence establishes it
+  authority: unresolved here; H's authority must come from separately constituted evidence
 
 A → M
-  representation-story: reconstituted/preserved through later sources
-  purpose-meaning: possible or reconstituted, if evidenced
-  text-schema / protocol: transformed or unresolved, depending on intermediaries
-  participants: broken/unresolved
-  custody: unresolved/none
-  identity: broken/unresolved
-  authority: none from the continuity claim itself
+  representation-story: reconstituted when later sources demonstrably revive the tradition
+  purpose-meaning: reconstituted only if evidence establishes purposeful inheritance; otherwise unresolved
+  text-schema: transformed only if intermediaries establish a textual chain; otherwise unresolved
+  protocol: transformed only if intermediaries establish a practice chain; otherwise unresolved
+  participants: broken if an actual participant chain is known to have ended; otherwise unresolved
+  custody: unresolved unless custody evidence exists
+  identity: broken if institutional termination is established; otherwise unresolved
+  authority: unresolved here and never created by the braid
 ```
 
 The false move is:
@@ -479,6 +484,7 @@ Project 0 may mechanically validate:
 
 - schema/version;
 - allowed lane kinds and modes;
+- exactly one mode per declared lane claim;
 - exact declared roots and refs;
 - duplicate or contradictory lane classification where forbidden;
 - required environment/policy declarations;
@@ -546,7 +552,8 @@ The first executable fixture family should eventually prove at least these shape
 17. same-lane composition with a known broken intermediate edge refuses uninterrupted continuity;
 18. reconstituted continuation remains distinguishable from preserved continuation;
 19. removal of a known loss/break/residual changes claim identity and fails expected conformance;
-20. one real downstream authority-hostile specimen can map without weakening its own local law.
+20. slash-separated or blended lane modes fail validation;
+21. one real downstream authority-hostile specimen can map without weakening its own local law.
 
 ## Compatibility and migration
 
