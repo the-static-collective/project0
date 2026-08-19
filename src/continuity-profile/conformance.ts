@@ -1,3 +1,4 @@
+import { verifyContinuityClaim } from "./address";
 import type {
   ContinuityClaimV0,
   ContinuityLaneClaim,
@@ -91,7 +92,10 @@ export function checkLaneComposition({
   const reasons: ContinuityConformanceReason[] = [];
 
   if (
-    parents.some((parent) => !proposedParentRefs.has(parent.ref))
+    parents.some((parent) => (
+      !proposedParentRefs.has(parent.ref)
+      || !verifyContinuityClaim(parent.ref, parent.claim)
+    ))
     || proposedClaim.parentContinuityRefs.some((ref) => !suppliedParentRefs.has(ref))
   ) {
     reasons.push("MISSING_PARENT_CONTINUITY");
