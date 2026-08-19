@@ -79,3 +79,58 @@ test("settles below threshold after one addressed excitation", () => {
   assert.deepEqual(result.terminal.body.activeCouplingRefs, []);
   assert.equal(result.terminal.body.finalLoads[cell.ref], 4);
 });
+
+test("records one snap, declared transfer, and recoil with causal lineage", () => {
+  const passiveB = { cellId: "B-passive", threshold: 10, initialLoad: 0, recoilAmount: 10 };
+  const a = addressSnapStateRecord("cell", A);
+  const b = addressSnapStateRecord("cell", passiveB);
+  const couplingBody = {
+    couplingId: "AB",
+    fromCellRef: a.ref,
+    toCellRef: b.ref,
+    transferAmount: 3,
+    activation: "on-source-snap" as const,
+  };
+  const coupling = addressSnapStateRecord("coupling", couplingBody);
+  const excitationBody = {
+    excitationId: "pulse-threshold",
+    targetCellRef: a.ref,
+    amount: 5,
+  };
+  const excitation = addressSnapStateRecord("excitation", excitationBody);
+  const declaration = {
+    protocolVersion: SNAP_STATE_PROTOCOL_VERSION,
+    snapshotRef: "snapshot-one-snap",
+    purposeRef: "purpose-one-snap",
+    excitationRef: excitation.ref,
+    cellRefs: [a.ref, b.ref],
+    couplingRefs: [coupling.ref],
+    evaluatorId: "snap-state-reference",
+    evaluatorVersion: "0.1.0",
+    orderingRule: "cell-ref-lexicographic" as const,
+    budget: { maxEvents: 8 },
+  };
+
+  const result = runSnapState({
+    declaration,
+    cells: [A, passiveB],
+    couplings: [couplingBody],
+    excitation: excitationBody,
+  });
+
+  assert.deepEqual(result.events.map((event) => event.body.kind), [
+    "excitation",
+    "snap",
+    "transfer",
+    "recoil",
+  ]);
+  const [excitationEvent, snapEvent, transferEvent, recoilEvent] = result.events;
+  assert.equal(snapEvent.body.sourceEventRef, excitationEvent.ref);
+  assert.equal(transferEvent.body.sourceEventRef, snapEvent.ref);
+  assert.equal(transferEvent.body.couplingRef, coupling.ref);
+  assert.equal(recoilEvent.body.sourceEventRef, snapEvent.ref);
+  assert.deepEqual(result.terminal.body.snappedCellRefs, [a.ref]);
+  assert.deepEqual(result.terminal.body.activeCouplingRefs, [coupling.ref]);
+  assert.equal(result.terminal.body.finalLoads[a.ref], 0);
+  assert.equal(result.terminal.body.finalLoads[b.ref], 3);
+});
