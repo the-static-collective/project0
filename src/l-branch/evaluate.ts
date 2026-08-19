@@ -74,48 +74,31 @@ export function runLBranch(
 
   while (!completed) {
     const pending = normalizedCandidates.filter((candidate) => !handledRefs.has(candidate.candidateRef));
-    const inputAndInfluenceReady = pending.filter((candidate) =>
+    const ready = pending.filter((candidate) =>
       candidate.requiresInputRefs.every((ref) => availableRefs.has(ref))
-      && candidate.requiresInfluenceRefs.every((ref) => branch.influenceRefs.includes(ref))
     );
-    const depthBlocked = inputAndInfluenceReady.filter((candidate) => candidate.depth > branch.budget.maxDepth);
-    const ready = inputAndInfluenceReady.filter((candidate) => candidate.depth <= branch.budget.maxDepth);
 
     if (steps.length >= branch.budget.maxSteps) {
-      exhausted = ready.length > 0 || depthBlocked.length > 0;
+      exhausted = ready.length > 0;
       break;
     }
-    if (ready.length === 0) {
-      exhausted = depthBlocked.length > 0;
-      break;
-    }
+    if (ready.length === 0) break;
 
-    const frontier = ready.slice(0, branch.budget.maxFrontierWidth);
+    const frontier = ready;
     const eligibleOutputRefs: string[] = [];
     const refusedOutputRefs: string[] = [];
     const refusalReasonCodes: Record<string, string> = {};
     const stepAuthorityRefs = new Set<string>();
-    const influenceRefsConsulted = new Set<string>();
     const inputRefs = new Set<string>();
 
     for (const candidate of frontier) {
       handledRefs.add(candidate.candidateRef);
       candidate.requiresInputRefs.forEach((ref) => inputRefs.add(ref));
-      candidate.requiresInfluenceRefs.forEach((ref) => influenceRefsConsulted.add(ref));
 
-      let refusalReason: string | null = null;
-      if (!branch.participantRefs.includes(candidate.candidateRef)) {
-        refusalReason = "LBRANCH_UNDECLARED_PARTICIPANT";
-      } else if (candidate.requiredPolicyRef !== branch.policyRef) {
-        refusalReason = "LBRANCH_POLICY_REQUIRED";
-      } else if (candidate.requiresAuthorityRefs.some((ref) => !branch.authorityRefs.includes(ref))) {
-        refusalReason = "LBRANCH_AUTHORITY_REQUIRED";
-      }
-
-      if (refusalReason) {
+      if (candidate.requiresAuthorityRefs.some((ref) => !branch.authorityRefs.includes(ref))) {
         refusedOutputRefs.push(candidate.candidateRef);
         refusedRefs.add(candidate.candidateRef);
-        refusalReasonCodes[candidate.candidateRef] = refusalReason;
+        refusalReasonCodes[candidate.candidateRef] = "LBRANCH_AUTHORITY_REQUIRED";
         continue;
       }
 
@@ -140,7 +123,7 @@ export function runLBranch(
       refusedOutputRefs,
       refusalReasonCodes,
       authorityRefsUsed: sortedUnique(stepAuthorityRefs),
-      influenceRefsConsulted: sortedUnique(influenceRefsConsulted),
+      influenceRefsConsulted: [],
       remainingBudget: {
         maxSteps: remainingSteps,
         maxFrontierWidth: branch.budget.maxFrontierWidth,
