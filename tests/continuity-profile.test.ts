@@ -46,6 +46,10 @@ const expectedModes = [
   "unresolved",
 ] as const;
 
+const parentA = `cty-${"a".repeat(64)}`;
+const parentB = `cty-${"b".repeat(64)}`;
+const parentC = `cty-${"c".repeat(64)}`;
+
 const environment: ContinuityEnvironment = {
   decoderRef: "decoder:v1",
   runtimeRef: "runtime:v1",
@@ -85,7 +89,7 @@ const claim: ContinuityClaimV0 = {
     },
   ],
   outputRefs: ["output:two", "output:one"],
-  parentContinuityRefs: ["cty-parent-b", "cty-parent-a"],
+  parentContinuityRefs: [parentB, parentA],
   occurrenceClaim: "continuation-only",
 };
 
@@ -125,6 +129,7 @@ test("normalization sorts only set-like fields and does not mutate input", () =>
   assert.deepEqual(normalized.lanes.map((item) => item.lane), ["protocol", "text-schema"]);
   assert.deepEqual(normalized.lanes[0].dimensions.map((item) => item.dimension), ["procedure-a", "procedure-b"]);
   assert.deepEqual(normalized.lanes[0].dimensions[1].evidenceRefs, ["evidence:one", "evidence:two"]);
+  assert.deepEqual(normalized.parentContinuityRefs, [parentA, parentB]);
 });
 
 test("set-like input ordering does not change continuity address", () => {
@@ -165,7 +170,7 @@ test("material continuity changes produce distinct addresses", () => {
     (value) => { value.lanes[0].residualRefs.push("residual:new"); },
     (value) => { value.lanes[0].uncertainty.push("uncertainty:new"); },
     (value) => { value.lanes[0].doesNotEstablish.push("custody"); },
-    (value) => { value.parentContinuityRefs.push("cty-parent-c"); },
+    (value) => { value.parentContinuityRefs.push(parentC); },
   ];
 
   for (const mutate of mutations) {
