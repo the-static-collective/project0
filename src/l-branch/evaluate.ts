@@ -74,18 +74,23 @@ export function runLBranch(
 
   while (!completed) {
     const pending = normalizedCandidates.filter((candidate) => !handledRefs.has(candidate.candidateRef));
-    const ready = pending.filter((candidate) =>
+    const referenceReady = pending.filter((candidate) =>
       candidate.requiresInputRefs.every((ref) => availableRefs.has(ref))
       && candidate.requiresInfluenceRefs.every((ref) => branch.influenceRefs.includes(ref))
     );
+    const depthBlocked = referenceReady.filter((candidate) => candidate.depth > branch.budget.maxDepth);
+    const ready = referenceReady.filter((candidate) => candidate.depth <= branch.budget.maxDepth);
 
     if (steps.length >= branch.budget.maxSteps) {
-      exhausted = ready.length > 0;
+      exhausted = ready.length > 0 || depthBlocked.length > 0;
       break;
     }
-    if (ready.length === 0) break;
+    if (ready.length === 0) {
+      exhausted = depthBlocked.length > 0;
+      break;
+    }
 
-    const frontier = ready;
+    const frontier = ready.slice(0, branch.budget.maxFrontierWidth);
     const eligibleOutputRefs: string[] = [];
     const refusedOutputRefs: string[] = [];
     const refusalReasonCodes: Record<string, string> = {};
