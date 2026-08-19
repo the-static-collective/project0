@@ -2,23 +2,23 @@
 
 ## Status
 
-Approved design direction for a new experimental Project 0 primitive. This document specifies the smallest Project 0-owned contract for **thresholded topology / snap-state mechanics**: a declared structure whose active coupling may change when local accumulated load crosses a deterministic threshold, while declared bounds remain fixed and event history remains append-only.
+Approved design direction for a new experimental Project 0 primitive. This document fixes the smallest Project 0-owned contract for **thresholded topology / snap-state mechanics**: local load may cross a declared threshold, causing a bounded state transition that changes which already-declared couplings are active, while the structural envelope remains immutable and event history remains append-only.
 
-This is an architectural sibling of L-Branch v0.1, not an extension or rewrite of it. It does not alter Project 0's frozen nine-kind ontology, does not add a universal relationship kind, and does not create a scheduler, autonomous runtime, model loop, or product-specific effect system.
+Snap-State is an architectural sibling of L-Branch v0.1, not an extension or rewrite of it. It does not alter Project 0's frozen nine-kind ontology, add a universal relationship kind, or create a scheduler, autonomous runtime, model loop, physics engine, or product-specific effect system.
 
 ## Design sentence
 
-> Active topology may change inside a declared structural envelope. Recoil may restore material state; history does not recoil.
+> Active topology may change inside a declared structural envelope. Recoil may restore current material state; history does not recoil.
 
 Human-facing compression:
 
 > Beetle stores the shape. Bumblebee makes the shape ring. Cicada lets the shape change how it can ring after a threshold is crossed.
 
-The biological image is design lineage only. Project 0 does not depend on literal cicada biomechanics. The useful systems pattern is narrower: **stored local load may cross a declared threshold, cause a bounded state transition, change which already-declared couplings are active, and later recoil without erasing the transition from history.**
+The biological image is design lineage only. Project 0 does not depend on literal cicada biomechanics. The portable systems claim is narrower: **stored local load may cross a declared threshold, cause one attributable snap, activate only predeclared couplings, transfer bounded load, and recoil without erasing the snap from history.**
 
 ## Why this is separate from L-Branch
 
-L-Branch v0.1 already proves bounded propagation through a fixed declared candidate topology:
+L-Branch v0.1 proves bounded propagation through a fixed declared candidate topology:
 
 ```text
 admitted excitation
@@ -29,196 +29,188 @@ admitted excitation
   -> explicit terminal record
 ```
 
-Its key law is that propagation may continue without a new external command for every micro-step, while authority, policy, participants, and work budget remain bounded by the declaration.
+Its responsibility is bounded propagation. Snap-State answers a different question:
 
-Snap-State answers a different question:
+> What if one fixed structural envelope contains multiple possible active configurations, and crossing a local threshold changes which declared configuration is currently conducting?
 
-> What if the structure itself has multiple predeclared active configurations, and crossing a local threshold changes which configuration is currently conducting?
-
-That is not merely another eligibility predicate. It introduces three distinct state layers that must remain mechanically separate:
+That requires three state layers that must remain mechanically distinct:
 
 ```text
 declared topology envelope
         !=
-active topology state
+active topology projection
         !=
 append-only event history
 ```
 
-L-Branch should remain the primitive for bounded propagation through declared candidates. Snap-State should remain the primitive for deterministic threshold crossings that alter active coupling inside a predeclared structural envelope.
-
-A later composition may allow L-Branch to consume Snap-State evidence, or Snap-State to use an L-Branch result as excitation. Neither primitive should absorb the other in v0.1.
+L-Branch remains the primitive for bounded candidate propagation. Snap-State remains the primitive for deterministic threshold crossings and active-coupling changes inside a predeclared envelope. A later composition may connect them explicitly; neither absorbs the other in v0.1.
 
 ## Relationship to Resonant Tension issue #30
 
-Issue #30 owns the separate executable line for deterministic resonant-tension evaluation. That evaluator preserves disagreement, provenance, disclosure boundaries, and unresolved remainder while refusing to manufacture authority or force adoption.
+Issue #30 owns deterministic resonant-tension evaluation: preserving tension, dissent, provenance, disclosure boundaries, and unresolved remainder without manufacturing authority or forcing adoption.
 
-Snap-State is not a semantic resonance evaluator. It should not answer whether two claims, motifs, interpretations, or tensions resonate.
+Snap-State is not a semantic resonance evaluator. Its first proof is deliberately mechanical:
 
-Its first slice is deliberately mechanical:
-
-- integer local load;
-- integer thresholds;
-- integer transfer amounts;
-- finite predeclared cells;
-- finite predeclared couplings;
+- safe-integer local loads;
+- safe-integer thresholds;
+- safe-integer transfer amounts;
+- finite addressed cells and couplings;
 - deterministic event ordering;
-- explicit settling/exhaustion.
+- finite event budget;
+- explicit settling or exhaustion.
 
-Issue #30 remains independently implementable and independently versioned.
+Issue #30 remains independently versioned and independently implementable.
 
-## Classification and ownership boundary
-
-This is an architectural addition above ontology v0.1 because it defines a portable process contract that downstream products may later implement.
+## Ownership boundary
 
 Project 0 owns:
 
-- the versioned declaration boundary;
-- the distinction between declared and active topology;
-- deterministic threshold crossing semantics;
-- bounded coupling activation semantics;
-- append-only snap/recoil/terminal evidence;
-- finite termination rules;
-- canonical addressed records under an experimental domain;
-- adversarial fixtures proving no undeclared topology can emerge.
+- versioned Snap-State record semantics;
+- the declared-topology / active-topology distinction;
+- deterministic threshold crossing;
+- bounded coupling activation;
+- append-only excitation/snap/transfer/recoil history;
+- finite termination;
+- canonical experimental addressing using the existing Project 0 canonicalizer;
+- adversarial fixtures proving undeclared topology cannot emerge.
 
 Project 0 does not own:
 
-- visual wing simulation;
 - continuous physics;
+- visual wing simulation;
 - audio DSP;
+- musical or emotional meaning of load;
 - creative scoring;
 - model interpretation;
-- music analysis;
-- UI animation;
-- video rendering;
+- rendering/UI;
 - autonomous scheduling;
-- product-specific meanings of load, threshold, snap, recoil, or coupling.
+- product-specific snap effects.
 
-Downstream systems may map their own domain quantities into the primitive only after the deterministic contract exists.
+A downstream adapter may map a domain quantity into integer excitation only through an explicit versioned mapping.
 
 ## Considered approaches
 
-### A. Extend L-Branch to v0.2
+### A. Extend L-Branch v0.1/v0.2
 
-Add threshold accumulation, active coupling state, snap events, and recoil directly to L-Branch.
+Rejected for this slice. Adding load accumulation, structural state, snap, recoil, and active coupling to L-Branch would bundle two independent responsibilities.
 
-Rejected for v0.1. L-Branch currently has one coherent responsibility: bounded propagation through declared candidates. Adding structural state transitions would bundle propagation mechanics and topology mechanics into one primitive and make both harder to reason about.
+### B. Prove it first in Haunted Toaster
 
-### B. Implement the idea first in Haunted Toaster
-
-Treat musical energy as load, visual topology modes as cells/couplings, and let a render cross thresholds into alternate visual configurations.
-
-Rejected as the first proof. This would produce useful aesthetic behavior but would not prove the portable distinction between declared topology, active topology, and historical event state. Product behavior would become the de facto contract before the contract is mechanically clear.
+Rejected as the first proof. A Toaster embodiment could be useful, but aesthetic behavior should not become the implicit cross-project contract before the deterministic structural distinction is executable.
 
 ### C. Add a sibling experimental Snap-State module
 
-Create one fixture-sized deterministic module parallel to `src/l-branch/`, with versioned declaration/cell/coupling/event/terminal records, pure evaluation, canonical addressing, fail-closed validation, and no runtime infrastructure.
+Selected. Add a fixture-sized deterministic module parallel to `src/l-branch/`, with versioned records, fail-closed validation, pure evaluation, canonical addressing, focused tests, and no runtime infrastructure.
 
-Selected. This preserves the semantic boundary and makes later composition explicit rather than accidental.
+## Governing invariant
 
-## Core law
+> A snap may change active state only among structures already declared in the envelope. It may not invent a cell, coupling, threshold, transfer law, participant, authority, policy, or scope.
 
-The Snap-State primitive has one governing constraint:
-
-> A snap may change active state only among modes already declared in the structural envelope. A snap may not invent a new cell, coupling, threshold, transfer law, participant, authority, policy, or scope.
-
-In v0.1:
+For every reachable state in v0.1:
 
 ```text
-active_topology(t) subset-of declared_topology_envelope
+current_cells = declared_cells
+active_couplings subset-of declared_couplings
 ```
 
-At every event:
+The possibility envelope is immutable. Only its active projection changes.
 
-```text
-cells_after = cells_declared
-couplings_after subset-of couplings_declared
-```
+## Experimental protocol and address domain
 
-The set of possible structural relationships is fixed before excitation begins. What changes is which declared relationships are active.
-
-## Three state layers
-
-### 1. Declared topology envelope
-
-The immutable declaration names the complete structural possibility space for one run:
-
-- protocol/version;
-- snapshot reference;
-- excitation reference;
-- purpose reference;
-- evaluator identity/version;
-- fixed cell definitions;
-- fixed coupling definitions;
-- deterministic ordering law;
-- finite event budget;
-- optional policy/disclosure references when external evidence is represented;
-- no product-specific hidden state.
-
-The declaration itself is content-addressed.
-
-### 2. Active topology state
-
-The current state is a deterministic projection of the declaration plus append-only prior events.
-
-A cell may be in one of a small finite v0.1 states:
-
-```text
-rest
-loaded
-snapped
-recoiled
-```
-
-These are runtime dispositions, not new Project 0 node kinds.
-
-A coupling may be inactive or active according to a predeclared activation rule.
-
-No mutation of the declaration is required to represent active-state change.
-
-### 3. Event history
-
-Every threshold crossing that changes active state produces an append-only addressed event record.
-
-A later recoil may return the cell to a baseline material disposition, but the previous snap event remains part of history.
-
-This distinction is intentional:
-
-```text
-material/current state may return
-historical state only grows
-```
-
-That is the central proof target for v0.1.
-
-## Proposed experimental protocol
-
-The machine identifier should be:
+Machine protocol:
 
 ```text
 p0.snap-state/0.1
 ```
 
-The canonical addressing domain should be distinct from Project 0 canonical receipts and from L-Branch experimental addresses:
+Experimental canonical domain:
 
 ```text
 Project0-SnapState-v0.1|
 ```
 
-Address refs should use a distinct prefix:
+All Snap-State records use:
 
 ```text
 ssr-<64 lowercase hex digest>
 ```
 
-These are experimental addressed records, not additions to the frozen canonical `ReceiptType` family.
+These are **experimental addressed records**, not additions to the frozen canonical `ReceiptType` family.
 
-## Proposed contracts
+The record types are exactly:
 
-Exact TypeScript names are part of the implementation plan, but the design fixes this semantic shape.
+```ts
+type SnapStateRecordTypeV01 =
+  | "cell"
+  | "coupling"
+  | "excitation"
+  | "declaration"
+  | "event"
+  | "terminal";
+```
 
-### Declaration
+Every record is addressed with the existing Project 0 canonicalization/hash path. No second serializer or hasher is permitted.
+
+## Input records
+
+### Cell
+
+```ts
+export type SnapCellV01 = {
+  cellId: string;
+  threshold: number;
+  initialLoad: number;
+  recoilAmount: number;
+};
+```
+
+Rules:
+
+- `cellId` is a non-empty local label, not the canonical address;
+- `threshold` is a positive safe integer;
+- `initialLoad` and `recoilAmount` are non-negative safe integers;
+- the addressed cell ref is derived from the complete cell body.
+
+Changing a threshold, starting load, or recoil amount therefore changes the cell address.
+
+### Coupling
+
+```ts
+export type SnapCouplingV01 = {
+  couplingId: string;
+  fromCellRef: string;
+  toCellRef: string;
+  transferAmount: number;
+  activation: "on-source-snap";
+};
+```
+
+Rules:
+
+- `fromCellRef` and `toCellRef` must be addressed cell refs in the declaration;
+- `transferAmount` is a non-negative safe integer;
+- v0.1 supports only `on-source-snap`;
+- a coupling conducts at most once in a run because its source cell snaps at most once.
+
+### Excitation
+
+```ts
+export type SnapExcitationV01 = {
+  excitationId: string;
+  targetCellRef: string;
+  amount: number;
+};
+```
+
+Rules:
+
+- `targetCellRef` must be a declared addressed cell ref;
+- `amount` is a non-negative safe integer;
+- one run has exactly one addressed excitation record in v0.1.
+
+This resolves excitation deterministically: no fixture lookup, ambient mapping, callback, or external resolver is part of the executable contract.
+
+## Declaration
 
 ```ts
 export const SNAP_STATE_PROTOCOL_VERSION = "p0.snap-state/0.1" as const;
@@ -230,51 +222,26 @@ export type SnapStateBudgetV01 = {
 export type SnapStateDeclarationV01 = {
   protocolVersion: typeof SNAP_STATE_PROTOCOL_VERSION;
   snapshotRef: string;
-  excitationRef: string;
   purposeRef: string;
-  evaluatorId: string;
-  evaluatorVersion: string;
+  excitationRef: string;
   cellRefs: string[];
   couplingRefs: string[];
+  evaluatorId: string;
+  evaluatorVersion: string;
   orderingRule: "cell-ref-lexicographic";
   budget: SnapStateBudgetV01;
 };
 ```
 
-The declaration does not contain open-ended callbacks or hidden evaluators. `evaluatorId` and `evaluatorVersion` identify the deterministic implementation/rule profile used for replay.
+`cellRefs` and `couplingRefs` are set-like and normalize to sorted unique order for addressing. `excitationRef` must equal the addressed excitation record supplied to execution.
 
-### Cell
+Because the declaration references addressed cell, coupling, and excitation records, its identity binds the full mechanical input state without embedding duplicate mutable definitions.
 
-```ts
-export type SnapCellV01 = {
-  cellRef: string;
-  threshold: number;
-  initialLoad: number;
-  recoilAmount: number;
-};
-```
+`maxEvents` is a positive safe integer. Budget changes require a new declaration and therefore a new declaration address.
 
-All numeric fields are finite non-negative safe integers in v0.1. `threshold` must be strictly positive.
+## Event and terminal records
 
-`recoilAmount` defines deterministic post-snap load reduction. v0.1 does not model continuous elasticity.
-
-### Coupling
-
-```ts
-export type SnapCouplingV01 = {
-  couplingRef: string;
-  fromCellRef: string;
-  toCellRef: string;
-  transferAmount: number;
-  activation: "on-source-snap";
-};
-```
-
-All couplings are declared before execution begins. v0.1 needs only one activation profile: a coupling conducts once when its source cell snaps during the run.
-
-No dynamic coupling creation exists.
-
-### Event record
+### Event
 
 ```ts
 export type SnapEventKindV01 =
@@ -296,15 +263,21 @@ export type SnapEventRecordV01 = {
 };
 ```
 
-The event record is explicit rather than storing a generic opaque payload. Every transfer names the declared coupling that permitted it. Every recoil names the cell whose current load changed.
+Meanings:
 
-### Terminal record
+- `excitation`: applies the declared excitation amount to the target cell;
+- `snap`: records that a cell crossed threshold and activates its declared outgoing couplings;
+- `transfer`: applies one declared coupling's transfer amount to its target;
+- `recoil`: reduces the snapped source cell by its declared recoil amount, clamped at zero.
+
+`sourceEventRef` preserves explicit causal lineage. Transfer and recoil events cite the snap that caused them. A snap cites the load-changing event that made the cell threshold-eligible.
+
+### Terminal
 
 ```ts
 export type SnapStateTerminalDispositionV01 =
   | "settled"
-  | "exhausted"
-  | "inadmissible";
+  | "exhausted";
 
 export type SnapStateTerminalRecordV01 = {
   declarationRef: string;
@@ -317,292 +290,205 @@ export type SnapStateTerminalRecordV01 = {
 };
 ```
 
-`activeCouplingRefs` is the final active-state projection for the run. It does not modify the declaration and cannot contain undeclared refs.
+Malformed or unsupported input is **not** represented as an `inadmissible` terminal because no trustworthy addressed declaration may exist. Validation fails before execution with a stable `SnapStateValidationError` code. This matches the principle that invalid source representation must not be canonized merely to describe its invalidity.
 
-## Why the v0.1 state space stays small
+`eventRefs` are ordered history and must never be sorted during normalization. `snappedCellRefs` and `activeCouplingRefs` are set-like terminal projections and normalize by sorted uniqueness.
 
-The first version intentionally avoids:
+## Execution interface
 
-- floating point;
-- continuous time;
-- oscillation frequency;
-- velocity/acceleration;
-- arbitrary nonlinear functions;
-- mutable thresholds;
-- programmable callbacks;
-- probability;
-- stochastic event ordering;
-- multiple activation profiles;
-- hidden scheduler state.
+The pure evaluator should have an explicit shape equivalent to:
 
-Those may be useful later, but none is necessary to prove the primitive.
-
-The smallest proof requires only:
-
-```text
-load accumulates
-threshold is crossed
-snap is recorded
-predeclared coupling conducts
-neighbor load changes
-recoil changes current state
-snap history remains
+```ts
+runSnapState({
+  declaration,
+  cells,
+  couplings,
+  excitation,
+}) -> {
+  declaration,
+  inputs,
+  events,
+  terminal,
+}
 ```
 
-## Deterministic execution semantics
+Execution performs these steps before any state mutation:
 
-The first evaluator is a pure function over one declaration, one explicit cell list, one explicit coupling list, and one declared excitation amount resolved from fixture-local input.
+1. validate all raw representations without executing accessors;
+2. address every cell, coupling, and excitation record;
+3. verify that declaration refs exactly match the supplied addressed inputs;
+4. verify every coupling endpoint belongs to `cellRefs`;
+5. address the declaration;
+6. initialize current loads from addressed cells;
+7. initialize snapped cells and active couplings as empty;
+8. initialize ordered event history as empty.
 
-### Initialization
+No hidden mutable state or resolver is required for deterministic replay.
 
-1. validate declaration representation without executing accessors;
-2. validate all cells and couplings;
-3. require every `cellRef` in the declaration to resolve to exactly one cell;
-4. require every `couplingRef` in the declaration to resolve to exactly one coupling;
-5. require every coupling endpoint to reference a declared cell;
-6. normalize set-like declaration arrays for addressing;
-7. create the addressed declaration;
-8. initialize current loads from `initialLoad`;
-9. initialize the active coupling set as empty;
-10. initialize the event ledger as empty.
+## Atomic event admission
 
-### Excitation
+The event budget is an admission boundary, not a counter updated after mutation.
 
-The run begins with one explicit excitation applied to one declared target cell.
+Before every state-changing event:
 
-The fixture may encode this as a small explicit input object outside the declaration or as a fixture mapping resolved by `excitationRef`; the implementation plan must choose one representation and keep it deterministic.
+1. determine the next event from current addressed state;
+2. if no event budget remains, stop as `exhausted` **without applying its mutation**;
+3. construct and address the event record;
+4. append the event ref;
+5. only then apply the event's declared current-state mutation;
+6. decrement remaining budget.
 
-The excitation creates an `excitation` event.
+Therefore no current-state change can exist without a corresponding addressed event.
 
-### Threshold evaluation
+## Deterministic ordering
 
-After every load-changing event, evaluate cells whose current load is greater than or equal to their declared threshold and that have not already snapped in the current run.
+A cell snaps at most once in one v0.1 run.
 
-If multiple cells are eligible simultaneously, process them by the fixed v0.1 ordering rule:
-
-```text
-cellRef lexicographic ascending
-```
-
-This rule is part of the declaration and therefore part of replay identity.
-
-### Snap
-
-For an eligible cell:
-
-1. emit one `snap` event;
-2. mark that cell as snapped for this run;
-3. activate every declared coupling whose `fromCellRef` equals the snapped cell and whose activation profile is `on-source-snap`;
-4. process those couplings in deterministic `couplingRef` lexicographic order;
-5. each transfer emits one `transfer` event and adds its integer amount to the target cell;
-6. emit one `recoil` event reducing the source cell by its declared `recoilAmount`, clamped at zero;
-7. evaluate newly threshold-eligible cells according to the same deterministic ordering rule.
-
-A cell snaps at most once in v0.1. This is a deliberate simplification that guarantees a small finite proof surface and keeps cycle behavior explicit.
-
-### Event budget
-
-Every addressed event consumes one unit of `maxEvents`.
-
-If another event is required for lawful continuation but the budget is zero, terminate as `exhausted` without silently executing the event.
-
-The implementation must preserve enough terminal evidence to distinguish:
-
-- no more eligible transitions (`settled`);
-- lawful continuation still exists but event budget is spent (`exhausted`);
-- malformed or unsupported declaration (`inadmissible`).
-
-No silent disappearance is a valid terminal state.
-
-## Recoil law
-
-Recoil is current-state restoration, not historical deletion.
-
-In v0.1:
+After each load-changing event, collect every declared unsnapped cell whose current load is greater than or equal to its threshold. If more than one is eligible, process by:
 
 ```text
-load_after_recoil = max(0, load_before_recoil - recoilAmount)
+addressed cellRef lexicographic ascending
 ```
 
-The source cell may therefore return to zero or another sub-threshold load after snapping.
-
-This does not remove:
-
-- the snap event;
-- transfer events caused by the snap;
-- the fact that the coupling became active;
-- downstream snaps caused by transferred load.
-
-A reconstruction from declaration + event ledger must recover both:
-
-1. the final current load projection; and
-2. the complete historical snap path.
-
-## Declared topology versus active topology
-
-A coupling existing in the declaration is not the same thing as it being active in the current run.
-
-Before its source snaps:
+For one snapped source, outgoing active couplings are processed by:
 
 ```text
-coupling declared = true
-coupling active = false
+addressed couplingRef lexicographic ascending
 ```
 
-After its source snaps:
+These rules are fixed by v0.1 and identified by `orderingRule: "cell-ref-lexicographic"`.
+
+No wall clock, async completion order, object insertion order, randomness, or scheduler timing may affect replay.
+
+## Snap / transfer / recoil semantics
+
+For one eligible unsnapped cell:
+
+1. admit and record `snap`;
+2. mark the cell snapped;
+3. mark all of its declared `on-source-snap` outgoing couplings active;
+4. for each outgoing coupling in canonical coupling-ref order, admit and record `transfer`, then add its amount to the target cell;
+5. admit and record one `recoil`, then set:
 
 ```text
-coupling declared = true
-coupling active = true
+load_after = max(0, load_before - recoilAmount)
 ```
 
-No new coupling identity is minted by activation.
+6. reevaluate threshold eligibility after every load-changing transfer/recoil event.
 
-This is critical. The snap changes **state of a declared relationship**, not the structural possibility envelope itself.
+Activation itself is the declared consequence of the already-recorded snap; it does not mint a new coupling identity.
+
+If budget exhaustion occurs after a snap but before one transfer/recoil, the snap and resulting active-coupling projection remain historical/current facts, while the unadmitted later event does not occur.
+
+## Historical irreversibility without material irreversibility
+
+The central v0.1 proof is:
+
+```text
+current projection:
+rest -> loaded -> snapped -> recoiled -> rest-like
+
+history:
+excitation -> snap -> transfer(s) -> recoil -> permanently retained lineage
+```
+
+Returning to a previous load does not return to an equivalent history.
+
+Two executions may end with identical `finalLoads` but different ordered `eventRefs`; they remain different addressed histories.
+
+Recoil may restore current load. It may never delete, replace, reorder, or rewrite a prior snap event.
 
 ## First frozen specimen
 
-The first specimen should contain exactly three cells and two couplings.
+Use exactly three addressed cells and two addressed couplings:
 
 ```text
 A --AB--> B --BC--> C
 ```
 
-Suggested fixed values:
+Cell bodies:
 
 ```text
-A threshold = 5
-A initialLoad = 0
-A recoilAmount = 5
+A: threshold 5, initialLoad 0, recoilAmount 5
+B: threshold 7, initialLoad 4, recoilAmount 7
+C: threshold 6, initialLoad 2, recoilAmount 6
+```
 
-B threshold = 7
-B initialLoad = 4
-B recoilAmount = 7
+Couplings:
 
-C threshold = 6
-C initialLoad = 2
-C recoilAmount = 6
-
-AB transferAmount = 3
-BC transferAmount = 4
+```text
+AB: A -> B, transferAmount 3
+BC: B -> C, transferAmount 4
 ```
 
 Excitation:
 
 ```text
-+5 to A
++5 -> A
 ```
 
-Expected path:
+Expected conceptual path:
 
 ```text
-excitation +5 -> A
-A load 0 -> 5
-A SNAP
-AB activates
-transfer +3 -> B
-B load 4 -> 7
-A recoil 5 -> 0
-B SNAP
-BC activates
-transfer +4 -> C
-C load 2 -> 6
-B recoil 7 -> 0
-C SNAP
-C recoil 6 -> 0
+excitation A: 0 -> 5
+A snap
+AB active
+transfer AB: B 4 -> 7
+A recoil: 5 -> 0
+B snap
+BC active
+transfer BC: C 2 -> 6
+B recoil: 7 -> 0
+C snap
+C recoil: 6 -> 0
 settled
 ```
 
-Expected historical facts:
+Terminal projection:
 
 ```text
-snappedCellRefs = [A, B, C]
-activeCouplingRefs = [AB, BC]
-finalLoads = { A: 0, B: 0, C: 0 }
+snappedCellRefs = [A, B, C] by addressed ref order
+activeCouplingRefs = [AB, BC] by addressed ref order
+finalLoads = { A: 0, B: 0, C: 0 } keyed by addressed cell refs
 ```
 
-The important proof is that **the material load projection returns to baseline while historical state proves that three threshold transitions occurred and two couplings activated.**
+The proof is not merely that a cascade happened. It is that **current loads can return to baseline while the append-only event path permanently distinguishes the run from a run in which no snap occurred.**
 
-## Required contrasting fixtures
+## Contrasting fixtures
 
-### Below-threshold fixture
+### Below threshold
 
-Excitation `+4` to A.
+Excitation `+4 -> A`.
 
-Expected:
+Expected: one excitation event, no snap, no active coupling, terminal `settled`.
 
-- one excitation event;
-- no snap;
-- no active coupling;
-- no transfer;
-- terminal `settled`;
-- all declared topology remains available but inactive.
+### Partial chain
 
-### Partial-chain fixture
+Lower B's initial load so A snaps and transfers to B but B remains below threshold.
 
-Use a smaller B initial load so A snaps and transfers to B, but B remains below threshold.
+Expected: A snapped; AB active; B loaded; B unsnapped; BC inactive; terminal `settled`.
 
-Expected:
+### Simultaneous eligibility
 
-- A snaps;
-- AB activates;
-- B receives transfer;
-- B does not snap;
-- BC remains inactive;
-- terminal `settled`.
+Construct a declared fixture where one transfer makes two unsnapped cells threshold-eligible at once.
 
-### Exhaustion fixture
+Expected: snap order follows addressed `cellRef` lexicographic order and produces stable event refs on repeat execution.
 
-Use the baseline specimen with an event budget that ends after a snap but before one required transfer or recoil event.
+### Exhaustion
 
-Expected:
+Use the baseline specimen with a budget that ends between two required events.
 
-- terminal `exhausted`;
-- no unrecorded state mutation beyond the last addressed event;
-- replay from declaration + event ledger yields the exact same partial current state.
+Expected: terminal `exhausted`; no mutation associated with the unadmitted event; replay of declaration + addressed inputs + ordered events reproduces the same partial current state.
 
-## Historical irreversibility without material irreversibility
+### Same final load, different history
 
-The primitive must make this distinction explicit:
+Create two lawful runs with identical final loads but distinct snap paths.
 
-```text
-current material projection:
-rest -> loaded -> snapped -> recoiled -> rest-like
+Expected: distinct ordered event histories and distinct terminal addresses.
 
-historical projection:
-no event -> excitation -> snap -> transfer -> recoil -> permanent append-only lineage
-```
+## Validation and fail-closed representation
 
-Returning to an equivalent current load does not mean returning to an equivalent world history.
-
-Two runs may therefore end with identical final loads but different histories and must remain independently addressable.
-
-This directly preserves Project 0's broader no-silent-rewrite and stable-identity laws.
-
-## Identity and canonicalization
-
-Snap-State must reuse Project 0's existing canonical serialization/hash path. It must not introduce a second serializer or hashing implementation.
-
-Addressing should follow the same experimental pattern used by L-Branch:
-
-```text
-canonicalizeDomainValue(
-  "Project0-SnapState-v0.1|",
-  { recordType, body: normalizedBody }
-)
-```
-
-Set-like arrays in declarations and terminal records should be normalized with sorted uniqueness before addressing where semantics are set-like.
-
-Ordered event refs must preserve execution order and must not be sorted.
-
-A record verifier must reject malformed refs and hash mismatches.
-
-## Representation and validation rules
-
-Validation must fail closed and must not execute hostile getters/accessors.
-
-The implementation should follow the defensive patterns already established in Project 0's L-Branch and World Encounter validators.
+Validation must reject hostile representation without executing getters/accessors. Reuse the defensive descriptor-based patterns already established by Project 0.
 
 At minimum reject:
 
@@ -610,21 +496,22 @@ At minimum reject:
 - unknown fields;
 - unsupported protocol versions;
 - unsupported ordering rules;
-- empty required strings;
+- empty required identifiers;
 - non-safe integers;
-- negative loads or transfers;
-- zero/negative thresholds;
-- zero/negative event budgets;
-- duplicate cell refs;
-- duplicate coupling refs;
-- undeclared coupling endpoints;
+- negative loads/transfers/recoil;
+- zero or negative thresholds;
+- zero or negative event budgets;
+- duplicate cell/coupling input identities;
+- declaration refs not matching supplied addressed inputs;
+- undeclared excitation target;
+- coupling endpoints outside the declared cell set;
 - sparse arrays;
-- arrays with symbol keys or unexpected own properties;
-- accessors in arrays or nested objects;
-- duplicate declaration refs that normalize inconsistently;
-- cells/couplings supplied outside the declaration envelope.
+- accessor-bearing arrays or nested objects;
+- symbol keys or unexpected own properties;
+- malformed `ssr-...` refs;
+- record/address mismatches.
 
-Suggested stable error codes include:
+Suggested stable error families:
 
 ```text
 SNAPSTATE_INVALID_REPRESENTATION
@@ -634,310 +521,160 @@ SNAPSTATE_ORDERING_UNSUPPORTED
 SNAPSTATE_INVALID_BUDGET
 SNAPSTATE_INVALID_CELL
 SNAPSTATE_INVALID_COUPLING
-SNAPSTATE_DUPLICATE_CELL
-SNAPSTATE_DUPLICATE_COUPLING
+SNAPSTATE_INVALID_EXCITATION
+SNAPSTATE_DUPLICATE_INPUT
 SNAPSTATE_UNDECLARED_CELL
 SNAPSTATE_UNDECLARED_COUPLING
-SNAPSTATE_EVENT_BUDGET_EXHAUSTED
+SNAPSTATE_REFERENCE_MISMATCH
 ```
 
-Exact names may be refined during implementation if the semantic distinctions remain stable.
+Exact error-code subdivision may be refined during the implementation plan, but the failure distinctions above may not be collapsed into permissive fallback behavior.
 
 ## Authority and disclosure boundary
 
-The first v0.1 fixture should not require authority consumption or cross-scope access. It should remain purely local and fixture-backed.
+The v0.1 specimen is local and fixture-backed. It does not consume authority or cross disclosure scopes.
 
-That is intentional: the primitive being proven is structural state transition, not execution capability.
+This is deliberate: Snap-State proves structural state transition, not execution capability.
 
-If future embodiments use privileged external material, they must compose with existing Project 0 authority/disclosure contracts rather than adding ambient authority to Snap-State.
+A threshold crossing, snap, coupling activation, transfer, recoil, or successful cascade **never creates authority**. If a later product uses Snap-State evidence to request an external side effect, that side effect must pass through an independently admitted authority boundary.
 
-A threshold crossing itself can never create authority.
+## No hidden semantics in `load`
 
-A coupling activation itself can never create authority.
+`load` is an abstract deterministic safe integer in Project 0 v0.1. It does not inherently mean force, charge, musical energy, emotional intensity, legal weight, confidence, probability, truth, or authority.
 
-A successful chain itself can never create authority.
+A downstream mapping must declare its own domain meaning and version boundary.
 
-If an implementation requires executable capability to perform a downstream side effect, that side effect belongs behind an independently admitted authority boundary.
+## TDD sequence
 
-## No hidden semantics in "load"
+Implementation should proceed RED -> GREEN in these bounded slices:
 
-Project 0 must treat `load` as an abstract deterministic integer quantity in v0.1.
+1. **Contract/addressing RED** — module absent; require protocol, record types, addressing domain, set normalization, and verification.
+2. **Contract/addressing GREEN** — implement types, validators, addressing, exports.
+3. **Below-threshold RED/GREEN** — excitation changes load but no snap occurs.
+4. **One-snap RED/GREEN** — exact threshold emits snap, activates declared coupling, transfers, recoils, retains history.
+5. **Cascade RED/GREEN** — A causes B causes C with no external command or undeclared topology.
+6. **History/recoil RED/GREEN** — final baseline load does not erase snap lineage.
+7. **Simultaneous-order RED/GREEN** — addressed cell refs fix snap ordering.
+8. **Exhaustion RED/GREEN** — budget admission prevents hidden mutation after exhaustion.
+9. **Hostile-input RED/GREEN** — sparse/accessor inputs fail closed without execution.
+10. **Frozen specimen RED/GREEN** — canonical fixture identities and terminal record are repeatable and source fixtures remain unchanged.
 
-It does not mean, by itself:
-
-- physical force;
-- electrical charge;
-- musical energy;
-- emotional intensity;
-- legal weight;
-- confidence;
-- model probability;
-- authority;
-- semantic truth.
-
-A downstream adapter may define a domain mapping, but the adapter must remain explicit and versioned.
-
-This prevents a useful mechanical metaphor from silently becoming a universal measurement claim.
-
-## TDD / executable specimen strategy
-
-Implementation should use strict RED -> GREEN increments.
-
-### RED 1 — contract absent
-
-Add a focused test that imports the not-yet-existing Snap-State module and requires:
-
-- protocol constant `p0.snap-state/0.1`;
-- valid three-cell declaration;
-- distinct experimental domain prefix;
-- deterministic declaration address;
-- set-like declaration arrays normalize canonically.
-
-Expected RED: module does not exist.
-
-### GREEN 1 — contract and addressing
-
-Implement only types, fail-closed validators, canonical addressing, and public exports.
-
-### RED 2 — below-threshold settling
-
-Require a `+4` excitation to A to produce an excitation event, no snap, no transfer, no active coupling, and terminal `settled`.
-
-### GREEN 2 — load and threshold evaluation
-
-Implement only enough deterministic state handling to satisfy the fixture.
-
-### RED 3 — one snap and coupling activation
-
-Require `+5` to A to cross A's threshold, emit one snap, activate AB, transfer `+3` to B, recoil A, and preserve A's snap history.
-
-### GREEN 3 — snap / transfer / recoil
-
-Implement the minimum event chain.
-
-### RED 4 — neighboring threshold propagation
-
-Use the primed B/C baseline fixture. Require A snap -> B snap -> C snap without any undeclared coupling or external command.
-
-### GREEN 4 — deterministic local cascade
-
-Add deterministic queue/ordering logic with no scheduler or async runtime.
-
-### RED 5 — history survives recoil
-
-Require final loads to return to baseline while snapped cell refs and event history remain complete and addressed.
-
-### GREEN 5 — terminal reconstruction
-
-Implement terminal projection from event history.
-
-### RED 6 — simultaneous threshold ordering
-
-Create a fixture where two cells become threshold-eligible from one preceding event. Require lexicographic `cellRef` ordering and stable event refs.
-
-### GREEN 6 — explicit ordering law
-
-Implement only the fixed v0.1 rule.
-
-### RED 7 — finite exhaustion
-
-Use a too-small `maxEvents`. Require `exhausted`, no hidden mutation after the last recorded event, and deterministic replay of the partial run.
-
-### GREEN 7 — bounded event budget
-
-Implement exact event-budget admission.
-
-### RED 8 — hostile representation
-
-Add accessor-bearing and sparse-array fixtures for declaration, cells, and coupling arrays. Require fail-closed validation without executing hostile getters.
-
-### GREEN 8 — defensive validator completion
-
-Reuse existing descriptor-based defensive patterns.
-
-### Broad gate
+Broad gate:
 
 ```bash
 npm run verify:all
 ```
 
-must pass offline with no model, network, database, queue, scheduler, UI, physics library, or second canonicalizer.
+No model, network, database, queue, scheduler, UI, physics library, or second canonicalizer may be introduced.
 
-## Required adversarial acceptance fixtures
+## Required acceptance evidence
+
+The first implementation must mechanically prove all of the following:
 
 1. below-threshold excitation produces no snap;
 2. exact threshold crossing produces exactly one snap for that cell;
-3. a snapped source activates only couplings already declared from that source;
-4. undeclared cells and couplings can never appear in current or terminal state;
-5. transfer can cause a neighboring declared cell to cross threshold;
-6. a cell snaps at most once per v0.1 run;
-7. recoil changes current load without deleting snap history;
-8. identical final loads with different event histories remain independently addressable;
-9. simultaneous threshold crossings use deterministic declared ordering;
-10. identical canonical inputs replay to identical declaration, event, and terminal refs;
-11. event budget exhaustion is distinct from settled termination;
-12. no mutation may occur after budget exhaustion without a corresponding event record;
-13. source fixtures remain unchanged after execution;
-14. reordering set-like declaration arrays does not change declaration identity;
-15. reordering ordered event refs is not canonicalized away;
-16. coupling endpoints outside the declared cell set fail closed;
-17. hostile getters/accessors are rejected without execution;
-18. sparse arrays and unexpected own properties fail closed;
-19. no canonical Project 0 node kind, relationship kind, or receipt family is changed;
-20. full verification remains offline and deterministic.
-
-## Error handling and reconstruction
-
-The evaluator should not throw for ordinary lawful terminal conditions. `settled` and `exhausted` are normal terminal dispositions represented in the terminal record.
-
-Malformed declarations may be handled through a validation error before addressed execution begins. If the implementation chooses to materialize an `inadmissible` terminal record, it must do so without pretending that invalid unaddressable source bytes have a canonical declaration identity.
-
-This exact boundary should be fixed in the implementation plan after inspecting how L-Branch represents invalid declarations.
-
-Reconstruction must be possible from:
-
-```text
-addressed declaration
-+ addressed cell/coupling fixture identities or canonical local inputs
-+ ordered event refs/events
-= final current projection + complete historical path
-```
-
-No hidden mutable state may be required.
+3. a cell snaps at most once per v0.1 run;
+4. a snap activates only predeclared couplings from that cell;
+5. undeclared cells/couplings never appear;
+6. transfer can make another declared cell threshold-eligible;
+7. recoil changes current state without deleting event history;
+8. identical final loads with different histories remain distinguishable;
+9. simultaneous eligibility uses deterministic addressed-ref ordering;
+10. identical canonical inputs replay to identical declaration/event/terminal refs;
+11. exhaustion is distinct from settling;
+12. no state mutation occurs without a corresponding admitted addressed event;
+13. source input records remain unchanged after execution;
+14. set-like declaration refs canonicalize independent of source array order;
+15. ordered event refs preserve execution order and are not sorted;
+16. hostile getters/accessors are rejected without execution;
+17. sparse arrays and unexpected own properties fail closed;
+18. no Project 0 canonical node, relationship, receipt, NAV, World Encounter, L-Branch, or issue #30 contract is changed;
+19. verification remains offline and deterministic;
+20. the exact implementation head passes `npm run verify:all`.
 
 ## Compatibility and migration
 
-The intended v0.1 effect is additive and experimental.
+The v0.1 effect is additive and experimental. Existing canonical records require no migration.
 
-No migration is required for:
-
-- canonical Project 0 nodes;
-- canonical relationships;
-- canonical receipt families;
-- NAV;
-- World Encounter;
-- L-Branch;
-- Resonance Seed work;
-- issue #30 Resonant Tension work.
-
-If implementation appears to require any of the following, stop and create an explicit version-boundary/ADR decision before continuing:
+Stop and require a separate version-boundary/ADR decision if implementation appears to require:
 
 - a tenth universal node kind;
 - a new universal relationship kind;
-- mutation of L-Branch v0.1 contracts;
-- reinterpretation of `influenceRefs` or `authorityRefs`;
-- a second canonicalizer or hasher;
-- floating-point canonical identity rules;
-- a scheduler or autonomous runtime;
-- hidden model inference inside deterministic verification;
-- product-specific visual/audio semantics in the Project 0 kernel.
+- mutation of L-Branch v0.1;
+- reinterpretation of `authorityRefs` or `influenceRefs`;
+- a second canonicalizer/hasher;
+- floating-point canonical identity;
+- a scheduler or autonomous loop;
+- hidden model inference in deterministic verification;
+- product-specific visual/audio semantics in Project 0.
 
 ## Downstream adoption after proof
 
-Only after the deterministic Project 0 specimen exists should downstream products adopt the primitive.
+Only after the deterministic Project 0 specimen lands should products adopt the primitive.
 
-### Haunted Toaster
+Potential later embodiments:
 
-Possible embodiment:
-
-```text
-musical/visual evidence
-  -> domain adapter maps evidence to bounded integer excitation
-  -> topology cell crosses threshold
-  -> alternate predeclared visual coupling becomes active
-  -> topology response changes
-  -> recoil allows later visual return
-  -> render receipt preserves the snap lineage
-```
-
-This could support temporary topology mutations without treating one global filter or topology as permanent state.
-
-### Haunted Phonograph
-
-Possible embodiment:
-
-```text
-motif/harmonic/rhythmic evidence
-  -> bounded excitation
-  -> local musical cell snaps
-  -> predeclared transformation lane conducts
-  -> downstream motif receives load
-  -> resulting score keeps exact mutation lineage
-```
-
-### TranchNode / continuity experiments
-
-Possible later use: thresholded local reconstruction or topology activation. This must remain speculative until TranchNode owns an explicit compatible version boundary.
-
-### Corpus OS / NAV
-
-A snap event may later be useful as witnessable history or attention-shaping evidence. It must not become authority merely because a threshold was crossed.
+- **Haunted Toaster** — bounded integer evidence can excite visual topology cells; a snap activates an alternate predeclared visual coupling; recoil allows return while the render receipt preserves lineage.
+- **Haunted Phonograph** — motif/rhythm/harmony adapters can excite declared musical cells and preserve exact mutation lineage.
+- **TranchNode** — possible thresholded continuity/reconstruction experiments only after an explicit compatible version boundary exists.
+- **Corpus OS / NAV** — snap history may become witnessable evidence or attention-shaping influence, never authority merely because a threshold was crossed.
 
 ## GitBook projection rule
 
-Before executable proof, GitBook may hold this only as **Frontier / approved design** if publication is useful.
+Before executable proof, GitBook may represent Snap-State only as **Frontier / approved design**. After a deterministic Project 0 specimen lands, GitBook may project the field law with exact issue/PR/commit evidence and Project 0 named as implementation authority.
 
-After executable proof lands, GitBook may project the field law with exact Project 0 evidence and commit/PR lineage.
-
-GitBook must not claim the primitive is a universal Static Collective Pattern merely because the design is compelling.
-
-Promotion should require at least one landed deterministic Project 0 specimen and later independent downstream evidence if a portable Pattern is proposed.
+Do not promote Snap-State into a universal Static Collective Pattern on design strength alone. A later Pattern promotion should require landed Project 0 proof plus independent downstream evidence.
 
 ## Security review focus
 
 Reviewers should challenge these questions directly:
 
-1. Can any event introduce a cell or coupling absent from the declaration?
-2. Can active-state change mutate the declared topology envelope?
-3. Can a cell snap twice in v0.1 through an accidental cycle?
-4. Can event-budget exhaustion leave unrecorded state mutation?
-5. Can simultaneous eligibility produce nondeterministic ordering?
-6. Can a hostile accessor execute during validation or normalization?
-7. Can set normalization erase execution ordering that should remain historical?
-8. Can a threshold crossing accidentally imply authority, truth, confidence, or policy standing?
-9. Can recoil erase or rewrite prior snap history?
-10. Can a second canonicalization path emerge for convenience?
+1. Can an event introduce topology absent from the declaration?
+2. Can active-state change mutate the declared envelope?
+3. Can any cell snap twice in v0.1?
+4. Can exhaustion leave unrecorded state mutation?
+5. Can simultaneous eligibility become order-dependent on runtime timing?
+6. Can hostile accessors execute during validation/normalization?
+7. Can set normalization erase ordered history?
+8. Can snap or threshold status accidentally imply authority, truth, confidence, or policy standing?
+9. Can recoil erase prior snap history?
+10. Can any second identity/canonicalization path appear?
 
 Any yes answer is a design violation.
 
-## Definition of done for the first implementation
+## Definition of done
 
-The implementation is complete only when all of the following are true:
+The first implementation is complete only when:
 
-- one versioned experimental Snap-State module exists in Project 0;
-- declaration/cell/coupling/event/terminal shapes are mechanically validated;
-- records are deterministically addressed under `Project0-SnapState-v0.1|`;
-- one frozen three-cell specimen proves a threshold cascade;
-- one contrasting specimen proves below-threshold settling;
-- one contrasting specimen proves partial-chain settling;
-- one fixture proves deterministic simultaneous ordering;
-- one fixture proves exhaustion without hidden mutation;
-- recoil restores current load while historical snap evidence remains;
+- `src/snap-state/` exposes one experimental versioned module;
+- cell/coupling/excitation/declaration/event/terminal records are fail-closed and deterministically addressed;
+- the three-cell frozen specimen proves the cascade;
+- below-threshold, partial-chain, simultaneous-order, exhaustion, and same-final-load/different-history fixtures pass;
+- recoil restores current load without historical erasure;
 - undeclared topology cannot emerge;
-- hostile input representation fails closed without getter execution;
-- existing L-Branch and issue #30 boundaries remain unchanged;
-- `npm run verify:all` passes on the exact implementation head;
-- PR review explicitly checks the declared-topology / active-topology / history distinction;
-- GitBook publication, if performed, cites Project 0 as implementation authority and preserves unresolved fog.
+- hostile representations fail closed without getter execution;
+- L-Branch and issue #30 remain unchanged;
+- the exact implementation head passes `npm run verify:all`;
+- PR review explicitly checks declared topology vs active topology vs event history;
+- any GitBook projection cites Project 0 as implementation authority and preserves unresolved fog.
 
 ## Residual fog
 
-The following questions are intentionally left unresolved for later versions:
+Deliberately deferred beyond v0.1:
 
-- whether cells may snap more than once in one run;
-- whether recoil should have profiles beyond integer subtraction;
-- whether coupling activation can later deactivate in the same run;
-- whether thresholds can themselves change through declared history;
-- whether multiple excitation sources belong in one declaration;
-- whether continuous-time or frequency-domain models are useful enough to justify a separate primitive;
-- how Snap-State should compose mechanically with L-Branch;
-- how issue #30 resonance evaluation might produce a lawful excitation without coupling semantic judgment to execution;
-- whether downstream independent specimens justify promoting part of this design into a portable Pattern.
+- repeated snaps by one cell;
+- coupling deactivation;
+- mutable thresholds;
+- multiple excitation records in one run;
+- recoil profiles beyond safe-integer subtraction;
+- continuous time, frequency, velocity, or other physical models;
+- stochastic or probabilistic behavior;
+- exact mechanical composition with L-Branch;
+- how issue #30 semantic resonance might lawfully produce a Snap-State excitation;
+- whether independent downstream specimens eventually justify promotion to a portable Pattern.
 
-Those are not blockers for v0.1.
+None is a blocker for v0.1.
 
 ## Final invariant
-
-The entire first slice can be tested against one sentence:
 
 > **The system may change which declared paths are active because a declared local threshold was crossed, but it may never pretend that the resulting current state erases the path by which it got there.**
