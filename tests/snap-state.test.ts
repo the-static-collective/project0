@@ -5,6 +5,7 @@ import {
   SNAP_STATE_DOMAIN_PREFIX,
   SNAP_STATE_PROTOCOL_VERSION,
   addressSnapStateRecord,
+  runSnapState,
 } from "../src/snap-state/index";
 
 const A = { cellId: "A", threshold: 5, initialLoad: 0, recoilAmount: 5 };
@@ -41,4 +42,40 @@ test("normalizes only declaration sets", () => {
     addressSnapStateRecord("declaration", declaration).ref,
     addressSnapStateRecord("declaration", { ...declaration, cellRefs: [a.ref, b.ref] }).ref,
   );
+});
+
+test("settles below threshold after one addressed excitation", () => {
+  const cell = addressSnapStateRecord("cell", A);
+  const excitationBody = {
+    excitationId: "pulse-below",
+    targetCellRef: cell.ref,
+    amount: 4,
+  };
+  const excitation = addressSnapStateRecord("excitation", excitationBody);
+  const declaration = {
+    protocolVersion: SNAP_STATE_PROTOCOL_VERSION,
+    snapshotRef: "snapshot-below",
+    purposeRef: "purpose-below",
+    excitationRef: excitation.ref,
+    cellRefs: [cell.ref],
+    couplingRefs: [],
+    evaluatorId: "snap-state-reference",
+    evaluatorVersion: "0.1.0",
+    orderingRule: "cell-ref-lexicographic" as const,
+    budget: { maxEvents: 4 },
+  };
+
+  const result = runSnapState({
+    declaration,
+    cells: [A],
+    couplings: [],
+    excitation: excitationBody,
+  });
+
+  assert.deepEqual(result.events.map((event) => event.body.kind), ["excitation"]);
+  assert.equal(result.events[0].body.loadAfter, 4);
+  assert.equal(result.terminal.body.disposition, "settled");
+  assert.deepEqual(result.terminal.body.snappedCellRefs, []);
+  assert.deepEqual(result.terminal.body.activeCouplingRefs, []);
+  assert.equal(result.terminal.body.finalLoads[cell.ref], 4);
 });
