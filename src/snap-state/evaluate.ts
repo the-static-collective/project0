@@ -36,6 +36,40 @@ export type SnapStateExecutionResultV01 = {
   terminal: AddressedSnapStateRecord<SnapStateTerminalRecordV01>;
 };
 
+function readExecutionEnvelope(value: unknown): SnapStateExecutionInputV01 {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new SnapStateValidationError("SNAPSTATE_INVALID_REPRESENTATION");
+  }
+  const proto = Object.getPrototypeOf(value);
+  if (proto !== Object.prototype && proto !== null) {
+    throw new SnapStateValidationError("SNAPSTATE_INVALID_REPRESENTATION");
+  }
+  if (Object.getOwnPropertySymbols(value).length > 0) {
+    throw new SnapStateValidationError("SNAPSTATE_INVALID_REPRESENTATION");
+  }
+
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const expected = ["declaration", "cells", "couplings", "excitation"] as const;
+  const expectedSet = new Set<string>(expected);
+  if (Object.keys(descriptors).some((key) => !expectedSet.has(key))) {
+    throw new SnapStateValidationError("SNAPSTATE_UNKNOWN_FIELD");
+  }
+  for (const key of expected) {
+    const descriptor = descriptors[key];
+    if (!descriptor) throw new SnapStateValidationError("SNAPSTATE_MISSING_FIELD");
+    if (descriptor.get || descriptor.set || !descriptor.enumerable || !("value" in descriptor)) {
+      throw new SnapStateValidationError("SNAPSTATE_INVALID_REPRESENTATION");
+    }
+  }
+
+  return {
+    declaration: descriptors.declaration.value as SnapStateDeclarationV01,
+    cells: descriptors.cells.value as SnapCellV01[],
+    couplings: descriptors.couplings.value as SnapCouplingV01[],
+    excitation: descriptors.excitation.value as SnapExcitationV01,
+  };
+}
+
 function sorted(values: readonly string[]): string[] {
   return [...values].sort();
 }
@@ -51,21 +85,22 @@ function requireUniqueRefs(refs: readonly string[], code: string): void {
 }
 
 export function runSnapState(input: SnapStateExecutionInputV01): SnapStateExecutionResultV01 {
-  validateSnapStateDeclaration(input.declaration);
-  const cellValues = validateSnapCellList(input.cells);
-  const couplingValues = validateSnapCouplingList(input.couplings);
-  validateSnapExcitation(input.excitation);
+  const safeInput = readExecutionEnvelope(input);
+  validateSnapStateDeclaration(safeInput.declaration);
+  const cellValues = validateSnapCellList(safeInput.cells);
+  const couplingValues = validateSnapCouplingList(safeInput.couplings);
+  validateSnapExcitation(safeInput.excitation);
 
   const cells = cellValues.map((cell) => addressSnapStateRecord("cell", cell));
   const couplings = couplingValues.map((coupling) => addressSnapStateRecord("coupling", coupling));
-  const excitation = addressSnapStateRecord("excitation", input.excitation);
+  const excitation = addressSnapStateRecord("excitation", safeInput.excitation);
 
   requireUniqueRefs(cells.map((cell) => cell.ref), "SNAPSTATE_DUPLICATE_CELL");
   requireUniqueRefs(couplings.map((coupling) => coupling.ref), "SNAPSTATE_DUPLICATE_COUPLING");
 
-  if (!sameRefs(cells.map((cell) => cell.ref), input.declaration.cellRefs)
-    || !sameRefs(couplings.map((coupling) => coupling.ref), input.declaration.couplingRefs)
-    || excitation.ref !== input.declaration.excitationRef) {
+  if (!sameRefs(cells.map((cell) => cell.ref), safeInput.declaration.cellRefs)
+    || !sameRefs(couplings.map((coupling) => coupling.ref), safeInput.declaration.couplingRefs)
+    || excitation.ref !== safeInput.declaration.excitationRef) {
     throw new SnapStateValidationError("SNAPSTATE_DECLARATION_INPUT_MISMATCH");
   }
 
@@ -79,7 +114,7 @@ export function runSnapState(input: SnapStateExecutionInputV01): SnapStateExecut
     }
   }
 
-  const declaration = addressSnapStateRecord("declaration", input.declaration);
+  const declaration = addressSnapStateRecord("declaration", safeInput.declaration);
   const currentLoads = new Map(cells.map((cell) => [cell.ref, cell.body.initialLoad]));
   const snapped = new Set<string>();
   const activeCouplings = new Set<string>();
