@@ -11,7 +11,7 @@ import type {
 } from "./types";
 import {
   LBranchValidationError,
-  validateLBranchCandidate,
+  validateLBranchCandidateList,
   validateLBranchDeclaration,
 } from "./validate";
 
@@ -45,14 +45,10 @@ export function runLBranch(
   const addressedDeclaration = addressLBranchRecord("declaration", declaration);
   const branch = addressedDeclaration.body;
 
-  if (!Array.isArray(candidates)) {
-    throw new LBranchValidationError("LBRANCH_INVALID_CANDIDATES");
-  }
-
-  const normalizedCandidates = candidates.map((candidate) => {
-    validateLBranchCandidate(candidate);
-    return normalizeCandidate(candidate);
-  }).sort((left, right) => left.depth - right.depth || left.candidateRef.localeCompare(right.candidateRef));
+  const candidateValues = validateLBranchCandidateList(candidates);
+  const normalizedCandidates = candidateValues
+    .map((candidate) => normalizeCandidate(candidate))
+    .sort((left, right) => left.depth - right.depth || left.candidateRef.localeCompare(right.candidateRef));
 
   const seenCandidateRefs = new Set<string>();
   for (const candidate of normalizedCandidates) {
