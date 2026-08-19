@@ -106,6 +106,8 @@ export function runLBranch(
       let refusalReason: string | null = null;
       if (!branch.participantRefs.includes(candidate.candidateRef)) {
         refusalReason = "LBRANCH_UNDECLARED_PARTICIPANT";
+      } else if (candidate.requiredPolicyRef !== branch.policyRef) {
+        refusalReason = "LBRANCH_POLICY_REQUIRED";
       } else if (candidate.requiresAuthorityRefs.some((ref) => !branch.authorityRefs.includes(ref))) {
         refusalReason = "LBRANCH_AUTHORITY_REQUIRED";
       }
