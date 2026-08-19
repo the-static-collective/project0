@@ -1,70 +1,100 @@
-# Continuity Witness v0 Implementation Plan
+# Typed Continuity Braid v0 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Use superpowers:test-driven-development for every production-code task and superpowers:verification-before-completion before any completion claim.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Use superpowers:test-driven-development for every production-code task and superpowers:verification-before-completion before any completion claim.
 
-**Goal:** Implement the smallest offline Project 0 continuity profile that can make an addressed, purpose-relative claim about what survived a transformation, what changed or was lost, which roots/environment are required for reconstruction, and why the claim cannot manufacture authority or impersonate historical occurrence.
+**Goal:** Implement the smallest offline Project 0 Typed Continuity Braid that can make deterministic, purpose-relative, root-closed claims about which kinds of continuity crossed a boundary, preserve explicit breakage and reconstitution, refuse cross-lane genealogy laundering, and never manufacture authority.
 
-**Architecture:** Add one experimental `src/continuity-profile/` seam parallel to other bounded Project 0 specimens. Reuse `canonicalizeDomainValue(...)` for deterministic representation. The profile remains independent of the frozen nine-kind ontology and canonical receipt union. It validates structural continuity claims and produces conformance evidence; downstream products retain all domain-specific meaning and authority admission.
+**Architecture:** Add one experimental `src/continuity-profile/` seam. The seam owns portable lane grammar, structural validation, deterministic addressing, explicit conformance/refusal checks, and transparent read models. Reuse Project 0 canonicalization; do not modify the frozen ontology, canonical receipt family, reference-kernel authority semantics, or downstream repositories. Non-transitivity is executable: a stronger long-line claim must be a new explicit claim over the same lane, its parent refs, and its material roots.
 
-**Tech Stack:** TypeScript 7, Node.js `node:test` / `node:assert`, existing `canonicalizeDomainValue`, existing Project 0 verification commands.
+**Tech Stack:** TypeScript 7, Node.js `node:test` / `node:assert`, existing `validateForCanonicalization(...)` and `canonicalizeDomainValue(...)`, existing Project 0 verification commands.
 
 **Spec:** `docs/superpowers/specs/2026-08-19-continuity-witness-v0-design.md` and GitHub issue #8.
 
 ## Global Constraints
 
-- Protocol: `p0.continuity/0.1`.
-- No global Continuity service, DB, event bus, registry, current-state daemon, UI, model, network, scheduler, or identity provider.
-- No new ontology kind, relationship type, or canonical receipt family.
-- Reuse `canonicalizeDomainValue`; do not create a second serializer/hasher.
-- Continuity claims are evidence only. Copying/transporting a claim cannot create authority.
-- `authorityContinuity` is declarative metadata only: `none | separately-evidenced | unresolved`.
-- Project 0 never decides whether a downstream semantic dimension is important or true.
-- Exact material roots must close; missing or invented roots fail conformance.
-- Environment/decoder/runtime/policy context is explicit when declared by the profile.
-- `preserved`, `transformed`, `lost`, and `unresolved` remain distinct.
-- A dimension must not silently occupy contradictory terminal classifications in one claim.
-- Multiple lawful continuations from the same roots remain legal and address-distinct.
-- Reconstruction must not silently claim historical occurrence identity.
-- Existing `src/witness-residue.ts`, NAV, World Encounter, Snap-State, L-Branch, and reference-kernel semantics remain unchanged.
-- Existing artifacts remain valid without a continuity profile.
-- Broad gate: `npm run verify:all`.
+- Protocol is exactly `p0.continuity/0.1`.
+- Address domain prefix is local to this experimental seam: `Project0-Continuity-v0.1|`.
+- Continuity refs are `cty-<64 lowercase hex>`.
+- Portable lane kinds are exactly: `identity`, `authority`, `custody`, `participants`, `protocol`, `text-schema`, `purpose-meaning`, `representation-story`.
+- Portable modes are exactly: `preserved`, `transformed`, `transferred`, `reconstituted`, `lost`, `broken`, `unresolved`.
+- Each lane appears at most once in one claim. A lane chooses exactly one mode; slash-separated or blended modes fail validation.
+- Downstream dimensions remain open strings. Project 0 does not decide whether a domain-specific dimension is true or important.
+- Continuity is purpose-relative and non-transitive by default.
+- Evidence for one lane never silently establishes another lane.
+- A `broken` or `lost` parent lane cannot silently become `preserved`, `transformed`, or `transferred` in an uninterrupted composed claim.
+- `reconstituted` remains distinct from `preserved`; normalization never collapses them.
+- Material root closure is checked against independently supplied context, not only against roots self-declared by the claim.
+- `occurrenceClaim` is exactly `continuation-only`.
+- Authority is represented only as a continuity lane backed by evidence refs. Project 0 never admits, executes, renews, validates, or mints the referenced authority.
+- Copying, JSON round-tripping, serialization, retrieval, or transport of a claim grants no capability.
+- No global Continuity service, registry, database, event bus, identity provider, current-state daemon, UI, network dependency, model, scheduler, or historical truth engine.
+- No new ontology kind, universal relationship type, or canonical receipt family.
+- Do not add the continuity prefix to global `DOMAIN_PREFIXES` in v0.
+- Reuse `validateForCanonicalization(...)` and `canonicalizeDomainValue(...)`; do not create a second canonicalizer or hasher.
+- Existing NAV, World Encounter, Snap-State, L-Branch, witness-residue, reference-kernel, and authority semantics remain unchanged.
+- Existing Project 0 artifacts remain valid without a continuity claim.
+- Broad verification gate is `npm run verify:all`.
 
-## Proposed Files
+## File Structure
 
-- `src/continuity-profile/types.ts` — v0 public records and status unions.
+- `src/continuity-profile/types.ts` — frozen v0 lane, mode, claim, and projection types.
 - `src/continuity-profile/validate.ts` — descriptor-safe, fail-closed structural validation.
-- `src/continuity-profile/address.ts` — continuity domain prefix, normalization, address + verification using existing canonicalizer.
-- `src/continuity-profile/inspect.ts` — pure `deriveWhyCurrent(...)` / `deriveStillAlive(...)` projections over an admitted claim.
-- `src/continuity-profile/index.ts` — public experimental seam.
-- `fixtures/continuity-profile/specimens.ts` — positive and adversarial frozen fixture family.
-- `tests/continuity-profile.test.ts` — ordinary contract/address/read-model proofs.
-- `tests/continuity-profile-adversarial.test.ts` — root closure, contradiction, impersonation, authority-copy, hostile representation proofs.
-- `tests/continuity-profile-specimen.test.ts` — deterministic frozen specimen and plurality proofs.
-- `docs/continuity-profile-v0.md` — compact consumer boundary after code is green.
+- `src/continuity-profile/address.ts` — deterministic normalization, addressing, and verification.
+- `src/continuity-profile/conformance.ts` — root closure, lane establishment, and explicit composition/refusal checks.
+- `src/continuity-profile/inspect.ts` — pure `Why Current?` / `Still Alive?` projections.
+- `src/continuity-profile/index.ts` — bounded public experimental exports.
+- `fixtures/continuity-profile/specimens.ts` — frozen positive, plural, gap, authority, and false-genealogy specimens.
+- `tests/continuity-profile.test.ts` — public contract, addressing, and read-model tests.
+- `tests/continuity-profile-adversarial.test.ts` — hostile representation, authority laundering, root erasure, and cross-lane attacks.
+- `tests/continuity-profile-specimen.test.ts` — deterministic frozen specimen, plurality, break/reconstitution, and non-transitivity proofs.
+- `docs/continuity-profile-v0.md` — consumer boundary and non-normative adapter guidance.
 
-## Task 1 — Freeze the record contract before behavior
+---
 
-**Files:**
-- Create `tests/continuity-profile.test.ts`
-- Create `src/continuity-profile/types.ts`
-- Create `src/continuity-profile/index.ts`
+## Task 1 — Freeze the typed braid contract before behavior
 
-### RED
+**Files:** Create `src/continuity-profile/types.ts`, `src/continuity-profile/index.ts`, `tests/continuity-profile.test.ts`.
 
-Write compile/runtime tests requiring these exported contracts:
+- [ ] **RED:** Add compile/runtime tests requiring the public records below and proving the continuity module imports no downstream repository code or host/network/model libraries.
 
 ```ts
-export type ContinuityDisposition =
-  | "preserved"
-  | "transformed"
-  | "lost"
-  | "unresolved";
+export const CONTINUITY_LANES = [
+  "identity",
+  "authority",
+  "custody",
+  "participants",
+  "protocol",
+  "text-schema",
+  "purpose-meaning",
+  "representation-story",
+] as const;
+export type ContinuityLaneKind = typeof CONTINUITY_LANES[number];
+
+export const CONTINUITY_MODES = [
+  "preserved",
+  "transformed",
+  "transferred",
+  "reconstituted",
+  "lost",
+  "broken",
+  "unresolved",
+] as const;
+export type ContinuityMode = typeof CONTINUITY_MODES[number];
 
 export type ContinuityDimension = {
   dimension: string;
-  disposition: ContinuityDisposition;
   evidenceRefs: string[];
   note?: string;
+};
+
+export type ContinuityLaneClaim = {
+  lane: ContinuityLaneKind;
+  mode: ContinuityMode;
+  dimensions: ContinuityDimension[];
+  transformationRefs: string[];
+  residualRefs: string[];
+  uncertainty: string[];
+  doesNotEstablish: ContinuityLaneKind[];
 };
 
 export type ContinuityEnvironment = {
@@ -79,306 +109,228 @@ export type ContinuityClaimV0 = {
   purpose: string;
   subjectRef: string;
   ancestorRoots: string[];
-  transformationRefs: string[];
   environment: ContinuityEnvironment;
-  dimensions: ContinuityDimension[];
-  residualRefs: string[];
+  lanes: ContinuityLaneClaim[];
   outputRefs: string[];
   parentContinuityRefs: string[];
-  authorityContinuity: "none" | "separately-evidenced" | "unresolved";
   occurrenceClaim: "continuation-only";
-  uncertainty: string[];
 };
 ```
 
-Require no imports from Corpus OS, TranchNode, Toaster, jublEchat, model libraries, host ports, or network code.
+- [ ] Run `npm run check`. Expected RED: module/exports missing.
+- [ ] **GREEN:** Add only these records/constants and bounded index exports. Do not add runtime behavior yet.
+- [ ] Run `npm run check` and the focused compiled test.
+- [ ] Commit: `feat: define typed continuity braid v0 contract`.
 
-Run:
+---
 
-```bash
-npm run check
-```
+## Task 2 — Validate hostile representations and lane-local semantics fail closed
 
-Expected RED: missing module/exports.
+**Files:** Create `src/continuity-profile/validate.ts`; extend `tests/continuity-profile.test.ts`; create `tests/continuity-profile-adversarial.test.ts`.
 
-### GREEN
+- [ ] **RED:** Specify `validateContinuityClaim(value: unknown): ContinuityClaimV0`.
+- [ ] Require `validateForCanonicalization(value)` to run before semantic property reads so getters/accessors are rejected rather than executed.
+- [ ] Reject wrong schema; missing/empty `purpose`, `subjectRef`, or roots; custom prototypes; accessors; symbols; functions; `undefined`; cycles; sparse arrays; unsafe canonical values; malformed nested records; unknown top-level keys.
+- [ ] Reject duplicate ancestor roots, outputs, parent refs, lanes, dimensions within a lane, evidence refs, transformation refs, residual refs, uncertainty strings, policy refs, context refs, or `doesNotEstablish` refs where duplication would hide structure.
+- [ ] Reject unknown lane kinds and modes. Explicitly test `broken/unresolved` and `preserved/transformed` as invalid modes.
+- [ ] Reject an empty lane list, empty dimension names, empty evidence-ref lists, and a lane that lists itself in `doesNotEstablish`.
+- [ ] Reject `occurrenceClaim` values other than `continuation-only`.
+- [ ] Reject an undeclared convenience field such as top-level `authorityRef`; evidence must live inside a typed lane dimension.
+- [ ] Run `npm run build && node --test .build/tests/continuity-profile-adversarial.test.js`. Expected RED: validator absent.
+- [ ] **GREEN:** Implement descriptor-safe structural validation using existing canonicalization defenses. Do not infer semantic truth, legal identity, or authority.
+- [ ] Re-run focused tests and `npm run check`.
+- [ ] Commit: `feat: validate typed continuity claims fail closed`.
 
-Add only the types and index export required by the test. Keep domain dimensions as open strings; do not invent a global taxonomy.
+---
 
-Run focused compile/test, then:
+## Task 3 — Address braid claims deterministically without creating an identity service
 
-```bash
-npm run check
-```
+**Files:** Create `src/continuity-profile/address.ts`; extend `src/continuity-profile/index.ts` and `tests/continuity-profile.test.ts`.
 
-### Commit
+- [ ] **RED:** Specify `normalizeContinuityClaim(value)`, `addressContinuityClaim(value)`, and `verifyContinuityClaim(ref, value)`.
+- [ ] Normalize by sorting copies of set-like fields: ancestor roots, policy/context refs, outputs, parent refs, lanes by lane name, dimensions by dimension name, dimension evidence refs, transformation refs, residual refs, uncertainty, and `doesNotEstablish`. Never mutate caller input and never silently deduplicate.
+- [ ] Prove insertion order and set-like input order do not change an address.
+- [ ] Prove purpose, roots, environment/decoder/runtime, lane mode, evidence, residuals, uncertainty, explicit non-establishment declarations, and lineage changes do change the address.
+- [ ] Prove identical visible output refs with different ancestry yield different continuity refs.
+- [ ] **GREEN:** Validate first, normalize copies, then call `canonicalizeDomainValue("Project0-Continuity-v0.1|", normalizedClaim)` and return `cty-${digestHex}`. Verification requires exact `cty-[0-9a-f]{64}` plus recomputation.
+- [ ] Do not modify global `DOMAIN_PREFIXES`.
+- [ ] Run focused tests and `npm run check`.
+- [ ] Commit: `feat: address typed continuity braid deterministically`.
 
-```bash
-git add src/continuity-profile/types.ts src/continuity-profile/index.ts tests/continuity-profile.test.ts
-git commit -m "feat: define continuity profile v0 contract"
-```
+---
 
-## Task 2 — Fail closed on malformed and contradictory claims
+## Task 4 — Prove material root closure from independent context
 
-**Files:**
-- Create `src/continuity-profile/validate.ts`
-- Extend `tests/continuity-profile.test.ts`
-- Create `tests/continuity-profile-adversarial.test.ts`
+**Files:** Create `src/continuity-profile/conformance.ts`, `fixtures/continuity-profile/specimens.ts`, `tests/continuity-profile-specimen.test.ts`; extend adversarial tests and public exports.
 
-### RED
-
-Specify `validateContinuityClaim(value: unknown): ContinuityClaimV0` and require rejection of:
-
-- wrong/missing schema;
-- empty `purpose`, `subjectRef`, or `ancestorRoots`;
-- duplicate roots, outputs, parent refs, or evidence refs where duplicates would hide structure;
-- unknown dispositions;
-- empty dimension names;
-- one dimension declared in mutually contradictory dispositions;
-- `occurrenceClaim` other than `continuation-only`;
-- accessors/getters, custom prototypes, sparse arrays, symbols, functions, `undefined`, cycles, or unsafe canonical values;
-- malformed nested environment records.
-
-Use the same defensive representation expectations already enforced by Project 0 canonicalization. Validation must inspect data without executing getters.
-
-Run:
-
-```bash
-npm run build && node --test .build/tests/continuity-profile-adversarial.test.js
-```
-
-Expected RED: validator absent.
-
-### GREEN
-
-Implement descriptor-safe validation. Reuse `validateForCanonicalization(...)` after top-level descriptor admission rather than duplicating numeric/string canonicalization rules.
-
-Do not validate downstream semantic truth.
-
-### Commit
-
-```bash
-git add src/continuity-profile/validate.ts tests/continuity-profile.test.ts tests/continuity-profile-adversarial.test.ts
-git commit -m "feat: validate continuity claims fail closed"
-```
-
-## Task 3 — Address claims without creating a new identity system
-
-**Files:**
-- Create `src/continuity-profile/address.ts`
-- Extend `src/continuity-profile/index.ts`
-- Extend `tests/continuity-profile.test.ts`
-
-### RED
-
-Require:
+- [ ] **RED:** Freeze these local reason codes:
 
 ```ts
-addressContinuityClaim(claim) -> `cty-<64 lowercase hex>`
-verifyContinuityClaim(ref, claim) -> boolean
+export type ContinuityConformanceReason =
+  | "MISSING_MATERIAL_ROOT"
+  | "UNDECLARED_ROOT"
+  | "MISSING_PARENT_CONTINUITY"
+  | "MISSING_PARENT_ROOT"
+  | "LANE_MISMATCH"
+  | "BROKEN_PARENT_LANE"
+  | "LOST_PARENT_LANE";
+
+export type ContinuityConformanceResult = {
+  status: "conforming" | "refused";
+  reasonCodes: ContinuityConformanceReason[];
+};
 ```
 
-Use domain prefix:
+- [ ] Specify `checkContinuityClosure({ claim, requiredMaterialRoots, allowedMaterialRoots })`.
+- [ ] A required material root absent from the claim returns `MISSING_MATERIAL_ROOT`; a declared root outside independently allowed roots returns `UNDECLARED_ROOT`.
+- [ ] The helper must not mutate claim or root inputs, and reason ordering must be deterministic.
+- [ ] Freeze specimens for exact one-root continuity, multi-root continuity, omitted-root refusal, invented-root refusal, and two distinct lawful realizations sharing roots/purpose.
+- [ ] **GREEN:** Implement the smallest pure closure checker. Do not let the claim determine the only source of required/allowed roots.
+- [ ] Run focused specimen/adversarial tests.
+- [ ] Commit: `feat: enforce continuity material root closure`.
 
-```text
-Project0-Continuity-v0.1|
-```
+---
 
-Prove:
+## Task 5 — Make non-transitivity executable and preserve lawful reconstitution
 
-- key insertion order does not change address;
-- array order remains semantically significant unless normalization explicitly sorts set-like fields;
-- exact duplicate set members reject rather than being silently deduped;
-- changing purpose, roots, environment, loss, uncertainty, or authority-continuity declaration changes the address;
-- same visible output payload with different lineage produces different claim identity.
+**Files:** Extend `src/continuity-profile/conformance.ts`, fixtures, specimen tests, adversarial tests, and public exports.
 
-Expected RED: addressing seam absent.
-
-### GREEN
-
-Normalize only fields the spec declares set-like. Sort copies; never mutate caller input. Call existing `canonicalizeDomainValue("Project0-Continuity-v0.1|", normalizedClaim)` and prefix digest with `cty-`.
-
-Do not add the prefix to global `DOMAIN_PREFIXES` unless implementation proves the shared enum is required; an experimental local prefix is preferable in v0.
-
-### Commit
-
-```bash
-git add src/continuity-profile/address.ts src/continuity-profile/index.ts tests/continuity-profile.test.ts
-git commit -m "feat: address continuity claims deterministically"
-```
-
-## Task 4 — Prove root closure and non-impersonation with frozen specimens
-
-**Files:**
-- Create `fixtures/continuity-profile/specimens.ts`
-- Extend `tests/continuity-profile-adversarial.test.ts`
-- Create `tests/continuity-profile-specimen.test.ts`
-
-### RED
-
-Build a fixture family with declared expected material roots and assertions for:
-
-1. exact one-root continuation;
-2. multi-root continuation;
-3. omitted material root -> `MISSING_MATERIAL_ROOT`;
-4. invented root -> `UNDECLARED_ROOT`;
-5. runtime/decoder change disclosed as transformed context;
-6. same roots + same purpose -> two different lawful output realizations;
-7. explicit `lost` dimension;
-8. explicit `unresolved` residual;
-9. reconstruction that attempts historical occurrence identity -> reject;
-10. copied/round-tripped claim remains only claim data and exposes no authority-capable API.
-
-Introduce a pure conformance helper approximately:
+- [ ] **RED:** Freeze a `representation-story/preserved` parent that explicitly does not establish identity/authority/participants, a separate `participants/preserved` parent, and a proposed `identity/preserved` descendant that cites both.
+- [ ] Freeze a `protocol/broken` parent with surviving residual evidence and a later `protocol/reconstituted` descendant.
+- [ ] Specify:
 
 ```ts
-checkContinuityClosure({
-  claim,
-  requiredMaterialRoots,
-  allowedMaterialRoots,
-}) -> { status: "conforming" | "refused"; reasonCodes: string[] }
+claimEstablishesLane(claim: ContinuityClaimV0, lane: ContinuityLaneKind): boolean
+
+checkLaneComposition({
+  proposedClaim,
+  lane,
+  parents,
+}: {
+  proposedClaim: ContinuityClaimV0;
+  lane: ContinuityLaneKind;
+  parents: Array<{ ref: string; claim: ContinuityClaimV0 }>;
+}): ContinuityConformanceResult
 ```
 
-Do not let the claim self-declare the only source of required roots in the same validation call; closure must be checked against independently supplied fixture/context evidence.
+- [ ] `claimEstablishesLane` is true only when that exact lane is declared and is not contradicted by that lane's explicit `doesNotEstablish`; it never promotes another lane.
+- [ ] Composition requires a new explicit proposed claim; the library never auto-creates or infers one.
+- [ ] Every supplied parent ref must be in `parentContinuityRefs`; missing parent refs return `MISSING_PARENT_CONTINUITY`.
+- [ ] Proposed ancestry must close over all parent material roots; missing inherited roots return `MISSING_PARENT_ROOT`.
+- [ ] Every parent used for composition must carry the same requested lane. Cross-lane evidence returns `LANE_MISMATCH`.
+- [ ] If the proposed mode is `preserved`, `transformed`, or `transferred`, a same-lane `broken` parent returns `BROKEN_PARENT_LANE` and a same-lane `lost` parent returns `LOST_PARENT_LANE`.
+- [ ] A broken same-lane parent may support a new explicit `reconstituted` claim when roots/parents close. Reconstitution must remain address-distinct from uninterrupted preservation.
+- [ ] Directly prove `representation-story + participants` cannot manufacture `identity`, and story continuity cannot manufacture authority.
+- [ ] Do not export any `composeClaims`, `inferLane`, or automatic genealogy builder.
+- [ ] **GREEN:** Implement only the pure checks necessary for these proofs.
+- [ ] Run focused tests.
+- [ ] Commit: `feat: refuse transitive continuity laundering`.
 
-### GREEN
+---
 
-Implement the minimum pure closure checker, either in `validate.ts` or a small `conformance.ts` if separation is clearer after tests.
+## Task 6 — Add transparent Why Current? / Still Alive? read models and authority hostility
 
-Prove the checker does not mutate the claim or root inputs.
+**Files:** Create `src/continuity-profile/inspect.ts`; extend types, fixtures, tests, and index exports.
 
-### Commit
-
-```bash
-git add fixtures/continuity-profile/specimens.ts tests/continuity-profile-adversarial.test.ts tests/continuity-profile-specimen.test.ts src/continuity-profile
-git commit -m "test: prove continuity root closure and non impersonation"
-```
-
-## Task 5 — Add local read models: Why Current? / Still Alive?
-
-**Files:**
-- Create `src/continuity-profile/inspect.ts`
-- Extend `src/continuity-profile/index.ts`
-- Extend `tests/continuity-profile.test.ts`
-
-### RED
-
-Specify pure read models:
+- [ ] **RED:** Freeze an authority-evidence specimen with a typed `authority/transferred` lane whose dimension cites `external:warrant-17`, plus a separate `custody/transferred` specimen containing a warrant-looking note but no authority lane.
+- [ ] Specify projections:
 
 ```ts
-deriveWhyCurrent(claim: ContinuityClaimV0): WhyCurrentProjection
-deriveStillAlive(claim: ContinuityClaimV0): StillAliveProjection
+export type WhyCurrentProjection = {
+  subjectRef: string;
+  purpose: string;
+  ancestorRoots: string[];
+  parentContinuityRefs: string[];
+  environment: ContinuityEnvironment;
+  outputRefs: string[];
+  lanes: ContinuityLaneClaim[];
+};
+
+export type StillAliveProjection = {
+  continuing: ContinuityLaneClaim[];
+  unresolved: ContinuityLaneClaim[];
+  ended: ContinuityLaneClaim[];
+  residualRefs: string[];
+  authority: {
+    declaredMode: ContinuityMode | null;
+    evidenceRefs: string[];
+    portableEffect: "none";
+    externalAdmissionRequired: true;
+  };
+};
 ```
 
-`WhyCurrent` must return exact subject, purpose, ancestor roots, transformations, parent continuity refs, environment refs, outputs, and uncertainty sufficient to explain the claimed current projection.
+- [ ] `deriveWhyCurrent` returns exact attributable claim data only; no narrative generation, timestamp guessing, semantic similarity, repository lookup, or hidden inference.
+- [ ] `deriveStillAlive` places `preserved`, `transformed`, `transferred`, and `reconstituted` lanes in `continuing`; `unresolved` in `unresolved`; `lost` and `broken` in `ended`; residual refs are unioned deterministically without erasure.
+- [ ] An authority lane may be reported as continuity evidence, but `portableEffect` is always `none` and `externalAdmissionRequired` is always true.
+- [ ] A custody lane containing an authority-looking string does not establish the authority lane.
+- [ ] JSON/spread/`structuredClone` of a claim still exposes no authority-capable API.
+- [ ] **GREEN:** Implement projections as frozen/plain deterministic transformations of a validated/normalized claim.
+- [ ] Run focused tests.
+- [ ] Commit: `feat: derive typed continuity read models`.
 
-`StillAlive` must return dimensions still preserved/transformed/unresolved, residual refs, and authority-continuity status without promoting `separately-evidenced` into validated authority.
+---
 
-Require deterministic ordering and frozen/plain projection data.
+## Task 7 — Attack historical impersonation, loss erasure, and authority laundering
 
-Refuse narrative generation, semantic inference, timestamp guessing, or hidden repository lookup.
+**Files:** Extend `tests/continuity-profile-adversarial.test.ts` and frozen fixtures; add production code only if a structural test exposes a gap.
 
-### GREEN
+- [ ] Prove changing a known `broken` or `reconstituted` lane into `preserved` changes the address and fails uninterrupted same-lane composition against the broken parent.
+- [ ] Prove deleting a residual to create a cleaner story changes the address.
+- [ ] Prove semantic/perceptual similarity notes cannot satisfy a missing material root.
+- [ ] Prove decoder/runtime drift changes claim identity when environment differs.
+- [ ] Prove same output refs with different lineage remain distinct.
+- [ ] Prove shared representation/story plus later participants cannot satisfy institutional identity.
+- [ ] Prove authority-looking evidence under custody, protocol, identity, purpose, or representation does not establish authority.
+- [ ] Prove no public export named `grantAuthority`, `executeAuthority`, `admitWarrant`, `composeClaims`, or `inferLane` exists.
+- [ ] Run adversarial and specimen tests.
+- [ ] Commit: `test: attack typed continuity impersonation`.
 
-Implement projections as transparent transformations of the validated claim. Do not add causal facts that are not present in the input.
+---
 
-### Commit
+## Task 8 — Document the consumer boundary and run broad verification
+
+**Files:** Create `docs/continuity-profile-v0.md`; reconcile `src/continuity-profile/index.ts` only if public exports require it.
+
+- [ ] Document exact sections: `Core law`, `Portable lanes`, `Modes`, `Non-transitivity`, `Witness not warrant`, `Gaps and reconstitution`, `Continuity Spine boundary`, `Non-normative adapter direction`.
+- [ ] State explicitly: Braid asks **what kinds of continuity crossed this boundary?** Spine asks **when may staged overlap, transfer, witness, and shedding move responsibility between carriers?**
+- [ ] State explicitly that downstream adoption is not part of this implementation PR.
+- [ ] Document TranchNode, Corpus OS, National Treasure, Toaster, and other mappings only as non-normative direction; Project 0 imports none of them.
+- [ ] Build and inspect the public export surface:
 
 ```bash
-git add src/continuity-profile/inspect.ts src/continuity-profile/index.ts tests/continuity-profile.test.ts
-git commit -m "feat: derive continuity explanation projections"
+npm run build
+node - <<'NODE'
+const api = require("./.build/src/continuity-profile/index.js");
+for (const forbidden of ["grantAuthority", "executeAuthority", "admitWarrant", "composeClaims", "inferLane"]) {
+  if (forbidden in api) throw new Error(`forbidden export: ${forbidden}`);
+}
+console.log(Object.keys(api).sort().join("\n"));
+NODE
 ```
 
-## Task 6 — Attack authority laundering and loss erasure
+- [ ] Run `npm run check`.
+- [ ] Run `npm test`.
+- [ ] Run `npm run verify:fixtures`.
+- [ ] Run `npm run conformance`.
+- [ ] Run `npm run verify:all`.
+- [ ] Invoke superpowers:verification-before-completion against the exact feature head and record actual command results before any completion claim.
+- [ ] Commit: `docs: bound typed continuity braid v0`.
 
-**Files:**
-- Extend `tests/continuity-profile-adversarial.test.ts`
-- Extend fixture family if needed
+## Downstream Proof Gate — not part of this implementation plan
 
-### RED cases
+After Project 0 v0 is green, prove adapters independently rather than making the first runtime slice ecosystem-wide:
 
-Prove all of the following fail or remain explicitly non-authoritative:
+1. **TranchNode:** map one real boundary specimen into Typed Continuity Braid without weakening TranchNode's stronger local lineage/residual laws.
+2. **Corpus OS:** map one real Continuity Attestation / WorldCut succession specimen and prove that a braid can explain authority continuity evidence without performing succession or admitting a warrant.
+3. **National Treasure:** use historical cases as adversarial research/test pressure for false genealogy, revival, property succession, symbolic inheritance, and broken institutional lines; never treat the research repo as substrate authority.
 
-- `authorityContinuity: "separately-evidenced"` with no external authority validator cannot execute or validate authority;
-- adding an `authorityRef`-looking string in notes/evidence does not change that;
-- JSON/spread/`structuredClone` of a claim grants nothing;
-- a claim that moves a known absent dimension from `lost` to `preserved` without changed independently supplied evidence fails the fixture's expected conformance;
-- dropping an unresolved residual to make a cleaner story changes address and fails the expected fixture;
-- perceptual/semantic similarity alone cannot satisfy an omitted required root;
-- same bytes with different lineage remain distinct continuity claims.
-
-### GREEN
-
-Prefer tests and explicit conformance inputs over new production abstractions. Add production code only where a test exposes a structural gap.
-
-### Commit
-
-```bash
-git add tests/continuity-profile-adversarial.test.ts fixtures/continuity-profile
-git commit -m "test: block continuity authority laundering"
-```
-
-## Task 7 — Document the consumer boundary and run broad verification
-
-**Files:**
-- Create `docs/continuity-profile-v0.md`
-- Update `docs/superpowers/plans/2026-08-19-continuity-witness-v0.md` only with observed implementation evidence after code exists
-- Update `src/continuity-profile/index.ts` only if public exports need reconciliation
-
-Document:
-
-```text
-continuity profile = portable claim/witness
-continuity profile != warrant
-continuity profile != identity provider
-continuity profile != universal current-state service
-```
-
-Include mapping examples only as non-normative adapters:
-
-- TranchNode boundary `preserved/differentiated/lost`;
-- jublEchat `Why Current? / Still Alive`;
-- Toaster candidate lineage;
-- Corpus OS constituted-history projection.
-
-Do not make any downstream repo depend on this first implementation PR.
-
-Run:
-
-```bash
-npm run check
-npm test
-npm run verify:fixtures
-npm run conformance
-npm run verify:all
-```
-
-Expected: all existing and new gates pass.
-
-Before declaring completion, run superpowers:verification-before-completion against the exact feature head and record actual counts/results, not expected counts.
-
-### Commit
-
-```bash
-git add docs/continuity-profile-v0.md docs/superpowers/plans/2026-08-19-continuity-witness-v0.md src/continuity-profile
-git commit -m "docs: bound continuity profile v0"
-```
-
-## Downstream Proof Gate — not part of this implementation PR
-
-Do not immediately publish a shared package or require ecosystem adoption.
-
-After Project 0 v0 is green, prove two adapters independently:
-
-1. **TranchNode boundary specimen** maps one real `BoundaryTranchReceipt` into the Project 0 profile while preserving its stronger local `preserved/differentiated/lost/unresolved` law.
-2. **A materially different product specimen** — preferably Corpus OS or jublEchat — maps a currentness/lineage witness without importing TranchNode or Project 0 execution semantics.
-
-Only then decide whether shared adapter helpers are justified.
+Only after at least two materially different adapters work without semantic weakening should Project 0 consider shared adapter helpers or graduation from experimental status.
 
 ## Stop Condition
 
-Stop when Project 0 can truthfully verify:
+Stop this implementation slice when Project 0 can truthfully verify:
 
-> **This is a deterministic, root-closed, purpose-relative claim that B continues from A under declared transformations and residuals. The claim explains its boundary, does not impersonate historical occurrence, and grants no authority.**
+> **This is a deterministic, root-closed, purpose-relative Typed Continuity Braid. Every claimed lane is explicit. Evidence in one lane cannot silently manufacture a stronger genealogy in another. Breakage and lawful reconstitution remain visible. Reconstruction does not impersonate occurrence. The witness grants no authority.**
 
-Do not proceed in this slice to portable warrants, legal succession, universal AI identity, cross-project storage, or automatic adoption.
+Do not proceed in this slice to portable warrants, legal succession, global identity, cross-project storage, automatic adoption, or a universal continuity registry.
