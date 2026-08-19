@@ -75,7 +75,7 @@ export function runSnapState(input: SnapStateExecutionInputV01): SnapStateExecut
   }
   for (const coupling of couplings) {
     if (!cellRefs.has(coupling.body.fromCellRef) || !cellRefs.has(coupling.body.toCellRef)) {
-      throw new SnapStateValidationError("SNAPSTATE_UNDECLARED_COUPLING");
+      throw new SnapStateValidationError("SNAPSTATE_UNDECLARED_CELL");
     }
   }
 
