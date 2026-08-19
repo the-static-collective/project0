@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   L_BRANCH_DOMAIN_PREFIX,
   addressLBranchRecord,
+  runLBranch,
   validateLBranchDeclaration,
 } from "../src/l-branch/index";
 
@@ -20,6 +21,36 @@ const declaration = {
   policyRef: "policy-public",
   budget: { maxSteps: 3, maxFrontierWidth: 2, maxDepth: 2 },
 };
+
+const candidates = [
+  {
+    candidateRef: "A",
+    depth: 1,
+    requiresInputRefs: ["excitation-E"],
+    requiresInfluenceRefs: [],
+    requiresAuthorityRefs: ["lease-A"],
+    requiredPolicyRef: "policy-public",
+    terminal: false,
+  },
+  {
+    candidateRef: "B",
+    depth: 2,
+    requiresInputRefs: ["A"],
+    requiresInfluenceRefs: [],
+    requiresAuthorityRefs: ["lease-A"],
+    requiredPolicyRef: "policy-public",
+    terminal: false,
+  },
+  {
+    candidateRef: "C",
+    depth: 2,
+    requiresInputRefs: ["B"],
+    requiresInfluenceRefs: [],
+    requiresAuthorityRefs: ["lease-C"],
+    requiredPolicyRef: "policy-public",
+    terminal: false,
+  },
+];
 
 test("accepts one bounded v0.1 declaration", () => {
   assert.doesNotThrow(() => validateLBranchDeclaration(declaration));
@@ -69,4 +100,32 @@ test("fails closed on unsupported protocol and hostile accessors", () => {
 
   assert.throws(() => validateLBranchDeclaration(hostile), /LBRANCH_INVALID_REPRESENTATION/);
   assert.equal(touched, false);
+});
+
+test("propagates two lawful steps, preserves refusal, and damps", () => {
+  const result = runLBranch(declaration, candidates);
+
+  assert.equal(result.steps.length, 3);
+  assert.deepEqual(result.steps[0].body.eligibleOutputRefs, ["A"]);
+  assert.deepEqual(result.steps[1].body.eligibleOutputRefs, ["B"]);
+  assert.deepEqual(result.steps[2].body.refusedOutputRefs, ["C"]);
+  assert.equal(result.steps[2].body.refusalReasonCodes.C, "LBRANCH_AUTHORITY_REQUIRED");
+  assert.equal(result.terminal.body.disposition, "damped");
+  assert.deepEqual(result.terminal.body.finalOutputRefs, ["A", "B"]);
+
+  for (const step of result.steps) {
+    assert.equal(step.body.authorityRefsUsed.every((ref: string) => declaration.authorityRefs.includes(ref)), true);
+  }
+});
+
+test("replays identical declarations and candidates byte-identically", () => {
+  const left = runLBranch(structuredClone(declaration), structuredClone(candidates));
+  const right = runLBranch(structuredClone(declaration), structuredClone(candidates));
+
+  assert.equal(left.declaration.ref, right.declaration.ref);
+  assert.deepEqual(left.declaration.canonicalBytes, right.declaration.canonicalBytes);
+  assert.deepEqual(left.steps.map((step) => step.ref), right.steps.map((step) => step.ref));
+  assert.deepEqual(left.steps.map((step) => step.canonicalBytes), right.steps.map((step) => step.canonicalBytes));
+  assert.equal(left.terminal.ref, right.terminal.ref);
+  assert.deepEqual(left.terminal.canonicalBytes, right.terminal.canonicalBytes);
 });
