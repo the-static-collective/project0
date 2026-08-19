@@ -1,26 +1,23 @@
 {
   "schema": "static-collective.project-status.v1",
-  "asOf": "2026-08-19",
+  "asOf": "2026-08-17",
   "repository": "the-static-collective/project0",
   "defaultBranch": "main",
   "project": "Project 0",
   "state": "active",
   "phase": "Floor 1.2 — executable encounter boundary",
   "canonicalAuthority": "project-owned repository",
-  "observedMainCommit": "7192b0640c6cef2556081ffbe24d683914d7d7f9",
+  "observedMainCommit": "6341b0223f2b57148d617dcc98d1e0d0c68e14a5",
   "executableSurface": [
     {"id": "floor-1.1-reference-kernel", "status": "landed", "evidence": {"commit": "ba8f8988e20e793ba6dfe1d1737ef629b9c8be78", "pullRequest": 33}},
     {"id": "advanced-floor-1.1-conformance", "status": "landed", "evidence": {"commit": "f87031c5c7b9b090a25b673a9d25c472b0fbce8a", "pullRequest": 36}},
     {"id": "nav-v0.1-crossing-witness", "status": "landed", "evidence": {"commit": "0961e44f7fabc5807acea2b267009230f1e846c3", "pullRequest": 34}},
     {"id": "lawful-cross-repo-nav-witness", "status": "landed", "evidence": {"commit": "1c4decea33e0d22babb4a48be29cf5034c9318f9", "pullRequest": 38}},
-    {"id": "world-encounter-envelope-v0.1", "status": "landed", "interface": "npm run world-encounter:stdio", "evidence": {"commit": "6341b0223f2b57148d617dcc98d1e0d0c68e14a5", "pullRequest": 44}},
-    {"id": "l-branch-v0.1-bounded-resonant-propagation", "status": "landed", "evidence": {"commit": "7192b0640c6cef2556081ffbe24d683914d7d7f9", "pullRequest": 47}},
-    {"id": "snap-state-v0.1-thresholded-topology", "status": "proposed", "evidence": {"pullRequest": 49}}
+    {"id": "world-encounter-envelope-v0.1", "status": "landed", "interface": "npm run world-encounter:stdio", "evidence": {"commit": "6341b0223f2b57148d617dcc98d1e0d0c68e14a5", "pullRequest": 44}}
   ],
   "nonClaims": [
     "not a universal database or command center",
     "world encounter testimony carries no source authority merely by transport",
-    "bounded executable proof does not imply full ecosystem conformance",
-    "experimental Snap-State evidence does not expand the frozen ontology or canonical receipt family"
+    "bounded executable proof does not imply full ecosystem conformance"
   ]
 }
