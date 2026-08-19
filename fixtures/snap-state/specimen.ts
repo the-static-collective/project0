@@ -159,8 +159,8 @@ const ZERO_AC: SnapCouplingV01 = {
   activation: "on-source-snap",
 };
 const zeroTransferHistoryContrast = makeInput(
-  "snapshot-history-contrast",
-  "purpose-history-contrast",
+  "snapshot-baseline",
+  "purpose-baseline",
   [BASE_A, BASE_B, BASE_C],
   [BASE_AB, ZERO_AC, BASE_BC],
   BASE_EXCITATION,
