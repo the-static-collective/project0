@@ -11,6 +11,9 @@ export {
   normalizeContinuityClaim,
   verifyContinuityClaim,
 } from "./address";
+export {
+  checkContinuityClosure,
+} from "./conformance";
 
 export type {
   ContinuityClaimV0,
@@ -20,3 +23,7 @@ export type {
   ContinuityLaneKind,
   ContinuityMode,
 } from "./types";
+export type {
+  ContinuityConformanceReason,
+  ContinuityConformanceResult,
+} from "./conformance";
