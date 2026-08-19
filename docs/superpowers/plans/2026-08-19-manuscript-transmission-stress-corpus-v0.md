@@ -1,10 +1,12 @@
 # Manuscript Transmission Stress Corpus v0 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Use superpowers:test-driven-development before production-code changes and superpowers:verification-before-completion before any completion claim.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Use superpowers:test-driven-development before production-code changes and superpowers:verification-before-completion before any completion claim.
+
+**Status:** dependency-gated; execution must stop after Task 1 until Typed Continuity Braid v0 exists as an implemented public contract.
 
 **Goal:** Add exactly three deterministic synthetic manuscript-transmission attacks that prove Project 0 can preserve attributable continuity without collapsing a later copy into composition occurrence, a translation into exact source form, or plural fragment reconstructions into one forced whole.
 
-**Architecture:** This slice is an adversarial conformance layer over the approved manuscript-transmission design, not a manuscript subsystem. It must consume the eventual Typed Continuity Braid v0 public contract from PR #50 rather than invent a second continuity grammar. Until PR #50 freezes and implements that public contract, this plan may freeze fixture semantics and sequencing only; runtime/test wiring remains blocked.
+**Architecture:** This slice is an adversarial conformance layer over the approved manuscript-transmission design, not a manuscript subsystem. It must consume the implemented Typed Continuity Braid v0 public contract from PR #50 rather than invent a second continuity grammar. PR #50 is currently docs-only, so fixture semantics may be frozen here but runtime/test wiring is intentionally blocked.
 
 **Tech Stack:** TypeScript 7, Node.js `node:test` / `node:assert`, Project 0 deterministic canonicalization and verification commands.
 
@@ -26,31 +28,44 @@
 
 ---
 
-### Task 1: Freeze the upstream dependency gate
+### Task 1: Enforce the upstream dependency gate
 
 **Files:**
 - Read: `docs/superpowers/specs/2026-08-19-continuity-witness-v0-design.md`
-- Read: the reconciled implementation plan that replaces `docs/superpowers/plans/2026-08-19-continuity-witness-v0.md`
-- Read: the final public files introduced by the Typed Continuity Braid implementation under `src/continuity-profile/`
+- Read: `docs/superpowers/plans/2026-08-19-continuity-witness-v0.md`
+- Read after implementation exists: `src/continuity-profile/**`
 
 **Interfaces:**
-- Consumes: the actual public Typed Continuity Braid v0 claim, validation, conformance/closure, and deterministic-addressing interfaces after PR #50 is approved and implemented.
-- Produces: a written import/API map for Tasks 2–4 using only names that exist on the implementation branch.
+- Consumes: no manuscript-local continuity API.
+- Produces: a binary decision: `BLOCKED` until the Typed Continuity Braid runtime exists; `OPEN` only after its public claim, validation, conformance/closure, and deterministic-addressing interfaces are implemented and green.
 
-- [ ] **Step 1: Verify the dependency is implemented, not docs-only**
+- [ ] **Step 1: Verify whether the runtime seam exists**
 
 Run:
 
 ```bash
-git log --oneline -- src/continuity-profile
-find src/continuity-profile -maxdepth 2 -type f -print
+test -d src/continuity-profile && find src/continuity-profile -maxdepth 2 -type f -print
 ```
 
-Expected: at least one production TypeScript file exists under `src/continuity-profile/`. If the directory does not exist, **stop**. Do not create manuscript-local continuity types to bypass the gate.
+Expected today: the directory is absent because PR #50 is still docs-only. Record `BLOCKED` and stop.
 
-- [ ] **Step 2: Verify the approved braid semantics are represented**
+- [ ] **Step 2: Refuse a manuscript-local workaround**
 
-Inspect the public types and require all eight lane kinds and all seven modes from the design:
+The following are forbidden while Task 1 is blocked:
+
+```text
+src/manuscript-continuity/**
+new manuscript-specific continuity claim types
+new manuscript-specific continuity hashing/addressing
+new manuscript-specific authority or occurrence rules
+copying the illustrative PR #50 type block into this branch as production code
+```
+
+Expected: no runtime or test file is added by this branch while the upstream contract is absent.
+
+- [ ] **Step 3: Re-open only after PR #50 implements the approved braid**
+
+Before Task 2 begins, the upstream implementation must demonstrate all eight lane kinds and all seven modes from the design:
 
 ```text
 lanes:
@@ -73,144 +88,65 @@ modes:
   unresolved
 ```
 
-Expected: the implemented public contract can represent the `text-schema` lane with `preserved`, `transformed`, `reconstituted`, `lost`, or `unresolved` as needed, and can carry evidence/transformation/residual/context references without creating authority.
+It must also expose deterministic addressing and an independently evidenced closure/conformance check without granting authority or historical occurrence.
 
-- [ ] **Step 3: Verify the dependency still enforces non-transitivity and non-occurrence**
+- [ ] **Step 4: Run upstream focused tests before manuscript work**
 
-Run the upstream continuity-profile focused tests supplied by PR #50.
-
-Expected: upstream tests are green before manuscript fixtures are added. If they are not green, repair PR #50 first; do not weaken the manuscript fixtures.
-
-- [ ] **Step 4: Record the concrete upstream names in this plan before implementation**
-
-Replace only the integration-note block below with the exact exported names and signatures observed in the implemented branch. Do not change fixture semantics.
-
-```text
-Integration note (must be concrete before Task 2 starts):
-- claim type/export: <resolved from implemented PR #50>
-- claim validator/export: <resolved from implemented PR #50>
-- closure/conformance export: <resolved from implemented PR #50>
-- deterministic address export: <resolved from implemented PR #50>
-```
-
-Expected: no manuscript-specific continuity API is introduced.
-
-- [ ] **Step 5: Commit only if the import/API map changed**
+Run the actual continuity-profile focused tests introduced by the Typed Continuity Braid implementation, then:
 
 ```bash
-git add docs/superpowers/plans/2026-08-19-manuscript-transmission-stress-corpus-v0.md
-git commit -m "docs: bind manuscript corpus to continuity braid api"
+npm run verify:all
 ```
+
+Expected: upstream green. If not green, repair upstream first and keep this slice blocked.
+
+- [ ] **Step 5: Regenerate this implementation plan from the real exported API**
+
+Use `superpowers:writing-plans` again after the upstream implementation exists. The regenerated plan must name exact exported functions/types and exact test code; it must not guess from the illustrative design block.
 
 ---
 
-### Task 2: Attack copy versus composition occurrence
+## Frozen fixture semantics for the regenerated plan
 
-**Files:**
-- Create: `fixtures/continuity-profile/manuscript-transmission.ts`
-- Create or extend: `tests/continuity-profile-manuscript.test.ts`
+These are the only three attacks authorized for v0. They preserve the research result without prematurely freezing an API that does not exist.
 
-**Interfaces:**
-- Consumes: concrete Typed Continuity Braid interfaces recorded in Task 1.
-- Produces: fixture export `copyVsCompositionSpecimen` and a focused conformance test proving a surviving copy cannot impersonate composition occurrence.
+### Attack A — Copy is not composition occurrence
 
-- [ ] **Step 1: Write the failing test**
-
-Use synthetic source text only:
-
-```ts
-const COMPOSITION_TEXT = "the lamp stands beside the door";
-const COPY_TEXT = "the lamp stands beside the door";
-```
-
-The fixture must model two distinct occurrences:
+Synthetic payload:
 
 ```text
-composition occurrence C0
-  -> unknown or separately witnessed transmission interval
-  -> surviving copy occurrence C1
+composition C0: "the lamp stands beside the door"
+copy C1:        "the lamp stands beside the door"
 ```
 
-Assert all of the following:
+Required shape:
+
+```text
+C0
+ -> explicit unknown/separately witnessed transmission interval
+ -> C1
+```
+
+Required assertions:
 
 ```text
 C1 may preserve exact text-schema for the declared comparison purpose.
-C1 is not C0's historical occurrence.
-The unknown intermediary is not silently invented.
-A clean identical payload cannot upgrade occurrence identity.
-The claim remains continuation-only / non-authoritative.
+C1 must not impersonate C0's historical occurrence.
+The unknown intermediary stays unknown; no invented manuscript node closes the story.
+Identical visible bytes do not upgrade occurrence identity.
+The witness remains evidence-only and non-authoritative.
 ```
 
-Expected RED: the manuscript fixture/test does not exist.
+### Attack B — Translation is not exact source form
 
-- [ ] **Step 2: Run the focused test and observe RED**
-
-```bash
-npm run build && node --test .build/tests/continuity-profile-manuscript.test.js
-```
-
-Expected: FAIL because the fixture export is absent.
-
-- [ ] **Step 3: Add the minimum synthetic fixture using the upstream braid**
-
-Represent the surviving copy with:
+Synthetic payload:
 
 ```text
-text-schema: preserved
-identity: unresolved or broken only if fixture evidence justifies it
-representation-story: unresolved unless separately declared
-authority: unresolved or absent according to upstream contract
-occurrence: continuation/relation only; never historical occurrence identity
+source form: "LAMPA DORA"
+target form: "lamp by door"
 ```
 
-Use explicit evidence/context refs such as:
-
-```text
-fixture:composition:C0
-fixture:copy:C1
-fixture:gap:C0-C1
-policy:exact-text-comparison-v0
-```
-
-Do not fabricate an intermediate manuscript node merely to close the story.
-
-- [ ] **Step 4: Run the focused test and verify GREEN**
-
-```bash
-npm run build && node --test .build/tests/continuity-profile-manuscript.test.js
-```
-
-Expected: PASS for the copy/composition case.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add fixtures/continuity-profile/manuscript-transmission.ts tests/continuity-profile-manuscript.test.ts
-git commit -m "test: distinguish copy from composition occurrence"
-```
-
----
-
-### Task 3: Attack translation versus exact source form
-
-**Files:**
-- Extend: `fixtures/continuity-profile/manuscript-transmission.ts`
-- Extend: `tests/continuity-profile-manuscript.test.ts`
-
-**Interfaces:**
-- Consumes: concrete upstream braid APIs from Task 1 and the fixture module from Task 2.
-- Produces: fixture export `translationVsSourceFormSpecimen` proving translation can be a lawful transformed continuation without impersonating exact source-language form.
-
-- [ ] **Step 1: Write the failing test**
-
-Use intentionally artificial language labels and synthetic tokens; do not make philological claims about a real language:
-
-```ts
-const SOURCE_FORM = "LAMPA DORA";
-const TARGET_FORM = "lamp by door";
-```
-
-Require the fixture to disclose:
+Required evidence context:
 
 ```text
 source language ref
@@ -222,79 +158,19 @@ translation-policy ref
 source-form ambiguity/residual ref
 ```
 
-Assert:
+Required assertions:
 
 ```text
-text-schema continuity may be transformed for a declared translation purpose.
-TARGET_FORM cannot satisfy an exact-source-form claim.
-Translation policy is evidence context, not proof of semantic equivalence.
-Changing the translation policy or residual ambiguity changes the addressed claim when those fields are material under the upstream contract.
-No translation witness acquires authority over the source witness merely by being current or readable.
+text-schema may be transformed for the declared translation purpose.
+target form cannot satisfy an exact-source lexical/script/orthographic claim.
+translation policy is evidence context, not proof of semantic equivalence.
+changing a material translation policy or residual changes claim identity.
+translation never manufactures authority over the source witness.
 ```
 
-Expected RED: translation fixture absent.
+### Attack C — Fragments do not force one whole
 
-- [ ] **Step 2: Run the focused test and observe RED**
-
-```bash
-npm run build && node --test .build/tests/continuity-profile-manuscript.test.js
-```
-
-Expected: FAIL only for the missing/new translation case after Task 2 remains green.
-
-- [ ] **Step 3: Add the minimum translation fixture**
-
-Represent the cross-language edge with:
-
-```text
-text-schema: transformed
-purpose-meaning: unresolved unless the fixture explicitly limits the claim to a declared test purpose
-authority: unchanged/non-granting
-exact source lexical/script/orthographic form: not preserved
-```
-
-Use explicit context refs, for example:
-
-```text
-language:synthetic-source
-script:latin-fixture-source
-language:synthetic-target
-script:latin-fixture-target
-translation-direction:source-to-target
-policy:literal-fixture-translation-v0
-residual:source-ambiguity-01
-```
-
-- [ ] **Step 4: Run the focused test and verify GREEN**
-
-```bash
-npm run build && node --test .build/tests/continuity-profile-manuscript.test.js
-```
-
-Expected: copy/composition and translation/source-form cases both PASS.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add fixtures/continuity-profile/manuscript-transmission.ts tests/continuity-profile-manuscript.test.ts
-git commit -m "test: distinguish translation from exact source form"
-```
-
----
-
-### Task 4: Preserve two lawful fragment reconstructions
-
-**Files:**
-- Extend: `fixtures/continuity-profile/manuscript-transmission.ts`
-- Extend: `tests/continuity-profile-manuscript.test.ts`
-
-**Interfaces:**
-- Consumes: concrete upstream braid APIs from Task 1 and deterministic addressing from PR #50.
-- Produces: fixture exports `fragmentReconstructionA` and `fragmentReconstructionB` proving two assembly proposals may share material roots while remaining separately attributable and address-distinct.
-
-- [ ] **Step 1: Write the failing test**
-
-Use three synthetic fragment roots:
+Synthetic material roots:
 
 ```text
 F1 = "the lamp"
@@ -302,97 +178,36 @@ F2 = "beside"
 F3 = "the door"
 ```
 
-Define two reconstruction proposals over the same roots:
+Two proposals:
 
 ```text
 R1: F1 -> F2 -> F3
 R2: F3 -> F2 -> F1
 ```
 
-The test must assert:
+Required assertions:
 
 ```text
-F1/F2/F3 remain immutable/address-distinct source fragments.
-R1 and R2 are relationship/assembly claims, not mutations of F1/F2/F3.
-Both proposals close over the same declared material roots.
-R1 and R2 receive different deterministic continuity addresses because proposal structure/policy differs.
-Neither proposal becomes canonical because it is created first, returned first, or listed first.
-Rejecting one proposal in a downstream domain does not destroy the other proposal or the source fragments.
-Missing source material may remain unresolved; neither proposal may invent a fourth fragment.
+F1/F2/F3 remain immutable, address-distinct source fragments.
+R1 and R2 are assembly/relationship claims, not mutations of the fragments.
+Both proposals close over the same three declared material roots.
+R1 and R2 remain deterministically address-distinct because their proposal structure/policy differs.
+Neither becomes canonical by creation order, retrieval order, or test order.
+Rejecting one downstream does not destroy the other or the fragments.
+Neither proposal may invent a fourth fragment to clean up uncertainty.
+Reconstructed whole is never historical occurrence merely because it is coherent.
 ```
 
-Expected RED: plural reconstruction fixtures absent.
+## Verification gate after the dependency opens
 
-- [ ] **Step 2: Run the focused test and observe RED**
+The regenerated executable plan must use TDD for the three attacks and finish with:
 
 ```bash
 npm run build && node --test .build/tests/continuity-profile-manuscript.test.js
-```
-
-Expected: FAIL only for the new plural-reconstruction assertions.
-
-- [ ] **Step 3: Add both reconstruction proposals with explicit assembly policy refs**
-
-Use refs such as:
-
-```text
-fixture:fragment:F1
-fixture:fragment:F2
-fixture:fragment:F3
-policy:assembly:R1
-policy:assembly:R2
-```
-
-Represent the reconstructed whole as `reconstituted` or `transformed` only as justified by the upstream braid contract; never as preserved historical occurrence. Keep known gaps/residuals visible.
-
-- [ ] **Step 4: Verify deterministic plurality**
-
-Run:
-
-```bash
-npm run build && node --test .build/tests/continuity-profile-manuscript.test.js
-```
-
-Expected: all three manuscript attacks PASS, and the two reconstruction addresses differ.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add fixtures/continuity-profile/manuscript-transmission.ts tests/continuity-profile-manuscript.test.ts
-git commit -m "test: preserve plural fragment reconstructions"
-```
-
----
-
-### Task 5: Run the broad gate and stop
-
-**Files:**
-- Modify only if evidence requires it: `docs/superpowers/plans/2026-08-19-manuscript-transmission-stress-corpus-v0.md`
-- Do not add Tasks 6–10 from the design unless a separate review approves expansion.
-
-**Interfaces:**
-- Consumes: all three green manuscript fixtures.
-- Produces: fresh verification evidence and a decision to either stop or open one portable upstream repair.
-
-- [ ] **Step 1: Run focused manuscript verification**
-
-```bash
-npm run build && node --test .build/tests/continuity-profile-manuscript.test.js
-```
-
-Expected: PASS.
-
-- [ ] **Step 2: Run the full Project 0 gate**
-
-```bash
 npm run verify:all
 ```
 
-Expected: PASS with no regression in existing canonical-addressing, NAV, World Encounter, Snap-State, L-Branch, witness-residue, or reference-kernel behavior.
-
-- [ ] **Step 3: Classify what the three attacks taught**
-
-Use exactly one outcome:
+Then classify the result as exactly one of:
 
 ```text
 NO_GAP
@@ -403,25 +218,14 @@ or:
 
 ```text
 PORTABLE_GAP
-One attack exposes a continuity-grammar weakness that generalizes beyond manuscript transmission. Repair the upstream Project 0 braid with its own test before changing the manuscript fixture expectation.
+One attack exposes a continuity-grammar weakness that generalizes beyond manuscript transmission. Repair the upstream Project 0 braid with its own test before changing the manuscript expectation.
 ```
 
-Do not accept:
+Never accept:
 
 ```text
 DOMAIN_PATCH
 Add manuscript-specific production types just to make a fixture pass.
-```
-
-- [ ] **Step 4: Record fresh evidence only**
-
-Append the exact feature-head SHA and actual verification commands/results to this plan after they have run. Do not record expected counts as observed evidence.
-
-- [ ] **Step 5: Commit evidence if the plan changed**
-
-```bash
-git add docs/superpowers/plans/2026-08-19-manuscript-transmission-stress-corpus-v0.md
-git commit -m "docs: record manuscript stress verification"
 ```
 
 ## Stop Condition
