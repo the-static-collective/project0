@@ -13,6 +13,8 @@ export {
 } from "./address";
 export {
   checkContinuityClosure,
+  checkLaneComposition,
+  claimEstablishesLane,
 } from "./conformance";
 
 export type {
