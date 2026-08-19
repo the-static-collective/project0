@@ -4,7 +4,7 @@
 
 **Goal:** Build the smallest offline Project 0 reference specimen proving that a local threshold crossing may activate only predeclared structural couplings, propagate bounded integer load, recoil current state, and preserve an append-only addressed history.
 
-**Architecture:** Add an experimental `src/snap-state/` module parallel to `src/l-branch/`. It owns versioned record types, descriptor-safe validation, deterministic addressing under a distinct experimental domain, and one pure evaluator whose event budget is checked before every mutation. Cells, couplings, and the single excitation are addressed before the declaration, so the declaration binds the complete mechanical input state; current state is reconstructed from immutable inputs plus ordered addressed events.
+**Architecture:** Add an experimental `src/snap-state/` module parallel to `src/l-branch/`. Cells, couplings, and the single excitation are addressed before the declaration, so the declaration binds the complete mechanical input state. One pure evaluator reconstructs current state from immutable inputs plus ordered addressed events, and checks the finite event budget before every mutation.
 
 **Tech Stack:** TypeScript 7, Node.js `node:test` / `node:assert`, existing `canonicalizeDomainValue`, existing Project 0 verification commands.
 
@@ -18,8 +18,7 @@
 - Record types are exactly `cell | coupling | excitation | declaration | event | terminal`.
 - No tenth canonical node kind, no new universal relationship kind, and no addition to the canonical Project 0 receipt family.
 - Reuse `canonicalizeDomainValue`; do not introduce another serializer or hasher.
-- All mechanical numeric fields use safe integers; no floating point, probability, clocks, or continuous physics.
-- `threshold` and `maxEvents` are positive; load, recoil, transfer, and excitation amounts are non-negative.
+- Mechanical numeric fields use safe integers. `threshold` and `maxEvents` are positive. Loads, recoil, transfer, and excitation amounts are non-negative. `loadDelta` is a signed safe integer because recoil is negative.
 - One run has exactly one addressed excitation.
 - Couplings support only `activation: "on-source-snap"`.
 - Each cell snaps at most once per v0.1 run.
@@ -34,23 +33,21 @@
 
 ## File Structure
 
-Create these focused units:
-
-- `src/snap-state/types.ts` — versioned public record and execution-input types only.
-- `src/snap-state/validate.ts` — fail-closed descriptor-safe validators and stable error codes.
-- `src/snap-state/address.ts` — record normalization, addressing, and verification under the Snap-State domain.
-- `src/snap-state/evaluate.ts` — pure current-state projection and atomic event-admission evaluator.
+- `src/snap-state/types.ts` — versioned public record types.
+- `src/snap-state/validate.ts` — descriptor-safe fail-closed validators and stable errors.
+- `src/snap-state/address.ts` — normalization, addressing, and verification under the Snap-State domain.
+- `src/snap-state/evaluate.ts` — pure execution, current-state projection, and atomic event admission.
 - `src/snap-state/index.ts` — public experimental seam.
-- `fixtures/snap-state/specimen.ts` — deeply frozen baseline, below-threshold, partial-chain, simultaneous-order, exhaustion, and history-contrast inputs.
-- `tests/snap-state.test.ts` — contract, addressing, and focused execution behavior.
-- `tests/snap-state-adversarial.test.ts` — representation, topology-envelope, budget-atomicity, and ordering attacks.
-- `tests/snap-state-specimen.test.ts` — frozen fixture replay, immutability, and final-history assertions.
+- `fixtures/snap-state/specimen.ts` — deeply frozen fixture families.
+- `tests/snap-state.test.ts` — contract, addressing, and normal execution behavior.
+- `tests/snap-state-adversarial.test.ts` — hostile representation, topology, and budget-atomicity proofs.
+- `tests/snap-state-specimen.test.ts` — frozen replay, immutability, and history/current-state distinction.
 
-Do not modify `src/l-branch/`, the frozen ontology, or canonical receipt unions.
+Do not modify `src/l-branch/`, `ONTOLOGY.md`, or canonical receipt unions.
 
 ---
 
-### Task 1: Freeze the Snap-State contract, validators, and addressing domain
+### Task 1: Freeze record contracts, defensive validation, and addressing
 
 **Files:**
 - Create: `src/snap-state/types.ts`
@@ -61,11 +58,9 @@ Do not modify `src/l-branch/`, the frozen ontology, or canonical receipt unions.
 
 **Interfaces:**
 - Consumes: `canonicalizeDomainValue(prefix, value)` from `src/canonical-addressing/index.ts`.
-- Produces: `SNAP_STATE_PROTOCOL_VERSION`, `SNAP_STATE_DOMAIN_PREFIX`, all v0.1 record types, `SnapStateValidationError`, record validators, `addressSnapStateRecord`, `verifySnapStateRecord`, and `AddressedSnapStateRecord<T>`.
+- Produces: all Snap-State v0.1 record types; `SnapStateValidationError`; record validators; `addressSnapStateRecord`; `verifySnapStateRecord`; `AddressedSnapStateRecord<T>`.
 
-- [ ] **Step 1: Write the failing contract/addressing tests**
-
-Start `tests/snap-state.test.ts` with a contract that cannot compile yet:
+- [ ] **Step 1: Write the RED contract test**
 
 ```ts
 import assert from "node:assert/strict";
@@ -76,30 +71,25 @@ import {
   addressSnapStateRecord,
 } from "../src/snap-state/index";
 
-const cellA = { cellId: "A", threshold: 5, initialLoad: 0, recoilAmount: 5 };
-const cellB = { cellId: "B", threshold: 7, initialLoad: 4, recoilAmount: 7 };
+const A = { cellId: "A", threshold: 5, initialLoad: 0, recoilAmount: 5 };
+const B = { cellId: "B", threshold: 7, initialLoad: 4, recoilAmount: 7 };
 
-const addressedA = () => addressSnapStateRecord("cell", cellA);
-const addressedB = () => addressSnapStateRecord("cell", cellB);
-
-test("freezes the Snap-State v0.1 protocol and domain", () => {
+test("freezes Snap-State v0.1 identity", () => {
   assert.equal(SNAP_STATE_PROTOCOL_VERSION, "p0.snap-state/0.1");
   assert.equal(SNAP_STATE_DOMAIN_PREFIX, "Project0-SnapState-v0.1|");
-  assert.match(addressedA().ref, /^ssr-[0-9a-f]{64}$/);
+  assert.match(addressSnapStateRecord("cell", A).ref, /^ssr-[0-9a-f]{64}$/);
 });
 
-test("declaration set-like refs normalize canonically", () => {
-  const a = addressedA();
-  const b = addressedB();
+test("set-like declaration refs normalize without changing identity", () => {
+  const a = addressSnapStateRecord("cell", A);
+  const b = addressSnapStateRecord("cell", B);
   const excitation = addressSnapStateRecord("excitation", {
-    excitationId: "pulse-A",
-    targetCellRef: a.ref,
-    amount: 5,
+    excitationId: "pulse-A", targetCellRef: a.ref, amount: 5,
   });
-  const body = {
+  const declaration = {
     protocolVersion: SNAP_STATE_PROTOCOL_VERSION,
-    snapshotRef: "snapshot-001",
-    purposeRef: "purpose-threshold-proof",
+    snapshotRef: "snapshot-contract",
+    purposeRef: "purpose-contract",
     excitationRef: excitation.ref,
     cellRefs: [b.ref, a.ref],
     couplingRefs: [],
@@ -108,17 +98,14 @@ test("declaration set-like refs normalize canonically", () => {
     orderingRule: "cell-ref-lexicographic" as const,
     budget: { maxEvents: 8 },
   };
-  const reversed = { ...body, cellRefs: [a.ref, b.ref] };
   assert.equal(
-    addressSnapStateRecord("declaration", body).ref,
-    addressSnapStateRecord("declaration", reversed).ref,
+    addressSnapStateRecord("declaration", declaration).ref,
+    addressSnapStateRecord("declaration", { ...declaration, cellRefs: [a.ref, b.ref] }).ref,
   );
 });
 ```
 
-- [ ] **Step 2: Run the focused test and verify RED**
-
-Run:
+- [ ] **Step 2: Run RED**
 
 ```bash
 npm run build && node --test .build/tests/snap-state.test.js
@@ -126,13 +113,12 @@ npm run build && node --test .build/tests/snap-state.test.js
 
 Expected: build fails because `../src/snap-state/index` does not exist.
 
-- [ ] **Step 3: Add exact versioned record types**
+- [ ] **Step 3: Add exact v0.1 types**
 
-Create `src/snap-state/types.ts` with these public shapes:
+Create `src/snap-state/types.ts`:
 
 ```ts
 export const SNAP_STATE_PROTOCOL_VERSION = "p0.snap-state/0.1" as const;
-
 export type SnapStateBudgetV01 = { maxEvents: number };
 
 export type SnapCellV01 = {
@@ -170,7 +156,6 @@ export type SnapStateDeclarationV01 = {
 };
 
 export type SnapEventKindV01 = "excitation" | "snap" | "transfer" | "recoil";
-
 export type SnapEventRecordV01 = {
   declarationRef: string;
   eventIndex: number;
@@ -184,7 +169,6 @@ export type SnapEventRecordV01 = {
 };
 
 export type SnapStateTerminalDispositionV01 = "settled" | "exhausted";
-
 export type SnapStateTerminalRecordV01 = {
   declarationRef: string;
   disposition: SnapStateTerminalDispositionV01;
@@ -196,17 +180,12 @@ export type SnapStateTerminalRecordV01 = {
 };
 
 export type SnapStateRecordTypeV01 =
-  | "cell"
-  | "coupling"
-  | "excitation"
-  | "declaration"
-  | "event"
-  | "terminal";
+  | "cell" | "coupling" | "excitation" | "declaration" | "event" | "terminal";
 ```
 
-- [ ] **Step 4: Add descriptor-safe representation validators**
+- [ ] **Step 4: Implement descriptor-safe validators**
 
-Create `src/snap-state/validate.ts`. Carry forward the repository's descriptor-based safety boundary explicitly rather than traversing hostile values through getters:
+Create `src/snap-state/validate.ts`. Do not traverse untrusted records/arrays before descriptor checks:
 
 ```ts
 export class SnapStateValidationError extends Error {
@@ -239,7 +218,7 @@ function dataArray(value: unknown): unknown[] {
   if (!Array.isArray(value) || Object.getOwnPropertySymbols(value).length > 0) {
     throw new SnapStateValidationError("SNAPSTATE_INVALID_REPRESENTATION");
   }
-  const names = Object.getOwnPropertyNames(value);
+  const propertyNames = Object.getOwnPropertyNames(value);
   const expected = new Set<string>(["length"]);
   const items: unknown[] = [];
   for (let index = 0; index < value.length; index += 1) {
@@ -251,27 +230,31 @@ function dataArray(value: unknown): unknown[] {
     }
     items.push(descriptor.value);
   }
-  if (names.some((name) => !expected.has(name))) {
+  if (propertyNames.some((name) => !expected.has(name))) {
     throw new SnapStateValidationError("SNAPSTATE_INVALID_REPRESENTATION");
   }
   return items;
 }
 ```
 
-Add `exactKeys`, `requiredString`, `stringArray`, `positiveSafeInteger`, and `nonNegativeSafeInteger`. Implement and export:
+Implement `exactKeys`, `requiredString`, `stringArray`, and these numeric guards:
 
 ```ts
-validateSnapCell(value)
-validateSnapCoupling(value)
-validateSnapExcitation(value)
-validateSnapStateDeclaration(value)
-validateSnapEventRecord(value)
-validateSnapStateTerminalRecord(value)
-validateSnapCellList(value)
-validateSnapCouplingList(value)
+function positiveSafeInteger(value: unknown, code: string): number {
+  if (!Number.isSafeInteger(value) || (value as number) <= 0) throw new SnapStateValidationError(code);
+  return value as number;
+}
+function nonNegativeSafeInteger(value: unknown, code: string): number {
+  if (!Number.isSafeInteger(value) || (value as number) < 0) throw new SnapStateValidationError(code);
+  return value as number;
+}
+function signedSafeInteger(value: unknown, code: string): number {
+  if (!Number.isSafeInteger(value)) throw new SnapStateValidationError(code);
+  return value as number;
+}
 ```
 
-Use stable codes including:
+Export validators for cell, coupling, excitation, declaration, event, terminal, cell list, and coupling list. `loadBefore`/`loadAfter` are non-negative; `loadDelta` uses `signedSafeInteger`. Terminal `finalLoads` must pass `dataRecord` and every own value must be a non-negative safe integer. Stable errors include:
 
 ```text
 SNAPSTATE_INVALID_REPRESENTATION
@@ -289,15 +272,12 @@ SNAPSTATE_INVALID_TERMINAL
 SNAPSTATE_ADDRESS_MISMATCH
 ```
 
-`validateSnapStateDeclaration` must require `orderingRule === "cell-ref-lexicographic"`, a positive `maxEvents`, and syntactically valid non-empty refs. Topology membership is checked in execution after the supplied addressed inputs exist.
+- [ ] **Step 5: Implement one addressing path**
 
-- [ ] **Step 5: Add one canonical addressing path for all record types**
-
-Create `src/snap-state/address.ts` with:
+Create `src/snap-state/address.ts`:
 
 ```ts
 import { canonicalizeDomainValue } from "../canonical-addressing/index";
-
 export const SNAP_STATE_DOMAIN_PREFIX = "Project0-SnapState-v0.1|";
 
 export type AddressedSnapStateRecord<T> = {
@@ -309,47 +289,19 @@ export type AddressedSnapStateRecord<T> = {
 };
 ```
 
-Normalize only semantic sets:
+Use sorted uniqueness only for set-like refs. Declaration normalization sorts `cellRefs` and `couplingRefs`. Terminal normalization preserves `eventRefs` order, sorts `snappedCellRefs` and `activeCouplingRefs`, and sorts `finalLoads` entries by addressed cell ref.
+
+All six overloads validate their body, then call exactly:
 
 ```ts
-function sortedUnique(values: readonly string[]): string[] {
-  return [...new Set(values)].sort();
-}
-
-function normalizeDeclaration(value: SnapStateDeclarationV01): SnapStateDeclarationV01 {
-  return {
-    ...value,
-    cellRefs: sortedUnique(value.cellRefs),
-    couplingRefs: sortedUnique(value.couplingRefs),
-    budget: { maxEvents: value.budget.maxEvents },
-  };
-}
-
-function normalizeTerminal(value: SnapStateTerminalRecordV01): SnapStateTerminalRecordV01 {
-  return {
-    ...value,
-    eventRefs: [...value.eventRefs],
-    snappedCellRefs: sortedUnique(value.snappedCellRefs),
-    finalLoads: Object.fromEntries(
-      Object.entries(value.finalLoads).sort(([a], [b]) => a.localeCompare(b)),
-    ),
-    activeCouplingRefs: sortedUnique(value.activeCouplingRefs),
-    remainingBudget: { maxEvents: value.remainingBudget.maxEvents },
-  };
-}
+canonicalizeDomainValue(SNAP_STATE_DOMAIN_PREFIX, { recordType, body: normalizedBody })
 ```
 
-Implement overloads for all six record types. Each overload validates before calling:
+and return `ssr-${digestHex}`. `verifySnapStateRecord` must reject a malformed expected ref or a recomputed mismatch with `SNAPSTATE_ADDRESS_MISMATCH`.
 
-```ts
-canonicalizeDomainValue(SNAP_STATE_DOMAIN_PREFIX, { recordType, body: normalized })
-```
+- [ ] **Step 6: Export and run GREEN**
 
-and returns `ref: ssr-${digestHex}`. `verifySnapStateRecord(...)` must require `/^ssr-[0-9a-f]{64}$/` and recompute identity for all six record kinds.
-
-- [ ] **Step 6: Export the public seam and run GREEN**
-
-Create `src/snap-state/index.ts`:
+`src/snap-state/index.ts`:
 
 ```ts
 export * from "./types";
@@ -365,7 +317,7 @@ npm run build && node --test .build/tests/snap-state.test.js
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit the contract slice**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add src/snap-state tests/snap-state.test.ts
@@ -374,7 +326,7 @@ git commit -m "feat: define Snap-State v0.1 contract"
 
 ---
 
-### Task 2: Prove below-threshold settling and atomic excitation admission
+### Task 2: Prove below-threshold settling and atomic excitation
 
 **Files:**
 - Create: `src/snap-state/evaluate.ts`
@@ -382,61 +334,31 @@ git commit -m "feat: define Snap-State v0.1 contract"
 - Modify/Test: `tests/snap-state.test.ts`
 
 **Interfaces:**
-- Consumes: `addressSnapStateRecord`, `SnapStateDeclarationV01`, raw cell/coupling/excitation records.
-- Produces: `SnapStateExecutionInputV01`, `SnapStateExecutionResultV01`, and `runSnapState(input)`.
+- Produces `SnapStateExecutionInputV01`, `SnapStateExecutionResultV01`, and `runSnapState(input)`.
 
-- [ ] **Step 1: Add the failing below-threshold execution test**
+- [ ] **Step 1: Add the failing below-threshold test**
 
-Use a helper that addresses cells and builds a declaration from those exact refs. Add:
+Address one A cell and one `+4` excitation targeting A. Build a declaration whose `cellRefs` and `excitationRef` are those exact addresses. Require:
 
 ```ts
-test("settles when excitation remains below threshold", () => {
-  const a = addressSnapStateRecord("cell", {
-    cellId: "A", threshold: 5, initialLoad: 0, recoilAmount: 5,
-  });
-  const excitation = addressSnapStateRecord("excitation", {
-    excitationId: "below-A", targetCellRef: a.ref, amount: 4,
-  });
-  const declaration = {
-    protocolVersion: SNAP_STATE_PROTOCOL_VERSION,
-    snapshotRef: "snapshot-below",
-    purposeRef: "purpose-below",
-    excitationRef: excitation.ref,
-    cellRefs: [a.ref],
-    couplingRefs: [],
-    evaluatorId: "snap-state-reference",
-    evaluatorVersion: "0.1.0",
-    orderingRule: "cell-ref-lexicographic" as const,
-    budget: { maxEvents: 4 },
-  };
-  const result = runSnapState({
-    declaration,
-    cells: [a.body],
-    couplings: [],
-    excitation: excitation.body,
-  });
-
-  assert.equal(result.events.length, 1);
-  assert.equal(result.events[0].body.kind, "excitation");
-  assert.equal(result.events[0].body.loadAfter, 4);
-  assert.equal(result.terminal.body.disposition, "settled");
-  assert.deepEqual(result.terminal.body.snappedCellRefs, []);
-  assert.deepEqual(result.terminal.body.activeCouplingRefs, []);
-  assert.equal(result.terminal.body.finalLoads[a.ref], 4);
-});
+const result = runSnapState(input);
+assert.deepEqual(result.events.map((event) => event.body.kind), ["excitation"]);
+assert.equal(result.events[0].body.loadAfter, 4);
+assert.equal(result.terminal.body.disposition, "settled");
+assert.deepEqual(result.terminal.body.snappedCellRefs, []);
+assert.deepEqual(result.terminal.body.activeCouplingRefs, []);
+assert.equal(result.terminal.body.finalLoads[addressedA.ref], 4);
 ```
 
-- [ ] **Step 2: Run focused test and verify RED**
+- [ ] **Step 2: Run RED**
 
 ```bash
 npm run build && node --test .build/tests/snap-state.test.js
 ```
 
-Expected: FAIL because `runSnapState` is not exported.
+Expected: FAIL because `runSnapState` does not exist.
 
-- [ ] **Step 3: Implement execution input verification before state exists**
-
-In `evaluate.ts`, define:
+- [ ] **Step 3: Add execution types and verify all addressed inputs before state initialization**
 
 ```ts
 export type SnapStateExecutionInputV01 = {
@@ -458,20 +380,7 @@ export type SnapStateExecutionResultV01 = {
 };
 ```
 
-Validation/order before mutation must be:
-
-```ts
-validateSnapStateDeclaration(input.declaration);
-const cellBodies = validateSnapCellList(input.cells);
-const couplingBodies = validateSnapCouplingList(input.couplings);
-validateSnapExcitation(input.excitation);
-
-const cells = cellBodies.map((body) => addressSnapStateRecord("cell", body));
-const couplings = couplingBodies.map((body) => addressSnapStateRecord("coupling", body));
-const excitation = addressSnapStateRecord("excitation", input.excitation);
-```
-
-Reject duplicate addressed refs and then require exact set equality between supplied addressed refs and declaration `cellRefs` / `couplingRefs`. Require `excitation.ref === declaration.excitationRef`. Require every coupling endpoint and excitation target to be in the declared addressed cell set. Use stable execution-boundary codes:
+Call descriptor-safe list validators first, then address cells/couplings/excitation. Reject duplicate addressed cell/coupling refs. Require exact set equality between supplied addressed refs and declaration refs; require exact excitation-ref equality. Then require every coupling endpoint and the excitation target to be a declared addressed cell ref. Use:
 
 ```text
 SNAPSTATE_DUPLICATE_CELL
@@ -481,85 +390,85 @@ SNAPSTATE_UNDECLARED_CELL
 SNAPSTATE_UNDECLARED_COUPLING
 ```
 
-Only after all checks pass may the declaration be addressed and `currentLoads` be initialized.
+Only after those checks pass may the declaration be addressed and current loads initialized.
 
-- [ ] **Step 4: Implement the event-admission helper before any cascade logic**
+- [ ] **Step 4: Implement atomic event admission and excitation causal state**
 
-Inside `runSnapState`, hold local state only:
+Initialize:
 
 ```ts
 const currentLoads = new Map(cells.map((cell) => [cell.ref, cell.body.initialLoad]));
 const snapped = new Set<string>();
 const activeCouplings = new Set<string>();
+const causeByCell = new Map<string, string>();
 const events: AddressedSnapStateRecord<SnapEventRecordV01>[] = [];
-let remainingEvents = declaration.body.budget.maxEvents;
+let remainingEvents = addressedDeclaration.body.budget.maxEvents;
 let exhausted = false;
 
-function admitEvent(body: SnapEventRecordV01, mutate: () => void): boolean {
+function admitEvent(body: SnapEventRecordV01, mutate: (eventRef: string) => void): boolean {
   if (remainingEvents === 0) {
     exhausted = true;
     return false;
   }
   const addressed = addressSnapStateRecord("event", body);
   events.push(addressed);
-  mutate();
+  mutate(addressed.ref);
   remainingEvents -= 1;
   return true;
 }
 ```
 
-Construct the excitation event from the current load, admit it first, and mutate the target load only inside `mutate`.
+Construct the excitation event from the target's exact current load. Its successful mutation callback must both update the load and bind its causal ref:
 
-If the excitation itself cannot be admitted because `maxEvents` is zero, validation should already have rejected that declaration as an invalid positive budget; therefore every valid run can admit at least its excitation event.
+```ts
+admitEvent(excitationBody, (eventRef) => {
+  currentLoads.set(targetRef, after);
+  causeByCell.set(targetRef, eventRef);
+});
+```
 
-- [ ] **Step 5: Produce a settled terminal projection**
+This guarantees a later A snap cites the excitation event that made A eligible.
 
-After excitation, if no unsnapped cell is threshold-eligible, address:
+- [ ] **Step 5: Address the terminal projection**
+
+When no cell is eligible, terminal body is:
 
 ```ts
 {
   declarationRef: addressedDeclaration.ref,
-  disposition: "settled",
+  disposition: exhausted ? "exhausted" : "settled",
   eventRefs: events.map((event) => event.ref),
-  snappedCellRefs: [],
-  finalLoads: Object.fromEntries([...currentLoads.entries()]),
-  activeCouplingRefs: [],
+  snappedCellRefs: [...snapped],
+  finalLoads: Object.fromEntries(currentLoads.entries()),
+  activeCouplingRefs: [...activeCouplings],
   remainingBudget: { maxEvents: remainingEvents },
 }
 ```
 
-Return the addressed inputs, events, and terminal. Export `evaluate.ts` from `index.ts`.
+Export `evaluate.ts` from `index.ts`.
 
-- [ ] **Step 6: Run focused GREEN**
+- [ ] **Step 6: Run GREEN and commit**
 
 ```bash
 npm run build && node --test .build/tests/snap-state.test.js
-```
-
-Expected: PASS.
-
-- [ ] **Step 7: Commit the below-threshold evaluator**
-
-```bash
 git add src/snap-state/evaluate.ts src/snap-state/index.ts tests/snap-state.test.ts
 git commit -m "feat: settle below-threshold Snap-State runs"
 ```
 
 ---
 
-### Task 3: Add one snap, declared coupling activation, transfer, and recoil
+### Task 3: Add snap, coupling activation, transfer, and recoil
 
 **Files:**
 - Modify: `src/snap-state/evaluate.ts`
 - Modify/Test: `tests/snap-state.test.ts`
 
 **Interfaces:**
-- Consumes: Task 2 current-state maps and `admitEvent`.
-- Produces: one complete `snap -> transfer(s) -> recoil` causal sequence with explicit `sourceEventRef` lineage.
+- Produces one complete `snap -> transfer(s) -> recoil` causal sequence.
 
-- [ ] **Step 1: Write the failing one-snap test**
+- [ ] **Step 1: Add the one-snap RED test**
 
-Build addressed A/B and AB. Use `+5 -> A`, with B starting at zero so no neighbor snap occurs. Assert:
+Use A threshold 5/recoil 5, B threshold 10/initial 0, AB transfer 3, excitation +5 to A. Require:
 
 ```ts
 assert.deepEqual(result.events.map((event) => event.body.kind), [
@@ -576,17 +485,13 @@ assert.equal(result.terminal.body.finalLoads[addressedA.ref], 0);
 assert.equal(result.terminal.body.finalLoads[addressedB.ref], 3);
 ```
 
-- [ ] **Step 2: Run test and verify RED**
+- [ ] **Step 2: Run RED**
 
 ```bash
 npm run build && node --test .build/tests/snap-state.test.js
 ```
 
-Expected: FAIL because threshold-eligible cells do not yet snap.
-
-- [ ] **Step 3: Implement deterministic eligibility lookup**
-
-Add helpers inside `runSnapState`:
+- [ ] **Step 3: Add deterministic topology indexes and eligibility**
 
 ```ts
 const cellByRef = new Map(cells.map((cell) => [cell.ref, cell]));
@@ -607,122 +512,75 @@ function eligibleCellRefs(): string[] {
 }
 ```
 
-- [ ] **Step 4: Implement one snap causal sequence using atomic admission**
+- [ ] **Step 4: Implement one `processSnap(cellRef)` causal sequence**
 
-For the selected eligible cell:
+Snap event uses `sourceEventRef: causeByCell.get(cellRef) ?? null` and does not change load. Its successful mutation marks the cell snapped and activates all predeclared outgoing coupling refs.
+
+For each outgoing coupling in addressed-ref order, construct the transfer from the target's current load and admit it before mutation. On success:
 
 ```ts
-const loadAtSnap = currentLoads.get(cellRef)!;
-const snapBody: SnapEventRecordV01 = {
+currentLoads.set(targetRef, after);
+causeByCell.set(targetRef, transferEventRef);
+```
+
+Then construct recoil from the source's exact current load:
+
+```ts
+const after = Math.max(0, before - cell.body.recoilAmount);
+const recoilBody = {
   declarationRef: addressedDeclaration.ref,
   eventIndex: events.length,
-  kind: "snap",
+  kind: "recoil" as const,
   cellRef,
-  sourceEventRef: causeByCell.get(cellRef) ?? null,
+  sourceEventRef: snap.ref,
   couplingRef: null,
-  loadBefore: loadAtSnap,
-  loadDelta: 0,
-  loadAfter: loadAtSnap,
+  loadBefore: before,
+  loadDelta: after - before,
+  loadAfter: after,
 };
 ```
 
-Admit the snap. In its mutation callback, add `cellRef` to `snapped` and add every declared outgoing coupling ref to `activeCouplings`.
+Admit before `currentLoads.set(cellRef, after)`.
 
-Then, in sorted outgoing-coupling order, create each transfer from the target's exact current load:
+Do not interleave a new cell's snap inside the current source's transfer/recoil sequence. Current loads are updated after each admitted event; the next eligible snap is selected only after the current source sequence completes.
 
-```ts
-loadDelta: coupling.body.transferAmount,
-loadAfter: before + coupling.body.transferAmount,
-sourceEventRef: snap.ref,
-couplingRef: coupling.ref,
-cellRef: coupling.body.toCellRef,
-```
-
-Admit it before changing the target load. On successful transfer, store `causeByCell.set(targetRef, transfer.ref)` so a later snap cites the load-changing event that made it eligible.
-
-Finally create recoil:
-
-```ts
-const before = currentLoads.get(cellRef)!;
-const after = Math.max(0, before - cell.body.recoilAmount);
-loadDelta: after - before,
-loadAfter: after,
-sourceEventRef: snap.ref,
-couplingRef: null,
-cellRef,
-```
-
-Admit recoil before applying `currentLoads.set(cellRef, after)`.
-
-Do not recursively process a newly eligible target in the middle of the current source's outgoing transfer/recoil sequence. Refresh eligibility after each successful load mutation, but choose the next snap only after the current snap's declared transfer(s) and recoil have completed. This preserves the spec's causal sequence while still deriving eligibility solely from current addressed state.
-
-- [ ] **Step 5: Run focused GREEN**
+- [ ] **Step 5: Run GREEN and commit**
 
 ```bash
 npm run build && node --test .build/tests/snap-state.test.js
-```
-
-Expected: PASS.
-
-- [ ] **Step 6: Commit the one-snap mechanics**
-
-```bash
 git add src/snap-state/evaluate.ts tests/snap-state.test.ts
 git commit -m "feat: add Snap-State snap transfer and recoil"
 ```
 
 ---
 
-### Task 4: Prove the three-cell cascade and deterministic simultaneous ordering
+### Task 4: Prove three-cell cascade and addressed-ref ordering
 
 **Files:**
 - Modify: `src/snap-state/evaluate.ts`
 - Modify/Test: `tests/snap-state.test.ts`
 
-**Interfaces:**
-- Consumes: Task 3 completed snap sequence.
-- Produces: repeated bounded snap processing until no eligible unsnapped cell remains, with addressed-ref ordering as the only tie-breaker.
+- [ ] **Step 1: Add the baseline cascade RED test**
 
-- [ ] **Step 1: Write the failing three-cell cascade test**
-
-Use the approved specimen values:
+Use exactly:
 
 ```text
-A threshold 5, initial 0, recoil 5
-B threshold 7, initial 4, recoil 7
-C threshold 6, initial 2, recoil 6
-AB transfer 3
-BC transfer 4
-excitation +5 -> A
+A: threshold 5, initialLoad 0, recoilAmount 5
+B: threshold 7, initialLoad 4, recoilAmount 7
+C: threshold 6, initialLoad 2, recoilAmount 6
+AB: A -> B, transfer 3
+BC: B -> C, transfer 4
+excitation: +5 -> A
 ```
 
-Require:
+Require `settled`, all three addressed cells in `snappedCellRefs`, AB/BC active, three snap events, and final loads zero for all three addressed cell refs.
 
-```ts
-assert.equal(result.terminal.body.disposition, "settled");
-assert.deepEqual(
-  result.terminal.body.snappedCellRefs,
-  [addressedA.ref, addressedB.ref, addressedC.ref].sort(),
-);
-assert.deepEqual(
-  result.terminal.body.activeCouplingRefs,
-  [addressedAB.ref, addressedBC.ref].sort(),
-);
-assert.deepEqual(result.terminal.body.finalLoads, {
-  [addressedA.ref]: 0,
-  [addressedB.ref]: 0,
-  [addressedC.ref]: 0,
-});
-assert.equal(result.events.filter((event) => event.body.kind === "snap").length, 3);
-```
+- [ ] **Step 2: Add simultaneous eligibility ordering test**
 
-- [ ] **Step 2: Write the simultaneous-order RED test**
-
-Create two cells whose `initialLoad === threshold`, plus a third excitation target that remains below threshold. After the excitation event, both loaded cells are eligible. Do not assume labels A/B imply address order:
+Create two cells whose `initialLoad === threshold`, plus a third excitation target that remains below threshold. After the excitation event, both are eligible. Compute expected order from canonical refs:
 
 ```ts
 const expected = [loadedOne.ref, loadedTwo.ref].sort();
-const result = runSnapState(input);
 const actual = result.events
   .filter((event) => event.body.kind === "snap")
   .slice(0, 2)
@@ -730,17 +588,15 @@ const actual = result.events
 assert.deepEqual(actual, expected);
 ```
 
-- [ ] **Step 3: Run tests and verify RED**
+- [ ] **Step 3: Run RED**
 
 ```bash
 npm run build && node --test .build/tests/snap-state.test.js
 ```
 
-Expected: at least the cascade test fails because only one snap sequence is processed.
+Expected: cascade fails until repeated snap processing exists.
 
-- [ ] **Step 4: Implement the bounded snap loop**
-
-After successful excitation, loop only while no exhaustion has occurred:
+- [ ] **Step 4: Add the finite deterministic snap loop**
 
 ```ts
 while (!exhausted) {
@@ -750,43 +606,29 @@ while (!exhausted) {
 }
 ```
 
-`processSnap(cellRef)` must return `false` immediately if any required snap/transfer/recoil event cannot be admitted because budget is exhausted. It must never mutate the state for that unadmitted event.
+`processSnap` returns `false` as soon as a required next event cannot be admitted. It never applies that unadmitted event's mutation.
 
-Because `eligibleCellRefs()` sorts addressed refs and outgoing coupling lists are already sorted by addressed coupling refs, object insertion order and local labels cannot affect replay.
-
-- [ ] **Step 5: Run focused GREEN**
+- [ ] **Step 5: Run GREEN and commit**
 
 ```bash
 npm run build && node --test .build/tests/snap-state.test.js
-```
-
-Expected: PASS.
-
-- [ ] **Step 6: Commit cascade and ordering**
-
-```bash
 git add src/snap-state/evaluate.ts tests/snap-state.test.ts
 git commit -m "feat: cascade Snap-State thresholds deterministically"
 ```
 
 ---
 
-### Task 5: Prove event-budget exhaustion cannot create hidden mutation
+### Task 5: Prove exhaustion is an event-admission boundary
 
 **Files:**
 - Modify: `src/snap-state/evaluate.ts`
 - Create/Test: `tests/snap-state-adversarial.test.ts`
 
-**Interfaces:**
-- Consumes: `runSnapState` and atomic `admitEvent`.
-- Produces: exact `exhausted` terminal semantics and regression proof that the first unadmitted event has no effect.
+- [ ] **Step 1: Add exhaustion-after-snap RED**
 
-- [ ] **Step 1: Add the RED exhaustion-after-snap test**
-
-Use A -> B with A exactly thresholded by excitation and `maxEvents: 2`. The only admitted events must be `excitation`, then `snap`; the required AB transfer cannot be admitted.
+Use A -> B with A thresholded by excitation and `maxEvents: 2`. Require only `excitation`, `snap`; AB is active because the admitted snap activated it, but its transfer and A recoil are unadmitted and therefore absent:
 
 ```ts
-const result = runSnapState(inputWithTwoEventBudget);
 assert.equal(result.terminal.body.disposition, "exhausted");
 assert.deepEqual(result.events.map((event) => event.body.kind), ["excitation", "snap"]);
 assert.equal(result.terminal.body.finalLoads[addressedA.ref], 5);
@@ -796,29 +638,9 @@ assert.deepEqual(result.terminal.body.activeCouplingRefs, [addressedAB.ref]);
 assert.equal(result.terminal.body.remainingBudget.maxEvents, 0);
 ```
 
-This exact state is intentional: the admitted snap activated AB, but the unadmitted transfer and recoil never happened.
+- [ ] **Step 2: Add exact-budget settled regression**
 
-- [ ] **Step 2: Run and verify RED if terminal semantics are incomplete**
-
-```bash
-npm run build && node --test .build/tests/snap-state-adversarial.test.js
-```
-
-Expected before the fix: FAIL if the evaluator reports `settled`, applies the transfer/recoil anyway, or does not preserve the partial state.
-
-- [ ] **Step 3: Make terminal selection depend on attempted lawful continuation**
-
-Terminal disposition must be:
-
-```ts
-const disposition: SnapStateTerminalDispositionV01 = exhausted ? "exhausted" : "settled";
-```
-
-Do not infer exhaustion merely from `remainingEvents === 0`; spending the final event and then having no further eligible transition is lawful `settled`. Set `exhausted = true` only when the evaluator actually attempts to admit a required next event and budget is already zero.
-
-- [ ] **Step 4: Add a regression proving exact-budget completion is settled**
-
-Run a below-threshold one-event fixture with `maxEvents: 1`:
+Below-threshold fixture with `maxEvents: 1` must consume its last event and still settle:
 
 ```ts
 assert.equal(result.events.length, 1);
@@ -826,36 +648,41 @@ assert.equal(result.terminal.body.remainingBudget.maxEvents, 0);
 assert.equal(result.terminal.body.disposition, "settled");
 ```
 
-- [ ] **Step 5: Run adversarial and focused tests GREEN**
+- [ ] **Step 3: Run RED**
+
+```bash
+npm run build && node --test .build/tests/snap-state-adversarial.test.js
+```
+
+- [ ] **Step 4: Fix terminal selection only if the tests expose a defect**
+
+The required rule is:
+
+```ts
+const disposition: SnapStateTerminalDispositionV01 = exhausted ? "exhausted" : "settled";
+```
+
+`exhausted` becomes true only when `admitEvent` is asked to admit a lawful required event with zero remaining budget. `remainingEvents === 0` alone is not exhaustion.
+
+- [ ] **Step 5: Run GREEN and commit**
 
 ```bash
 npm run build && node --test .build/tests/snap-state.test.js .build/tests/snap-state-adversarial.test.js
-```
-
-Expected: PASS.
-
-- [ ] **Step 6: Commit budget atomicity**
-
-```bash
 git add src/snap-state/evaluate.ts tests/snap-state-adversarial.test.ts
 git commit -m "test: prove Snap-State event budget atomicity"
 ```
 
 ---
 
-### Task 6: Freeze canonical specimen families and prove recoil/history separation
+### Task 6: Freeze specimen families and prove current-state/history separation
 
 **Files:**
 - Create: `fixtures/snap-state/specimen.ts`
 - Create/Test: `tests/snap-state-specimen.test.ts`
 
-**Interfaces:**
-- Consumes: public `src/snap-state/index.ts` types and evaluator.
-- Produces: deeply frozen fixture families for baseline, below-threshold, partial-chain, simultaneous-order, exhaustion, and same-final-load/different-history comparisons.
+- [ ] **Step 1: Build deeply frozen raw execution fixtures**
 
-- [ ] **Step 1: Create a deeply frozen fixture module**
-
-Use the same recursive freeze convention as existing Project 0 fixtures:
+Use:
 
 ```ts
 function deepFreeze<T>(value: T): T {
@@ -865,25 +692,18 @@ function deepFreeze<T>(value: T): T {
 }
 ```
 
-Because declaration refs depend on addressed cell/coupling/excitation bodies, build each fixture family through a pure fixture factory that first addresses immutable input bodies and then returns raw execution input with a declaration containing those exact refs. The factory must not mutate its source bodies.
+Fixture factories address immutable cell/coupling/excitation bodies only to derive declaration refs, then return raw `SnapStateExecutionInputV01`; do not store addressed records/Buffers inside the deeply frozen fixture.
 
-The baseline bodies are exactly:
+Export baseline, below-threshold, partial-chain, simultaneous-order, exhaustion, and a **zero-transfer history contrast**.
 
-```ts
-const A = { cellId: "A", threshold: 5, initialLoad: 0, recoilAmount: 5 };
-const B = { cellId: "B", threshold: 7, initialLoad: 4, recoilAmount: 7 };
-const C = { cellId: "C", threshold: 6, initialLoad: 2, recoilAmount: 6 };
-```
+The history contrast uses the same A/B/C cell bodies and baseline AB/BC couplings, but adds one extra declared `A -> C` coupling with `transferAmount: 0`. Both runs therefore use the same addressed cell refs and finish with the same `finalLoads`, while the contrast run contains one additional addressed transfer event and a different active-coupling/history projection.
 
-with AB transfer 3, BC transfer 4, and excitation +5 to addressed A.
-
-- [ ] **Step 2: Add the baseline replay and immutability test**
+- [ ] **Step 2: Add deterministic replay and source immutability test**
 
 ```ts
 const before = structuredClone(SNAP_STATE_SPECIMEN.baseline);
 const first = runSnapState(SNAP_STATE_SPECIMEN.baseline);
 const second = runSnapState(SNAP_STATE_SPECIMEN.baseline);
-
 assert.equal(first.declaration.ref, second.declaration.ref);
 assert.deepEqual(first.events.map((event) => event.ref), second.events.map((event) => event.ref));
 assert.equal(first.terminal.ref, second.terminal.ref);
@@ -891,55 +711,44 @@ assert.deepEqual(SNAP_STATE_SPECIMEN.baseline, before);
 assert.ok(Object.isFrozen(SNAP_STATE_SPECIMEN));
 ```
 
-- [ ] **Step 3: Prove material return does not erase historical difference**
-
-Create two fixture runs that end with identical final loads but different event paths: baseline threshold cascade versus a no-snap control whose initial loads are already the same final baseline and whose excitation amount is zero. Assert:
+- [ ] **Step 3: Prove identical final loads do not collapse different histories**
 
 ```ts
-assert.deepEqual(cascade.terminal.body.finalLoads, control.terminal.body.finalLoads);
-assert.notDeepEqual(cascade.terminal.body.eventRefs, control.terminal.body.eventRefs);
-assert.notEqual(cascade.terminal.ref, control.terminal.ref);
-assert.equal(cascade.terminal.body.snappedCellRefs.length, 3);
-assert.equal(control.terminal.body.snappedCellRefs.length, 0);
+const baseline = runSnapState(SNAP_STATE_SPECIMEN.baseline);
+const contrast = runSnapState(SNAP_STATE_SPECIMEN.zeroTransferHistoryContrast);
+assert.deepEqual(baseline.terminal.body.finalLoads, contrast.terminal.body.finalLoads);
+assert.notDeepEqual(baseline.terminal.body.eventRefs, contrast.terminal.body.eventRefs);
+assert.notEqual(baseline.terminal.ref, contrast.terminal.ref);
+assert.equal(
+  contrast.events.filter((event) => event.body.kind === "transfer").length,
+  baseline.events.filter((event) => event.body.kind === "transfer").length + 1,
+);
 ```
 
-Construct the control with distinct addressed input records and declaration; identical final load projection must not collapse historical identity.
+This proves material/current projection equality does not erase the path by which it was reached.
 
-- [ ] **Step 4: Prove partial-chain and below-threshold fixture families**
+- [ ] **Step 4: Prove partial-chain and below-threshold fixtures**
 
-Require the partial chain to settle with A snapped, AB active, B loaded below threshold, and BC inactive. Require the below-threshold fixture to settle with no snaps/couplings.
+Partial chain must settle with only A snapped, AB active, B below threshold, BC inactive. Below-threshold must settle with no snap and no active coupling.
 
-- [ ] **Step 5: Run specimen GREEN**
+- [ ] **Step 5: Run GREEN and commit**
 
 ```bash
 npm run build && node --test .build/tests/snap-state-specimen.test.js
-```
-
-Expected: PASS.
-
-- [ ] **Step 6: Commit the frozen specimens**
-
-```bash
 git add fixtures/snap-state/specimen.ts tests/snap-state-specimen.test.ts
 git commit -m "test: freeze Snap-State v0.1 specimens"
 ```
 
 ---
 
-### Task 7: Harden topology and representation boundaries adversarially
+### Task 7: Harden representation and declared-topology boundaries
 
 **Files:**
 - Modify: `src/snap-state/validate.ts`
 - Modify: `src/snap-state/evaluate.ts`
 - Modify/Test: `tests/snap-state-adversarial.test.ts`
 
-**Interfaces:**
-- Consumes: public validation and execution seam.
-- Produces: fail-closed proof for hostile accessors, sparse arrays, duplicate/undeclared topology, and declaration/input mismatch.
-
-- [ ] **Step 1: Add hostile-accessor tests before production changes**
-
-Use getter counters and require zero execution:
+- [ ] **Step 1: Add hostile accessor tests with zero getter execution**
 
 ```ts
 let getterCalls = 0;
@@ -959,11 +768,9 @@ assert.throws(
 assert.equal(getterCalls, 0);
 ```
 
-Also create an array whose numeric index is an accessor and pass it as `cells`; require the same error and zero getter calls.
+Also put an accessor at numeric index `0` of the `cells` array and require zero getter calls.
 
-- [ ] **Step 2: Add sparse/symbol/extra-property array tests**
-
-Require `SNAPSTATE_INVALID_REPRESENTATION` for:
+- [ ] **Step 2: Add sparse, symbol, and extra-property array tests**
 
 ```ts
 const sparse = new Array(2);
@@ -972,36 +779,36 @@ sparse[0] = validCell;
 const extra = [validCell];
 Object.defineProperty(extra, "surprise", { value: 1, enumerable: true });
 
-const symbolArray = [validCell];
-(symbolArray as unknown as Record<symbol, unknown>)[Symbol("x")] = 1;
+const symbolArray = [validCell] as unknown as Record<symbol, unknown> & unknown[];
+symbolArray[Symbol("x")] = 1;
 ```
 
-- [ ] **Step 3: Add exact topology-envelope tests**
+Each must fail with `SNAPSTATE_INVALID_REPRESENTATION`.
 
-Require stable errors for:
+- [ ] **Step 3: Add exact addressed-envelope tests**
+
+Require:
 
 ```text
-- duplicate supplied cell bodies that address to the same ref -> SNAPSTATE_DUPLICATE_CELL
-- duplicate supplied couplings -> SNAPSTATE_DUPLICATE_COUPLING
-- declaration cellRefs missing one supplied addressed cell -> SNAPSTATE_DECLARATION_INPUT_MISMATCH
-- declaration couplingRefs naming a ref not supplied -> SNAPSTATE_DECLARATION_INPUT_MISMATCH
-- coupling endpoint not present in declaration cellRefs -> SNAPSTATE_UNDECLARED_CELL
-- excitation target not present in declaration cellRefs -> SNAPSTATE_UNDECLARED_CELL
+duplicate supplied addressed cell -> SNAPSTATE_DUPLICATE_CELL
+duplicate supplied addressed coupling -> SNAPSTATE_DUPLICATE_COUPLING
+declaration/supplied cell set mismatch -> SNAPSTATE_DECLARATION_INPUT_MISMATCH
+declaration/supplied coupling set mismatch -> SNAPSTATE_DECLARATION_INPUT_MISMATCH
+coupling endpoint outside declared addressed cells -> SNAPSTATE_UNDECLARED_CELL
+excitation target outside declared addressed cells -> SNAPSTATE_UNDECLARED_CELL
 ```
 
-- [ ] **Step 4: Run adversarial tests and verify RED where defenses are missing**
+- [ ] **Step 4: Run RED**
 
 ```bash
 npm run build && node --test .build/tests/snap-state-adversarial.test.js
 ```
 
-Expected: only newly specified unimplemented defenses fail.
+- [ ] **Step 5: Complete the defenses without unsafe traversal**
 
-- [ ] **Step 5: Complete descriptor-safe validators and execution envelope checks**
+Never call `.map`, `.some`, spread, or iteration on a user-supplied array until `dataArray` has copied descriptor values into a trusted dense array. Never read untrusted record fields until `dataRecord` has rejected accessors.
 
-Do not access user-supplied arrays with `.map`, `.some`, spread, or iteration until `dataArray(...)` has copied descriptor values into a trusted dense array. Do not read object fields before `dataRecord(...)` has rejected accessors.
-
-Ensure all topology equality is set equality over **addressed refs**, not `cellId` / `couplingId` labels:
+Set equality is over addressed refs:
 
 ```ts
 function sameRefSet(expected: readonly string[], actual: readonly string[]): boolean {
@@ -1011,34 +818,25 @@ function sameRefSet(expected: readonly string[], actual: readonly string[]): boo
 }
 ```
 
-- [ ] **Step 6: Run focused adversarial GREEN**
+Local labels `cellId` and `couplingId` never substitute for canonical record refs.
+
+- [ ] **Step 6: Run GREEN and commit**
 
 ```bash
 npm run build && node --test .build/tests/snap-state-adversarial.test.js
-```
-
-Expected: PASS with hostile getter counters still zero.
-
-- [ ] **Step 7: Commit hardening**
-
-```bash
 git add src/snap-state/validate.ts src/snap-state/evaluate.ts tests/snap-state-adversarial.test.ts
 git commit -m "fix: fail closed on hostile Snap-State topology"
 ```
 
 ---
 
-### Task 8: Reconcile the exact implementation head and run the repository gate
+### Task 8: Exact-head verification and implementation handoff
 
 **Files:**
-- Modify only if the preceding tests reveal a concrete defect: `src/snap-state/*`, `fixtures/snap-state/specimen.ts`, `tests/snap-state*.test.ts`
-- Do not update GitBook in this task; executable proof must land first.
+- Modify only when a verification failure identifies a concrete Snap-State defect.
+- Do not update GitBook before the executable PR lands.
 
-**Interfaces:**
-- Consumes: all Snap-State tasks.
-- Produces: exact-head verification evidence suitable for PR review and later GitBook projection.
-
-- [ ] **Step 1: Run the complete Snap-State test surface**
+- [ ] **Step 1: Run the complete Snap-State surface**
 
 ```bash
 npm run build && node --test \
@@ -1047,9 +845,9 @@ npm run build && node --test \
   .build/tests/snap-state-specimen.test.js
 ```
 
-Expected: PASS, zero failed tests.
+Expected: PASS, zero failed Snap-State tests.
 
-- [ ] **Step 2: Run TypeScript compile-only verification**
+- [ ] **Step 2: Run compile verification**
 
 ```bash
 npm run check
@@ -1057,30 +855,21 @@ npm run check
 
 Expected: PASS.
 
-- [ ] **Step 3: Run the exact repository-wide gate**
+- [ ] **Step 3: Run the full repository gate**
 
 ```bash
 npm run verify:all
 ```
 
-Expected:
+Expected: TypeScript compile, Node/TypeScript tests, Python fixture verification, and conformance CLI all PASS. Record the actual test count from this exact head; do not predict it in advance.
 
-```text
-TypeScript compile check: PASS
-Node/TypeScript tests: PASS
-Python canonical fixture verification: PASS
-conformance CLI: PASS
-```
+- [ ] **Step 4: Review the exact diff against the invariant questions**
 
-Do not claim exact test counts until this command reports them on the implementation head.
-
-- [ ] **Step 4: Inspect the implementation diff against the design invariants**
-
-The review must answer **no** to every question:
+Every answer must be **no**:
 
 ```text
 Can an event introduce a cell/coupling absent from the declaration?
-Can active-state change mutate the declared topology envelope?
+Can active state mutate the declared topology envelope?
 Can a cell snap twice in v0.1?
 Can exhaustion leave unrecorded mutation?
 Can simultaneous eligibility depend on insertion/async order?
@@ -1088,27 +877,27 @@ Can validation execute a hostile accessor?
 Can set normalization reorder event history?
 Can threshold crossing imply authority/truth/policy standing?
 Can recoil erase prior snap history?
-Can any second canonicalizer/hasher appear?
+Can a second canonicalizer/hasher appear?
 ```
 
-Use repository search/diff evidence rather than assumption.
+Also verify `src/l-branch/`, ontology kinds, and canonical receipt unions are unchanged.
 
-- [ ] **Step 5: Commit only concrete reconciliation changes, if any**
+- [ ] **Step 5: Correct only evidenced defects and rerun the affected RED -> GREEN cycle**
 
-If verification required a correction, commit the smallest fix with its regression test. If no correction was required, create no empty commit.
+If a defect is found, add the narrow regression test first, observe it fail, apply the smallest correction, rerun the focused test, then rerun `npm run verify:all`. If no defect is found, create no empty commit.
 
-- [ ] **Step 6: Record exact-head evidence in issue/PR handoff**
+- [ ] **Step 6: Produce the PR handoff evidence**
 
-The implementation handoff must include:
+The PR description/review handoff must contain:
 
 ```text
 implementation head SHA
-commands run
+commands actually run
 actual pass/fail result and test count from npm run verify:all
-Snap-State focused test result
-confirmation that src/l-branch/ is unchanged
-confirmation that canonical ontology/receipt unions are unchanged
-remaining unresolved v0.2 questions from the design
+focused Snap-State test result
+confirmation src/l-branch/ is unchanged
+confirmation ontology/receipt unions are unchanged
+remaining v0.2 questions preserved from the design
 ```
 
-Then hand the branch to the requested Riqor / Develoop / PR Completion review sequence. GitBook may be updated only after the executable PR lands, and must name Project 0 as implementation authority.
+Then use the requested Riqor evidence/reviewer, Develoop review loop, and PR Completion workflow. GitBook may receive a project-backed Frontier projection only after the executable PR lands, with Project 0 named as implementation authority.
