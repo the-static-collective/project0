@@ -194,7 +194,8 @@ export function runSnapState(input: SnapStateExecutionInputV01): SnapStateExecut
         loadAfter: transferAfter,
       }, (eventRef) => {
         currentLoads.set(coupling.body.toCellRef, transferAfter);
-        if (transferAfter !== transferBefore) {
+        const targetCell = cellByRef.get(coupling.body.toCellRef)!;
+        if (transferBefore < targetCell.body.threshold && transferAfter >= targetCell.body.threshold) {
           causeByCell.set(coupling.body.toCellRef, eventRef);
         }
       })) return false;
@@ -237,7 +238,8 @@ export function runSnapState(input: SnapStateExecutionInputV01): SnapStateExecut
     loadAfter: after,
   }, (eventRef) => {
     currentLoads.set(targetRef, after);
-    if (after !== before) {
+    const targetCell = cellByRef.get(targetRef)!;
+    if (before < targetCell.body.threshold && after >= targetCell.body.threshold) {
       causeByCell.set(targetRef, eventRef);
     }
   });
