@@ -200,15 +200,37 @@ export function validateSnapEvent(value: unknown): asserts value is SnapEventRec
   ]);
   requiredRef(record, "declarationRef", "SNAPSTATE_INVALID_EVENT");
   nonNegativeSafeInteger(record.eventIndex, "SNAPSTATE_INVALID_EVENT");
-  if (!["excitation", "snap", "transfer", "recoil"].includes(record.kind as string)) {
+  const kind = record.kind;
+  if (kind !== "excitation" && kind !== "snap" && kind !== "transfer" && kind !== "recoil") {
     throw new SnapStateValidationError("SNAPSTATE_INVALID_EVENT");
   }
   requiredRef(record, "cellRef", "SNAPSTATE_INVALID_EVENT");
-  nullableRef(record, "sourceEventRef", "SNAPSTATE_INVALID_EVENT");
-  nullableRef(record, "couplingRef", "SNAPSTATE_INVALID_EVENT");
-  nonNegativeSafeInteger(record.loadBefore, "SNAPSTATE_INVALID_EVENT");
-  signedSafeInteger(record.loadDelta, "SNAPSTATE_INVALID_EVENT");
-  nonNegativeSafeInteger(record.loadAfter, "SNAPSTATE_INVALID_EVENT");
+  const sourceEventRef = nullableRef(record, "sourceEventRef", "SNAPSTATE_INVALID_EVENT");
+  const couplingRef = nullableRef(record, "couplingRef", "SNAPSTATE_INVALID_EVENT");
+  const loadBefore = nonNegativeSafeInteger(record.loadBefore, "SNAPSTATE_INVALID_EVENT");
+  const loadDelta = signedSafeInteger(record.loadDelta, "SNAPSTATE_INVALID_EVENT");
+  const loadAfter = nonNegativeSafeInteger(record.loadAfter, "SNAPSTATE_INVALID_EVENT");
+
+  const computedAfter = loadBefore + loadDelta;
+  if (!Number.isSafeInteger(computedAfter) || computedAfter !== loadAfter) {
+    throw new SnapStateValidationError("SNAPSTATE_INVALID_EVENT");
+  }
+
+  if (kind === "excitation") {
+    if (sourceEventRef !== null || couplingRef !== null || loadDelta < 0) {
+      throw new SnapStateValidationError("SNAPSTATE_INVALID_EVENT");
+    }
+  } else if (kind === "snap") {
+    if (couplingRef !== null || loadDelta !== 0) {
+      throw new SnapStateValidationError("SNAPSTATE_INVALID_EVENT");
+    }
+  } else if (kind === "transfer") {
+    if (sourceEventRef === null || couplingRef === null || loadDelta < 0) {
+      throw new SnapStateValidationError("SNAPSTATE_INVALID_EVENT");
+    }
+  } else if (sourceEventRef === null || couplingRef !== null || loadDelta > 0) {
+    throw new SnapStateValidationError("SNAPSTATE_INVALID_EVENT");
+  }
 }
 
 export function validateSnapStateTerminal(value: unknown): asserts value is SnapStateTerminalRecordV01 {
