@@ -598,11 +598,29 @@ export function mapCorpusContinuityAttestation(value: unknown): TriangleConforma
   };
 
   validateContinuityClaim(claim);
+
+  const unresolvedCausalResiduals: TriangleConformanceResidual[] = [];
+  if (donor.priorUnresolved.length > 0) {
+    unresolvedCausalResiduals.push({
+      dimension: "corpus.prior-unresolved-causal-evidence",
+      evidenceRefs: [donor.priorCutRef],
+      note: JSON.stringify(donor.priorUnresolved),
+    });
+  }
+  if (donor.currentUnresolved.length > 0) {
+    unresolvedCausalResiduals.push({
+      dimension: "corpus.current-unresolved-causal-evidence",
+      evidenceRefs: [donor.currentCutRef],
+      note: JSON.stringify(donor.currentUnresolved),
+    });
+  }
+
   return {
     donor: "corpus-os",
-    grammarGap: "NO_GAP",
+    grammarGap: unresolvedCausalResiduals.length > 0 ? "BOUNDED_GAP" : "NO_GAP",
     claim,
     residuals: [
+      ...unresolvedCausalResiduals,
       {
         dimension: "corpus.authority-continuity-local",
         evidenceRefs: sortedUnique(authorityEvidence),
