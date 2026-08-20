@@ -516,8 +516,12 @@ export function mapTranchNodeBoundaryWitness(value: unknown): TriangleConformanc
 
 export function mapCorpusContinuityAttestation(value: unknown): TriangleConformanceResult {
   const donor = parseCorpusAttestation(value);
-  const transformed = [...donor.transformed].sort((a, b) => a.priorRef.localeCompare(b.priorRef));
-  const lost = [...donor.lost].sort((a, b) => a.priorRef.localeCompare(b.priorRef));
+  const transformed = [...donor.transformed].sort((a, b) => (
+    a.priorRef < b.priorRef ? -1 : a.priorRef > b.priorRef ? 1 : 0
+  ));
+  const lost = [...donor.lost].sort((a, b) => (
+    a.priorRef < b.priorRef ? -1 : a.priorRef > b.priorRef ? 1 : 0
+  ));
   const priorOrphanRefs = donor.priorOrphanObservations.map((entry) => entry.ref);
   const currentOrphanRefs = donor.currentOrphanObservations.map((entry) => entry.ref);
   const authorityEvidence = donor.authorityEvidenceRefs.length > 0
