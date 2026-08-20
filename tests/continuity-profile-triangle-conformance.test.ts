@@ -201,3 +201,35 @@ test("accessor-backed donor representation fails closed without executing the ac
   assert.throws(() => mapCorpusContinuityAttestation(hostile));
   assert.equal(executed, false);
 });
+
+test("donor edge ordering uses locale-independent code-unit order", () => {
+  const variant = structuredClone(corpusContinuityAttestation) as Record<string, unknown>;
+  variant.transformed = [
+    {
+      priorRef: "artifact:äther-prior",
+      currentRef: "artifact:äther-current",
+      evidenceRef: "transition:äther",
+    },
+    {
+      priorRef: "artifact:zeta-prior",
+      currentRef: "artifact:zeta-current",
+      evidenceRef: "transition:zeta",
+    },
+  ];
+  variant.lost = [];
+  variant.transitionEvidenceRefs = ["transition:äther", "transition:zeta"];
+  variant.whyCurrent = {
+    ...(variant.whyCurrent as Record<string, unknown>),
+    transitionEvidenceRefs: ["transition:äther", "transition:zeta"],
+  };
+
+  const result = mapCorpusContinuityAttestation(variant);
+  const names = result.claim.lanes[0].dimensions
+    .map((item) => item.dimension)
+    .filter((name) => name.startsWith("corpus.transformed:"));
+
+  assert.deepEqual(names, [
+    "corpus.transformed:artifact:zeta-prior",
+    "corpus.transformed:artifact:äther-prior",
+  ]);
+});
