@@ -55,15 +55,35 @@ test("Corpus donor keeps constituted classes, terminal history, and orphan resid
     "artifact:agreement-a",
     "artifact:correspondence-a",
   ]);
-  assert.deepEqual(mapped.get("corpus.transformed:artifact:legacy-note")?.evidenceRefs, [
-    "artifact:legacy-note",
+
+  const transformed = mapped.get("corpus.transformed:artifact:legacy-note");
+  assert.deepEqual(transformed?.evidenceRefs, [
     "artifact:amendment-b",
+    "artifact:legacy-note",
     "transition:legacy-to-amendment",
   ]);
-  assert.deepEqual(mapped.get("corpus.lost:artifact:superseded-appendix")?.evidenceRefs, [
+  assert.equal(
+    transformed?.note,
+    JSON.stringify({
+      priorRef: "artifact:legacy-note",
+      currentRef: "artifact:amendment-b",
+      evidenceRef: "transition:legacy-to-amendment",
+    }),
+  );
+
+  const lost = mapped.get("corpus.lost:artifact:superseded-appendix");
+  assert.deepEqual(lost?.evidenceRefs, [
     "artifact:superseded-appendix",
     "transition:appendix-retired",
   ]);
+  assert.equal(
+    lost?.note,
+    JSON.stringify({
+      priorRef: "artifact:superseded-appendix",
+      evidenceRef: "transition:appendix-retired",
+    }),
+  );
+
   assert.deepEqual(mapped.get("corpus.unresolved")?.evidenceRefs, [
     "artifact:unexplained-current",
   ]);
