@@ -529,10 +529,19 @@ export function mapCorpusContinuityAttestation(value: unknown): TriangleConforma
     ...transformed.map((edge) => dimension(
       `corpus.transformed:${edge.priorRef}`,
       [edge.priorRef, edge.currentRef, edge.evidenceRef],
+      JSON.stringify({
+        priorRef: edge.priorRef,
+        currentRef: edge.currentRef,
+        evidenceRef: edge.evidenceRef,
+      }),
     )),
     ...lost.map((edge) => dimension(
       `corpus.lost:${edge.priorRef}`,
       [edge.priorRef, edge.evidenceRef],
+      JSON.stringify({
+        priorRef: edge.priorRef,
+        evidenceRef: edge.evidenceRef,
+      }),
     )),
     dimension("corpus.unresolved", donor.unresolvedRefs),
     ...terminalDimensions("prior", donor.priorTerminalHistory),
