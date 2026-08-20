@@ -233,3 +233,30 @@ test("donor edge ordering uses locale-independent code-unit order", () => {
     "corpus.transformed:artifact:äther-prior",
   ]);
 });
+
+test("unmapped donor causal evidence becomes a bounded gap instead of disappearing", () => {
+  const variant = structuredClone(corpusContinuityAttestation) as Record<string, unknown>;
+  variant.priorUnresolved = [
+    {
+      code: "BROKEN_LINEAGE",
+      ref: "causal:prior-gap",
+    },
+  ];
+
+  const result = mapCorpusContinuityAttestation(variant);
+  const residual = result.residuals.find(
+    (item) => item.dimension === "corpus.prior-unresolved-causal-evidence",
+  );
+
+  assert.equal(result.grammarGap, "BOUNDED_GAP");
+  assert.deepEqual(residual, {
+    dimension: "corpus.prior-unresolved-causal-evidence",
+    evidenceRefs: ["world-cut:prior-v01"],
+    note: JSON.stringify([
+      {
+        code: "BROKEN_LINEAGE",
+        ref: "causal:prior-gap",
+      },
+    ]),
+  });
+});
