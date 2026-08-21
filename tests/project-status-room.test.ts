@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 test("project status declares the bounded room neighborhood without authority transfer", async () => {
-  const input = await readFile(new URL("../PROJECT_STATUS.json", import.meta.url), "utf8");
+  const input = await readFile("PROJECT_STATUS.json", "utf8");
   const status = JSON.parse(input) as Record<string, unknown>;
 
   assert.deepEqual(status.dependsOn, [
@@ -19,7 +19,7 @@ test("project status declares the bounded room neighborhood without authority tr
     },
   ]);
 
-  assert.equal(Object.hasOwn(status, "humanHeld"), false);
+  assert.equal(Object.prototype.hasOwnProperty.call(status, "humanHeld"), false);
   assert.deepEqual(status.touchpoints, [
     {
       id: "project-status",
