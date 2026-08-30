@@ -12,7 +12,7 @@ import {
 } from "../src/continuity-profile/index";
 
 const fixture = JSON.parse(
-  readFileSync(new URL("../fixtures/phaselift/CROSSING-001-source.json", import.meta.url), "utf8"),
+  readFileSync("fixtures/phaselift/CROSSING-001-source.json", "utf8"),
 );
 
 test("CROSSING-001 source uses existing Project 0 contracts only", () => {
