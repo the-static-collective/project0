@@ -14,8 +14,6 @@ The Static Collective now has several independently bounded organs with increasi
 
 PHASELIFT is the design for that transition.
 
-The target shape is:
-
 ```text
 collection of bounded organs
         ->
@@ -32,7 +30,7 @@ This design is cross-project in consequence but intentionally narrow in mechanis
 
 ## 2. Existing floor this design must not duplicate
 
-This design was self-reviewed against the current project floor before being committed.
+This design was self-reviewed against the current project floor before being handed back for human review.
 
 ### 2.1 Project 0 already owns the shared meaning and crossing contract
 
@@ -54,9 +52,15 @@ Current proven law:
 
 > A source frame may send bounded testimony across a declared boundary; the destination must decide locally what that testimony is allowed to become. Crossing never carries sovereignty.
 
-PHASELIFT extends the use of that law from "may this testimony be inspected here?" toward "may a locally sovereign successor world be constituted from this attributable crossing?"
+PHASELIFT extends the use of that law from:
 
-The first PHASELIFT proof should prefer a **profile/composition of existing Project 0 contracts** over adding fields to `p0.exchange/0.1`.
+> may this testimony be inspected here?
+
+into:
+
+> may a locally sovereign successor world be constituted from this attributable crossing?
+
+The first PHASELIFT proof should prefer a profile/composition of existing Project 0 contracts over adding fields to `p0.exchange/0.1`.
 
 ### 2.3 Typed Continuity Braid already owns continuity across change
 
@@ -107,6 +111,37 @@ Authority does not silently expand.
 
 LOADOUT therefore owns the receiver-local act of reconstitution: resolving what is present here, applying local fences, binding only locally admitted capabilities, and producing a local receipt for the constituted world.
 
+### 2.7 Boot the House is a direct predecessor, not a discarded architecture
+
+The existing **Boot the House — Federated World Encounter Loop v0.1** already composes Full Measure, TranchNode, Project 0 World Encounter, and Corpus OS through repo-owned process adapters while preserving destination-local disposition and refusing a new central world-runtime.
+
+PHASELIFT does not supersede that work. It extracts the more general continuation problem now visible across the newer stack:
+
+```text
+encounter testimony
+  -> destination-local evaluation
+  -> locally constituted successor
+  -> attributable continuation
+```
+
+Boot the House remains a practical federation specimen. PHASELIFT adds an explicit receiver-local reconstitution/birth seam and makes continuation across carrier/world boundaries the primary proof target.
+
+### 2.8 Reconstitution threshold is not Project 0 Snap-State
+
+Project 0 already owns `p0.snap-state/0.1`, an experimental deterministic primitive for threshold crossings that alter active topology inside a predeclared structural envelope.
+
+PHASELIFT's **reconstitution threshold** answers a different question:
+
+> Given incoming crossing testimony and this receiver's local constitution, may a new locally sovereign world occurrence be constituted?
+
+Therefore:
+
+```text
+RECONSTITUTION THRESHOLD != SNAP-STATE THRESHOLD
+```
+
+The first PHASELIFT threshold remains LOADOUT-local and must not reuse or silently overload Snap-State semantics.
+
 ## 3. Constitutional non-collapses
 
 The following are normative for PHASELIFT:
@@ -135,6 +170,7 @@ PROTECTED != TRUE
 PROTECTED != RELEVANT
 POSSIBILITY != OCCURRENCE
 THRESHOLD != WORLD
+RECONSTITUTION THRESHOLD != SNAP-STATE THRESHOLD
 BIRTH != DESERIALIZATION
 LOCALITY != AUTHORITY
 DISTANCE != DISTRUST
@@ -146,7 +182,7 @@ The Project 0 frozen nine-kind ontology is unchanged by this design.
 
 ## 4. Core model
 
-PHASELIFT uses four grammatical positions and one explicit transition state.
+PHASELIFT uses four grammatical positions and one explicit transition event:
 
 ```text
 WORLD
@@ -156,11 +192,11 @@ WORLD
   => WORLD'
 ```
 
-The first three positions preserve or exteriorize what already occurred. The threshold is receiver-local evaluation of whether the crossing can participate in a new locally sovereign world. The heavy arrow `=>` marks constitution of a new attributable occurrence.
+The first three positions preserve or exteriorize what already occurred. THRESHOLD is receiver-local evaluation of whether the crossing can participate in a new locally sovereign world. The heavy arrow `=>` marks constitution of a new attributable occurrence.
 
 ### 4.1 Fourfold role recurrence
 
-Let `Q` advance one grammatical position. Then after a complete turn:
+Let `Q` advance one grammatical position. After a complete turn:
 
 ```text
 Q^4(W_n) ~role W_n
@@ -169,9 +205,7 @@ Q^4(W_n) !=history W_n
 
 The role returns to WORLD, but historical occurrence advances.
 
-This is cyclic in grammar-space and open in history-space.
-
-The design uses this as an engineering compression only. It does not claim that four is metaphysically privileged.
+This is cyclic in grammar-space and open in history-space. The design uses this as an engineering compression only; it does not claim that four is metaphysically privileged.
 
 ### 4.2 Ternary-to-quaternary transition
 
@@ -209,22 +243,27 @@ This is an analogy for independence, not literal vector-space rank.
 
 PHASELIFT does not require a new universal `crossing/v0` schema in the first implementation slice.
 
-The source side should compose existing Project 0 objects:
+The source side should compose existing Project 0 objects without inventing unsupported fields inside `p0.exchange/0.1`.
 
-1. one `p0.exchange/0.1` World Encounter envelope carrying bounded source testimony;
-2. zero or more `p0.continuity/0.1` claims describing purpose-relative continuity across the boundary;
-3. exact references to owner-local receipts/evidence/projections that remain opaque to Project 0 unless Project 0 already owns their semantics;
-4. source-local proposals describing possible continuations, represented as proposals/testimony rather than executable destination edges.
+The minimal shape is:
+
+1. create or identify one exact Project 0 source object/reference that represents the bounded testimony offered for crossing;
+2. attach/cite any Project 0 `p0.continuity/0.1` claims through existing Project 0 relationships/provenance mechanisms rather than new World Encounter top-level fields;
+3. let owner-local receipts/evidence/projections remain owner-local objects referenced through the offered source object's existing provenance/relationship surface when needed;
+4. represent possible continuations as Project 0 proposals or owner-local proposal references, not destination executable edges;
+5. offer the exact established source reference through one `p0.exchange/0.1` World Encounter envelope.
+
+This design does **not** assume that World Encounter v0.1 already supports arbitrary new top-level arrays for continuity, open edges, protection, or foreign receipts. If the specimen cannot be expressed through the existing established-source-reference boundary without semantic weakening, implementation stops and a separately versioned Project 0 design is required.
 
 ### 5.1 Opaque owner-local references
 
-Crossing transport must understand only the minimum necessary address/integrity metadata for foreign objects.
+Transport must understand only the minimum necessary address/integrity/provenance metadata for foreign objects.
 
 Conceptually:
 
 ```text
 owner
-kind-or-schema-address
+kind-or-schema address
 object identity
 integrity/address
 provenance/disclosure references where required
@@ -291,7 +330,10 @@ REFUSE
 
 `DEGRADED` means a successor can be constituted while a declared continuity requirement is unavailable or weakened, and that loss is explicitly receipted.
 
-`DEGRADED != BROKEN` and `DEGRADED != PASS`.
+```text
+DEGRADED != BROKEN
+DEGRADED != PASS
+```
 
 ## 7. PROTECTED as a receiver-local administrative disposition
 
@@ -303,7 +345,7 @@ This design retains the concept but narrows its ownership after self-review.
 
 `PROTECTED` is **not a new Project 0 node kind** and is **not standardized as a portable Project 0 status in v0**.
 
-The source may testify that it treated an object as protected or may carry a proposal requesting protection. The receiver decides locally whether to adopt a protected hold.
+The source may testify that it treated an object as protected or may offer a proposal requesting protection. The receiver decides locally whether to adopt a protected hold.
 
 In the first proof, LOADOUT may expose a receiver-local administrative disposition:
 
@@ -335,7 +377,7 @@ If at least two materially different recipient systems later need the same dispo
 
 Only a receiver can evaluate whether a crossing is liftable under its constitution.
 
-The threshold object is therefore **LOADOUT-owned in the first implementation**, not a new Project 0 ontology or receipt family.
+The threshold object is therefore **LOADOUT-owned in the first implementation**, not a new Project 0 ontology or receipt family and not an instance of Project 0 Snap-State.
 
 Conceptual receiver-local form:
 
@@ -384,7 +426,7 @@ The crossing is retained but no successor world is constituted now. HOLD is a va
 
 Local law forbids the proposed constitution. The source crossing remains unchanged and attributable.
 
-A malformed representation or protocol failure must remain distinct from constitutional REFUSE.
+Malformed representation, protocol incompatibility, and operational failure must remain distinct from constitutional REFUSE.
 
 ## 9. Reconstitution lifecycle
 
@@ -412,7 +454,7 @@ If a historical receipt was produced by:
 ALEX@abc123
 ```
 
-and the receiver currently resolves the logical address ALEX to:
+and the receiver currently resolves logical address ALEX to:
 
 ```text
 ALEX@987xyz
@@ -443,7 +485,9 @@ Source authority is never intersected, unioned, copied, or inherited as a warran
 
 ### 9.5 HOME CHECK
 
-The receiver evaluates the declared continuity requirements and records PASS, DEGRADED, or REFUSE.
+The receiver evaluates declared continuity requirements and records PASS, DEGRADED, or REFUSE.
+
+A receiver may still choose HOLD after a PASS or DEGRADED-capable evaluation; HOLD expresses "do not constitute now," not a continuity classification.
 
 ### 9.6 PROTECTED HOLD
 
@@ -530,7 +574,7 @@ A later world may know both histories. It may not rewrite either earlier observe
 
 Two branches may encounter one another without merging.
 
-Encounter establishes availability of attributable testimony and may expose:
+Encounter may expose:
 
 ```text
 common ancestry
@@ -636,6 +680,12 @@ A successfully constituted successor may itself become a receiver and source of 
 - formation history, symbolic pressure, and the conversation-derived PHASELIFT clue;
 - no runtime authority.
 
+### Product worlds such as Full Measure / Corpus OS own
+
+- their native user-facing or operational world semantics;
+- local disposition and consequence;
+- adapters into the shared crossing floor without donating sovereignty to it.
+
 ### No one owns
 
 ```text
@@ -675,12 +725,12 @@ hash != semantic validation
 
 The source crossing must not change because receiver B chooses LIFT while receiver C chooses REFUSE.
 
-Same crossing, different local relation:
-
 ```text
 Theta_B = evaluate(H, L_B)
 Theta_C = evaluate(H, L_C)
 ```
+
+Same crossing. Different local relation.
 
 The source object therefore does not contain its own destiny.
 
@@ -690,14 +740,14 @@ The first proof is intentionally small.
 
 ### Source world A
 
-Use one deterministic Project 0 encounter fixture carrying:
+Use one deterministic Project 0 source object and World Encounter fixture carrying/offering:
 
 - one exact source reference;
 - source provenance/disclosure;
-- one Project 0 continuity claim for the declared purpose;
-- one owner-local receipt reference;
+- one Project 0 continuity claim reachable from the source object's existing provenance/relationship graph;
+- one owner-local receipt reference reachable through the same bounded source formation;
 - one source proposal representing an open continuation;
-- one object that the source treated as worth preserving without promotion.
+- one source testimony/proposal that an object is worth preserving without promotion.
 
 No executable source authority crosses.
 
@@ -831,11 +881,17 @@ The preferred first implementation requires **no change to the frozen nine-kind 
 
 The preferred first implementation also attempts to use `p0.exchange/0.1` and `p0.continuity/0.1` unchanged.
 
-If the first executable specimen reveals that the existing contracts cannot carry the minimum required testimony without semantic weakening, the implementation must stop and produce a separate versioned Project 0 design rather than silently widening `0.1`.
+If the executable specimen reveals that existing contracts cannot carry the minimum required testimony without semantic weakening, implementation must stop and produce a separate versioned Project 0 design rather than silently widening `0.1`.
+
+Project 0 Snap-State is unchanged and remains semantically separate.
 
 ### LOADOUT
 
 New receiver-local threshold/reconstitution records may be additive under a new versioned local schema. Historical LOADOUT receipts are not rewritten.
+
+### Boot the House / Full Measure / Corpus OS
+
+No existing Boot the House contract is rewritten by PHASELIFT. A later adapter may demonstrate that an existing World Encounter outcome can feed a LOADOUT-style reconstitution threshold, but that is a new specimen rather than retroactive reinterpretation of the earlier project.
 
 ### Other organs
 
@@ -859,6 +915,7 @@ The first PHASELIFT implementation explicitly rejects:
 - automatic inference of continuity across lanes;
 - branch deletion after merge;
 - semantic translation of foreign owner-local receipts;
+- overloading Project 0 Snap-State as reconstitution;
 - claiming that the fourfold design model is metaphysical truth;
 - EAR/audio-listening functionality in this slice.
 
@@ -869,19 +926,31 @@ EAR may later be an excellent client of PHASELIFT because exact audio, listening
 The design is ready for implementation planning when the human reviewer accepts these claims:
 
 1. Project 0, not a new crossing repo, owns portable shared crossing/continuity semantics.
-2. LOADOUT owns receiver-local reconstitution and world birth.
+2. LOADOUT owns receiver-local reconstitution and world birth in the first proof.
 3. Crossing testimony carries provenance and continuity evidence but never destination authority.
-4. HOME is relational continuity, not world snapshot restoration.
-5. PROTECTED remains receiver-local until repeated cross-project need justifies standardization.
-6. Open continuations cross as testimony/proposals, not executable edges.
-7. Threshold is a receiver-local relation between source crossing and local constitution.
-8. A new world gets an explicit occurrence birthday.
-9. Forks remain independent histories; later encounter does not retroactively share knowledge.
-10. Merge is optional and, when chosen, creates a new descendant rather than rewriting parents.
-11. Nested worlds use the same crossing law; locality does not bypass authority.
-12. The first proof is narrow enough to execute with existing Project 0 + LOADOUT floors before wider federation work.
+4. Existing `p0.exchange/0.1` is reused as an established-source-reference boundary, not silently widened with imagined top-level fields.
+5. HOME is relational continuity, not world snapshot restoration.
+6. PROTECTED remains receiver-local until repeated cross-project need justifies standardization.
+7. Open continuations cross as testimony/proposals, not executable edges.
+8. Threshold is a receiver-local relation between source crossing and local constitution and is not Project 0 Snap-State.
+9. A new world gets an explicit occurrence birthday.
+10. Forks remain independent histories; later encounter does not retroactively share knowledge.
+11. Merge is optional and, when chosen, creates a new descendant rather than rewriting parents.
+12. Nested worlds use the same crossing law; locality does not bypass authority.
+13. Boot the House remains a valid predecessor specimen rather than being overwritten by PHASELIFT terminology.
+14. The first proof is narrow enough to execute with existing Project 0 + LOADOUT floors before wider federation work.
 
-## 24. Design seal
+## 24. Self-review result
+
+The architectural self-review found and corrected three scope leaks before this human-review version:
+
+1. **No new `crossing` repo.** Project 0 already owns portable crossing semantics.
+2. **No imagined World Encounter fields.** The first proof must work through the existing established-source-reference boundary or stop for a versioned Project 0 design.
+3. **No threshold name collision.** PHASELIFT reconstitution threshold remains receiver-local and distinct from Project 0 Snap-State.
+
+No `TODO`, `TBD`, placeholder behavior, ontology expansion, or implementation authorization remains in this spec.
+
+## 25. Design seal
 
 ```text
 THE SAPLING THROUGH THE FLOOR,
