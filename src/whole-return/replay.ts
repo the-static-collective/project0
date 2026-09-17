@@ -135,7 +135,7 @@ function assertTransition(status: WholeReturnStatus, event: WholeReturnEvent): v
   if (!allowed) fail("WHOLE_RETURN_ILLEGAL_TRANSITION");
 }
 
-export function resumeTokenFor(
+function computeResumeToken(
   declaration: WholeReturnDeclaration,
   events: WholeReturnEvent[],
   status: WholeReturnStatus,
@@ -146,6 +146,13 @@ export function resumeTokenFor(
     status,
   });
   return `whole-return-sha256:${digestHex}`;
+}
+
+export function resumeTokenFor(
+  declaration: WholeReturnDeclaration,
+  events: WholeReturnEvent[],
+): string {
+  return replayWholeReturn(declaration, events).resumeToken;
 }
 
 export function replayWholeReturn(
@@ -223,6 +230,6 @@ export function replayWholeReturn(
     activeInterruptionEventId,
     crossingEventIds,
     returnRefs,
-    resumeToken: resumeTokenFor(declaration, events, status),
+    resumeToken: computeResumeToken(declaration, events, status),
   };
 }
