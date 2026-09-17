@@ -230,3 +230,23 @@ test("replaying one occurrence does not manufacture a new occurrence", () => {
   assert.equal(replay.occurrenceId, first.occurrenceId);
   assert.equal(replay.resumeToken, first.resumeToken);
 });
+
+test("rejects accessor-backed events without executing the accessor", () => {
+  const hostile = crossing();
+  let executed = false;
+
+  Object.defineProperty(hostile, "eventId", {
+    configurable: true,
+    enumerable: true,
+    get() {
+      executed = true;
+      return "event-hostile";
+    },
+  });
+
+  assert.throws(
+    () => replayWholeReturn(declaration(), [hostile]),
+    /WHOLE_RETURN_UNSAFE_VALUE/,
+  );
+  assert.equal(executed, false);
+});
