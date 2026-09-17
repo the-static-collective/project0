@@ -204,7 +204,7 @@ test("exact replay produces the same token", () => {
   assert.equal(first.resumeToken, second.resumeToken);
   assert.equal(
     first.resumeToken,
-    resumeTokenFor(declaration(), completedJourney(), "completed"),
+    resumeTokenFor(declaration(), completedJourney()),
   );
 });
 
