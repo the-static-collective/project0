@@ -5,6 +5,7 @@ import {
   replayWholeReturn,
   resumeTokenFor,
   validateWholeReturnDeclaration,
+  type WholeReturnCrossingEvent,
   type WholeReturnDeclaration,
   type WholeReturnEvent,
 } from "../src/whole-return/index";
@@ -39,7 +40,7 @@ function declaration(): WholeReturnDeclaration {
   };
 }
 
-function crossing(seq = 1, eventId = "event-cross-1"): WholeReturnEvent {
+function crossing(seq = 1, eventId = "event-cross-1"): WholeReturnCrossingEvent {
   return {
     kind: "crossing",
     seq,
