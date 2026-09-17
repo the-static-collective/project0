@@ -1,0 +1,133 @@
+{
+  "note": "Example-only ecosystem-shaped Whole Return fixture. Toaster and Dogram revisions are pinned from Dogram PR #121. ALEX and TranchNode participants and crossings are illustrative/unwitnessed and do not claim executed downstream integration.",
+  "declaration": {
+    "version": "whole-return/v0",
+    "jobId": "toaster-dogram-whole-return-001",
+    "occurrenceId": "example-occurrence-001",
+    "purpose": "example-only: preserve one ecosystem-shaped return from a Toaster artifact through measurement, inquiry retention, continuity retention, interruption, resume, and native return references",
+    "allowedOperations": [
+      "render",
+      "measure",
+      "retain_inquiry",
+      "retain_continuity",
+      "resume"
+    ],
+    "completionCondition": "native return references exist after the declared crossings",
+    "participants": [
+      {
+        "participantId": "toaster",
+        "repoRef": "the-static-collective/the-haunted-toaster",
+        "revision": "e8e8fb0",
+        "adapterVersion": "example-toaster-whole-return/0",
+        "identityDomain": "toaster-artifact"
+      },
+      {
+        "participantId": "dogram",
+        "repoRef": "the-static-collective/Dogram",
+        "revision": "a50df93f201ff186f8f3fb73c5c1d2e679415754",
+        "adapterVersion": "example-dogram-whole-return/0",
+        "identityDomain": "dogram-observation"
+      },
+      {
+        "participantId": "alex",
+        "repoRef": "the-static-collective/ALEX.2",
+        "revision": "example-unwitnessed",
+        "adapterVersion": "example-alex-whole-return/0",
+        "identityDomain": "alex-inquiry"
+      },
+      {
+        "participantId": "tranchnode",
+        "repoRef": "the-static-collective/tranchnode",
+        "revision": "example-unwitnessed",
+        "adapterVersion": "example-tranchnode-whole-return/0",
+        "identityDomain": "tranchnode-continuity"
+      }
+    ]
+  },
+  "events": [
+    {
+      "kind": "crossing",
+      "seq": 1,
+      "eventId": "cross-toaster-dogram",
+      "fromParticipantId": "toaster",
+      "toParticipantId": "dogram",
+      "sourceIdentity": {
+        "domain": "toaster-artifact",
+        "ref": "toaster://render/paired-control/example"
+      },
+      "destinationIdentity": {
+        "domain": "dogram-observation",
+        "ref": "dogram://observation/toaster-paired-render/example"
+      },
+      "sourceReceiptRef": "toaster://receipt/example-render",
+      "mappingReceiptRef": "dogram://receipt/example-import",
+      "sourceArtifactSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "acceptedArtifactSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "kind": "interrupt",
+      "seq": 2,
+      "eventId": "interrupt-after-dogram",
+      "reason": "example-only process stop after measurement"
+    },
+    {
+      "kind": "resume",
+      "seq": 3,
+      "eventId": "resume-after-dogram",
+      "interruptionEventId": "interrupt-after-dogram"
+    },
+    {
+      "kind": "crossing",
+      "seq": 4,
+      "eventId": "cross-dogram-alex",
+      "fromParticipantId": "dogram",
+      "toParticipantId": "alex",
+      "sourceIdentity": {
+        "domain": "dogram-observation",
+        "ref": "dogram://observation/toaster-paired-render/example"
+      },
+      "destinationIdentity": {
+        "domain": "alex-inquiry",
+        "ref": "alex://inquiry/example-001"
+      },
+      "sourceReceiptRef": "dogram://receipt/example-measurement",
+      "mappingReceiptRef": "alex://receipt/example-retention",
+      "sourceArtifactSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "acceptedArtifactSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    {
+      "kind": "crossing",
+      "seq": 5,
+      "eventId": "cross-alex-tranchnode",
+      "fromParticipantId": "alex",
+      "toParticipantId": "tranchnode",
+      "sourceIdentity": {
+        "domain": "alex-inquiry",
+        "ref": "alex://inquiry/example-001"
+      },
+      "destinationIdentity": {
+        "domain": "tranchnode-continuity",
+        "ref": "tranchnode://whole-return/example-001"
+      },
+      "sourceReceiptRef": "alex://receipt/example-inquiry",
+      "mappingReceiptRef": "tranchnode://receipt/example-continuity",
+      "sourceArtifactSha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "acceptedArtifactSha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    {
+      "kind": "complete",
+      "seq": 6,
+      "eventId": "complete-return-example",
+      "returnRefs": [
+        {
+          "domain": "toaster-artifact",
+          "ref": "toaster://render/paired-control/example"
+        },
+        {
+          "domain": "tranchnode-continuity",
+          "ref": "tranchnode://whole-return/example-001"
+        }
+      ]
+    }
+  ]
+}
