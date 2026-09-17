@@ -1,4 +1,7 @@
-import { canonicalizeDomainValue } from "../canonical-addressing/index";
+import {
+  canonicalizeDomainValue,
+  validateForCanonicalization,
+} from "../canonical-addressing/index";
 
 import {
   WHOLE_RETURN_VERSION,
@@ -17,6 +20,14 @@ function fail(code: string): never {
   throw new Error(code);
 }
 
+function requireCanonicalSafe(value: unknown): void {
+  try {
+    validateForCanonicalization(value);
+  } catch {
+    fail("WHOLE_RETURN_UNSAFE_VALUE");
+  }
+}
+
 function requireNonBlank(value: unknown, code: string): asserts value is string {
   if (typeof value !== "string" || value.trim().length === 0) fail(code);
 }
@@ -28,6 +39,7 @@ function validateNativeIdentity(identity: WholeReturnNativeIdentity, code: strin
 }
 
 export function validateWholeReturnDeclaration(declaration: WholeReturnDeclaration): void {
+  requireCanonicalSafe(declaration);
   if (!declaration || typeof declaration !== "object") fail("WHOLE_RETURN_INVALID_DECLARATION");
   if (declaration.version !== WHOLE_RETURN_VERSION) fail("WHOLE_RETURN_INVALID_VERSION");
 
@@ -142,6 +154,7 @@ export function replayWholeReturn(
 ): WholeReturnReplay {
   validateWholeReturnDeclaration(declaration);
   if (!Array.isArray(events)) fail("WHOLE_RETURN_INVALID_EVENTS");
+  requireCanonicalSafe(events);
 
   let status: WholeReturnStatus = "declared";
   let activeInterruptionEventId: string | null = null;
