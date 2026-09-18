@@ -1,0 +1,63 @@
+{
+  "schema": "body.surface/v0",
+  "organ": "project0",
+  "owner": "the-static-collective/project0",
+  "publication": {
+    "status": "owner-published",
+    "standard": "static-collective/body-surface/v0",
+    "scope": "interface-declaration"
+  },
+  "provides": [
+    {
+      "kind": "world-encounter-envelope",
+      "protocol": "project0.world-encounter-envelope",
+      "version": "v0.1"
+    }
+  ],
+  "needs": [],
+  "interfaces": [
+    {
+      "name": "world-encounter-envelope",
+      "direction": "emit",
+      "kind": "world-encounter-envelope",
+      "protocol": "project0.world-encounter-envelope",
+      "version": "v0.1"
+    }
+  ],
+  "measure": {
+    "declared": [
+      {
+        "dimension": "contract-role",
+        "value": "shared-meaning-floor",
+        "unit": "state"
+      },
+      {
+        "dimension": "authority-mode",
+        "value": "bounded-explicit",
+        "unit": "state"
+      }
+    ],
+    "observed": []
+  },
+  "receipts": [
+    {
+      "kind": "owner-contract",
+      "coordinate": "README.md"
+    }
+  ],
+  "residual_fog": [
+    "Only the explicitly named World Encounter boundary is declared here; Project 0's broader semantic contract is not flattened into body interfaces."
+  ],
+  "non_authorities": [
+    "transport != authority",
+    "retrieval != authority",
+    "surface != ontology expansion"
+  ],
+  "evidence": [
+    {
+      "kind": "owner-readme",
+      "coordinate": "README.md"
+    }
+  ],
+  "authority": "none"
+}
